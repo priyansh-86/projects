@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0a0a0a;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* 3D Stars Background */
+        #stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out alternate;
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, #fff, #00f5ff);
+            border-radius: 50%;
+            animation: shoot 3s linear infinite;
+        }
+
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(0,245,255,0.5) 50%, transparent 100%);
+            transform: translateX(-100px) translateY(-50%);
+            top: 50%;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(-100px) translateY(-100px);
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw) translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        /* Main Styles */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(78, 205, 196, 0.8)); }
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .form-group input::placeholder {
+            color: #ccc;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .expense-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .expense-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .category-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .category-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+
+        .footer span {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: rainbow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(180deg); }
+        }
+
+        /* Social Links Styles */
+        .social-section {
+            margin: 60px 0;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+        }
+
+        .social-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .social-card:hover::before {
+            left: 100%;
+        }
+
+        .social-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .social-card.instagram:hover {
+            box-shadow: 0 15px 35px rgba(225, 48, 108, 0.4);
+            border-color: #e1306c;
+        }
+
+        .social-card.twitter:hover {
+            box-shadow: 0 15px 35px rgba(29, 161, 242, 0.4);
+            border-color: #1da1f2;
+        }
+
+        .social-card.email:hover {
+            box-shadow: 0 15px 35px rgba(234, 67, 53, 0.4);
+            border-color: #ea4335;
+        }
+
+        .social-icon {
+            font-size: 2.5rem;
+            margin-right: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .social-info h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .social-info p {
+            margin: 5px 0 0 0;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* Data Management Styles */
+        .data-management {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .data-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .import-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .data-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .expense-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .expense-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .expense-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .expense-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Stars Background -->
+    <div id="stars-container"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏦 AI Finance Dashboard</h1>
+            <p>Smart expense tracking with AI insights</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>💰 Total Expenses</h3>
+                <p id="total-expenses" style="font-size: 2.5rem; font-weight: bold;">₹0</p>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Total Transactions</h3>
+                <p id="total-transactions" style="font-size: 2.5rem; font-weight: bold;">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>🎯 Active Categories</h3>
+                <p id="active-categories" style="font-size: 2.5rem; font-weight: bold;">0</p>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Add Expense -->
+            <div class="card">
+                <h3>➕ Add New Expense</h3>
+                <form id="expense-form">
+                    <div class="form-group">
+                        <input type="number" id="amount" placeholder="Amount (₹)" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="category" required>
+                            <option value="food">🍽️ Food</option>
+                            <option value="travel">🚗 Travel</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="rent">🏠 Rent</option>
+                            <option value="entertainment">🎬 Entertainment</option>
+                            <option value="health">🏥 Health</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="description" placeholder="Description" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="date" id="date" required>
+                    </div>
+                    <button type="submit" class="btn">Add Expense</button>
+                </form>
+
+                <!-- Data Management -->
+                <div class="data-management">
+                    <button class="data-btn export-btn" onclick="exportData()">
+                        💾 Export Data
+                    </button>
+                    <label for="import-file" class="data-btn import-btn">
+                        📁 Import Data
+                    </label>
+                    <input type="file" id="import-file" class="file-input" accept=".json" onchange="importData(event)">
+                    <button class="data-btn clear-btn" onclick="clearAllData()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+
+                <!-- Recent Transactions -->
+                <h3 style="margin-top: 30px;">📋 Recent Transactions</h3>
+                <div id="recent-transactions" class="expense-list">
+                    <!-- Transactions will be added here -->
+                </div>
+            </div>
+
+            <!-- Middle Column - Charts -->
+            <div class="card">
+                <h3>📊 Expense Analytics</h3>
+                
+                <!-- Pie Chart -->
+                <div class="chart-container">
+                    <canvas id="pie-chart"></canvas>
+                </div>
+
+                <!-- Line Chart -->
+                <div class="chart-container">
+                    <canvas id="line-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Column - AI Insights -->
+            <div class="card">
+                <h3>🤖 AI Insights</h3>
+                <div id="ai-insights">
+                    <div class="insight-item">
+                        <p style="color: #4ecdc4;">Start adding expenses to get AI insights! 🚀</p>
+                    </div>
+                </div>
+
+                <!-- Categories Overview -->
+                <h3 style="margin-top: 30px;">📋 Categories</h3>
+                <div id="categories-overview">
+                    <!-- Categories will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-section">
+            <h3 style="text-align: center; margin-bottom: 30px; font-size: 2rem;">Connect with me 🤝</h3>
+            <div class="social-links">
+                <a href="https://instagram.com/priyansh__.86/" target="_blank" class="social-card instagram">
+                    <div class="social-icon">📷</div>
+                    <div class="social-info">
+                        <h4>Instagram</h4>
+                        <p>@priyansh__.86</p>
+                    </div>
+                </a>
+                <a href="https://x.com/priyansh_86/" target="_blank" class="social-card twitter">
+                    <div class="social-icon">🐦</div>
+                    <div class="social-info">
+                        <h4>Twitter/X</h4>
+                        <p>@priyansh_86</p>
+                    </div>
+                </a>
+                <a href="mailto:priyanshrajbhar499@gmail.com" class="social-card email">
+                    <div class="social-icon">✉️</div>
+                    <div class="social-info">
+                        <h4>Email</h4>
+                        <p>priyanshrajbhar499@gmail.com</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Made with ❤️ by <span>Priyansh</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        let expenses = [
+            { id: 1, amount: 2500, category: 'food', description: 'Groceries', date: '2025-01-15' },
+            { id: 2, amount: 5000, category: 'rent', description: 'Monthly Rent', date: '2025-01-01' },
+            { id: 3, amount: 1200, category: 'travel', description: 'Metro Card', date: '2025-01-10' },
+        ];
+
+        const categories = {
+            food: { name: 'Food', icon: '🍽️', color: '#FF6B6B' },
+            travel: { name: 'Travel', icon: '🚗', color: '#4ECDC4' },
+            shopping: { name: 'Shopping', icon: '🛍️', color: '#45B7D1' },
+            rent: { name: 'Rent', icon: '🏠', color: '#96CEB4' },
+            entertainment: { name: 'Entertainment', icon: '🎬', color: '#FFEAA7' },
+            health: { name: 'Health', icon: '🏥', color: '#DDA0DD' }
+        };
+
+        let pieChart, lineChart;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createStarsBackground();
+            setTodayDate();
+            initCharts();
+            loadData(); // Load data from localStorage
+            updateDashboard();
+            
+            // Form submission
+            document.getElementById('expense-form').addEventListener('submit', addExpense);
+        });
+
+        // LocalStorage Functions
+        function saveData() {
+            try {
+                localStorage.setItem('financeData', JSON.stringify(expenses));
+            } catch (e) {
+                console.log('LocalStorage not available, data will be temporary');
+            }
+        }
+
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('financeData');
+                if (savedData) {
+                    expenses = JSON.parse(savedData);
+                }
+            } catch (e) {
+                console.log('Error loading data from localStorage');
+            }
+        }
+
+        // Export/Import Functions
+        function exportData() {
+            const dataStr = JSON.stringify(expenses, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `finance_data_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+            
+            // Show success message
+            alert('📊 Data exported successfully! You can upload this file to Google Drive manually.');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        expenses = importedData;
+                        saveData();
+                        updateDashboard();
+                        alert('📁 Data imported successfully!');
+                    } else {
+                        alert('❌ Invalid file format!');
+                    }
+                } catch (error) {
+                    alert('❌ Error reading file!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('🗑️ Are you sure you want to clear all data? This cannot be undone!')) {
+                expenses = [];
+                saveData();
+                updateDashboard();
+                alert('✅ All data cleared successfully!');
+            }
+        }
+
+        // Create 3D Stars Background
+        function createStarsBackground() {
+            const container = document.getElementById('stars-container');
+            
+            // Create regular stars
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+            
+            // Create shooting stars
+            setInterval(() => {
+                if (Math.random() < 0.3) {
+                    const shootingStar = document.createElement('div');
+                    shootingStar.className = 'shooting-star';
+                    shootingStar.style.left = Math.random() * 100 + '%';
+                    shootingStar.style.top = Math.random() * 50 + '%';
+                    shootingStar.style.animationDelay = Math.random() * 1 + 's';
+                    container.appendChild(shootingStar);
+                    
+                    setTimeout(() => {
+                        if (shootingStar.parentNode) {
+                            shootingStar.parentNode.removeChild(shootingStar);
+                        }
+                    }, 3000);
+                }
+            }, 2000);
+        }
+
+        function setTodayDate() {
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        }
+
+        function addExpense(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const expense = {
+                id: Date.now(),
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                date: document.getElementById('date').value
+            };
+            
+            expenses.push(expense);
+            saveData(); // Save to localStorage
+            updateDashboard();
+            e.target.reset();
+            setTodayDate();
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(exp => exp.id !== id);
+            saveData(); // Save to localStorage
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            updateStats();
+            updateRecentTransactions();
+            updateCharts();
+            updateAIInsights();
+            updateCategoriesOverview();
+        }
+
+        function updateStats() {
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const totalTransactions = expenses.length;
+            const activeCategories = new Set(expenses.map(exp => exp.category)).size;
+            
+            document.getElementById('total-expenses').textContent = `₹${totalExpenses.toLocaleString()}`;
+            document.getElementById('total-transactions').textContent = totalTransactions;
+            document.getElementById('active-categories').textContent = activeCategories;
+        }
+
+        function updateRecentTransactions() {
+            const container = document.getElementById('recent-transactions');
+            container.innerHTML = '';
+            
+            const recentExpenses = expenses.slice(-10).reverse();
+            
+            recentExpenses.forEach(expense => {
+                const category = categories[expense.category];
+                const item = document.createElement('div');
+                item.className = 'expense-item';
+                item.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">${category.icon}</span>
+                            <div>
+                                <div style="font-weight: bold;">${expense.description}</div>
+                                <div style="font-size: 0.9rem; color: #ccc;">${category.name} • ${expense.date}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: bold;">₹${expense.amount.toLocaleString()}</span>
+                        <button class="delete-btn" onclick="deleteExpense(${expense.id})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function initCharts() {
+            const pieCtx = document.getElementById('pie-chart').getContext('2d');
+            const lineCtx = document.getElementById('line-chart').getContext('2d');
+            
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [],
+                        borderWidth: 2,
+                        borderColor: 'rgba(255, 255, 255, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+            
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Monthly Expenses',
+                        data: [],
+                        borderColor: '#4ECDC4',
+                        backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    },
+                    scales: {
+                        x: { 
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: { 
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            // Update Pie Chart
+            const categoryData = {};
+            expenses.forEach(expense => {
+                if (categoryData[expense.category]) {
+                    categoryData[expense.category] += expense.amount;
+                } else {
+                    categoryData[expense.category] = expense.amount;
+                }
+            });
+            
+            const pieLabels = Object.keys(categoryData).map(cat => categories[cat].name);
+            const pieData = Object.values(categoryData);
+            const pieColors = Object.keys(categoryData).map(cat => categories[cat].color);
+            
+            pieChart.data.labels = pieLabels;
+            pieChart.data.datasets[0].data = pieData;
+            pieChart.data.datasets[0].backgroundColor = pieColors;
+            pieChart.update();
+            
+            // Update Line Chart
+            const monthlyData = {};
+            expenses.forEach(expense => {
+                const month = new Date(expense.date).toLocaleString('default', { month: 'short', year: '2-digit' });
+                if (monthlyData[month]) {
+                    monthlyData[month] += expense.amount;
+                } else {
+                    monthlyData[month] = expense.amount;
+                }
+            });
+            
+            const lineLabels = Object.keys(monthlyData).sort();
+            const lineData = lineLabels.map(month => monthlyData[month]);
+            
+            lineChart.data.labels = lineLabels;
+            lineChart.data.datasets[0].data = lineData;
+            lineChart.update();
+        }
+
+        function updateAIInsights() {
+            const container = document.getElementById('ai-insights');
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            if (totalExpenses === 0) {
+                container.innerHTML = `
+                    <div class="insight-item">
+                        <p style="color: #4ecdc4;">Start adding expenses to get AI insights! 🚀</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const insights = [];
+            const categoryTotals = {};
+            
+            expenses.forEach(expense => {
+                if (categoryTotals[expense.category]) {
+                    categoryTotals[expense.category] += expense.amount;
+                } else {
+                    categoryTotals[expense.category] = expense.amount;
+                }
+            });
+            
+            // Generate insights
+            Object.keys(categoryTotals).forEach(cat => {
+                const percentage = (categoryTotals[cat] / totalExpenses) * 100;
+                if (percentage > 40) {
+                    insights.push({
+                        message: `Aap ${categories[cat].name} pe ${percentage.toFixed(1)}% kharch kar rahe ho! Thoda balance karo 💡`,
+                        color: '#ff6b6b'
+                    });
+                } else if (percentage > 25) {
+                    insights.push({
+                        message: `${categories[cat].name} expenses (${percentage.toFixed(1)}%) manageable hai, but watch out! 👀`,
+                        color: '#ffeaa7'
+                    });
+                }
+            });
+            
+            if (totalExpenses > 15000) {
+                insights.push({
+                    message: `Total expenses ₹${totalExpenses.toLocaleString()} hai. Monthly budget set karne ka time! 📊`,
+                    color: '#45b7d1'
+                });
+            }
+            
+            if (insights.length === 0) {
+                insights.push({
+                    message: 'Waah! Aapka spending pattern balanced lag raha hai! Keep it up! 🎉',
+                    color: '#4ecdc4'
+                });
+            }
+            
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <p style="color: ${insight.color}; font-weight: bold;">${insight.message}</p>
+                </div>
+            `).join('');
+        }
+
+        function updateCategoriesOverview() {
+            const container = document.getElementById('categories-overview');
+            const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const categoryTotals = {};
+            
+            expenses.forEach(expense => {
+                if (categoryTotals[expense.category]) {
+                    categoryTotals[expense.category] += expense.amount;
+                } else {
+                    categoryTotals[expense.category] = expense.amount;
+                }
+            });
+            
+            container.innerHTML = Object.keys(categories).map(catId => {
+                const category = categories[catId];
+                const amount = categoryTotals[catId] || 0;
+                const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
+                
+                return `
+                    <div class="category-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.5rem;">${category.icon}</span>
+                                <span style="font-weight: bold;">${category.name}</span>
+                            </div>
+                            <span style="font-weight: bold;">₹${amount.toLocaleString()}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(percentage, 100)}%; background-color: ${category.color};"></div>
+                        </div>
+                        <p style="color: #ccc; font-size: 0.9rem;">${percentage.toFixed(1)}% of total</p>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

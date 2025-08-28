@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Portfolio - Advanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000010;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 60px 20px;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            max-width: 800px;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f5ff, #ff00f5, #00ff00);
+            background-size: 200% 200%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1s forwards;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: #00f5ff;
+            box-shadow: 0 0 20px #00f5ff;
+            border-color: #00f5ff;
+        }
+
+        .skills-section {
+            background: rgba(0, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            margin: 100px auto;
+            max-width: 900px;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .section-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #00f5ff;
+            text-shadow: 0 0 20px #00f5ff;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .skill-card {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 245, 0.1));
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+            transform: rotate(-45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .skill-card:hover::before {
+            animation: shimmer 0.5s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(-45deg) translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: rotate(-45deg) translateY(100%); opacity: 0; }
+        }
+
+        .skill-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 245, 255, 0.3);
+            border-color: #00f5ff;
+        }
+
+        .skill-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .contact-section {
+            position: relative;
+            background: rgba(10, 0, 30, 0.9);
+            padding: 80px 50px;
+            text-align: center;
+            border-radius: 30px;
+            margin: 100px auto;
+            max-width: 800px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .contact-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00f5ff, #ff00f5, #00ff00, #00f5ff);
+            background-size: 400% 400%;
+            border-radius: 30px;
+            z-index: -1;
+            animation: hologramBorder 3s ease-in-out infinite;
+        }
+
+        @keyframes hologramBorder {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hologram-text {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .hologram-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: rgba(0, 245, 255, 0.5);
+            animation: hologramGlitch 2s infinite;
+        }
+
+        @keyframes hologramGlitch {
+            0%, 90%, 100% {
+                transform: translate(0);
+                opacity: 0;
+            }
+            95% {
+                transform: translate(2px, -2px);
+                opacity: 1;
+            }
+        }
+
+        .contact-form {
+            display: grid;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 245, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #00f5ff, #ff00f5);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.4);
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00f5ff;
+            border-radius: 50%;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .skills-section, .contact-section {
+                margin: 50px 20px;
+                padding: 30px 20px;
+            }
+            
+            .nav-dots {
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="floating-particles"></div>
+    
+    <div class="nav-dots">
+        <div class="dot active" data-section="0"></div>
+        <div class="dot" data-section="1"></div>
+        <div class="dot" data-section="2"></div>
+    </div>
+
+    <section class="section hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">FUTURE DEV</h1>
+            <h2 class="hero-subtitle">Full Stack Developer & 3D Artist</h2>
+            <p class="hero-description">
+                Creating immersive digital experiences with cutting-edge technology. 
+                Specializing in React, Three.js, and futuristic web development.
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="skills-section">
+            <h2 class="section-title">TECH ARSENAL</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <span class="skill-icon">⚛️</span>
+                    <h3>React.js</h3>
+                    <p>Advanced component architecture</p>
+                </div>
+                <div class="skill-card">
+                    <span class="skill-icon">🌐</span>
+                    <h3>Three.js</h3>
+                    <p>3D graphics & animations</p>
+                </div>
+                <div class="skill-card">
+                    <span class="skill-icon">🚀</span>
+                    <h3>Node.js</h3>
+                    <p>Backend development</p>
+                </div>
+                <div class="skill-card">
+                    <span class="skill-icon">💾</span>
+                    <h3>Databases</h3>
+                    <p>MongoDB, PostgreSQL</p>
+                </div>
+                <div class="skill-card">
+                    <span class="skill-icon">🎨</span>
+                    <h3>UI/UX</h3>
+                    <p>Modern design principles</p>
+                </div>
+                <div class="skill-card">
+                    <span class="skill-icon">⚡</span>
+                    <h3>Performance</h3>
+                    <p>Optimization & scaling</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="contact-section">
+            <h2 class="hologram-text" data-text="CONNECT WITH ME">CONNECT WITH ME</h2>
+            <p style="margin-bottom: 30px; font-size: 1.2rem;">Ready to build something amazing together?</p>
+            
+            <form class="contact-form" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" class="form-input" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" class="form-input" rows="5" placeholder="Your Message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">SEND MESSAGE</button>
+            </form>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS with your public key
+        emailjs.init("_P9s7gkfCCjiqcyA-");
+        // Three.js Scene Setup
+        let scene, camera, renderer, planet, stars, moon;
+        let mouseX = 0, mouseY = 0;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000010, 1);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Create Planet
+            const planetGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const planetMaterial = new THREE.MeshPhongMaterial({
+                color: 0x00f5ff,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.8
+            });
+            planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            planet.position.set(-5, 0, -10);
+            scene.add(planet);
+
+            // Create Moon
+            const moonGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const moonMaterial = new THREE.MeshPhongMaterial({
+                color: 0xff00f5,
+                transparent: true,
+                opacity: 0.7
+            });
+            moon = new THREE.Mesh(moonGeometry, moonMaterial);
+            moon.position.set(3, 1, -8);
+            scene.add(moon);
+
+            // Create Stars
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = 1000;
+            const positions = new Float32Array(starsCount * 3);
+
+            for (let i = 0; i < starsCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 200;
+            }
+
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 2,
+                transparent: true,
+                opacity: 0.8
+            });
+            stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0x00f5ff, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const pointLight = new THREE.PointLight(0xff00f5, 0.8, 100);
+            pointLight.position.set(-5, 5, 5);
+            scene.add(pointLight);
+
+            camera.position.z = 5;
+
+            // Mouse movement
+            document.addEventListener('mousemove', onMouseMove, false);
+        }
+
+        function onMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate planet
+            if (planet) {
+                planet.rotation.y += 0.01;
+                planet.rotation.x += 0.005;
+            }
+
+            // Animate moon orbit
+            if (moon) {
+                const time = Date.now() * 0.001;
+                moon.position.x = Math.cos(time) * 4;
+                moon.position.z = Math.sin(time) * 4 - 8;
+                moon.rotation.y += 0.02;
+            }
+
+            // Rotate stars
+            if (stars) {
+                stars.rotation.y += 0.001;
+            }
+
+            // Camera movement based on mouse
+            camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 2 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+
+        // Smooth scrolling and navigation
+        const dots = document.querySelectorAll('.dot');
+        const sections = document.querySelectorAll('.section');
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                sections[index].scrollIntoView({ behavior: 'smooth' });
+                updateActiveDot(index);
+            });
+        });
+
+        function updateActiveDot(activeIndex) {
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === activeIndex);
+            });
+        }
+
+        // Scroll detection
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const currentSection = Math.floor(scrollPosition / windowHeight);
+            updateActiveDot(currentSection);
+        });
+
+        // Floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.floating-particles');
+            
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                
+                particlesContainer.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 10000);
+            }, 500);
+        }
+
+        // Working Contact Form with EmailJS
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const btn = event.target.querySelector('.submit-btn');
+            const formData = new FormData(event.target);
+            
+            // Get form values
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const message = formData.get('message');
+            
+            // Validation
+            if (!name || !email || !message) {
+                showNotification('Please fill all fields!', 'error');
+                return;
+            }
+            
+            // Add hologram sending effect
+            btn.style.transform = 'scale(1.1)';
+            btn.innerHTML = 'SENDING...';
+            btn.disabled = true;
+            
+            // Template parameters for EmailJS
+            const templateParams = {
+                from_name: name,
+                from_email: email,
+                message: message,
+                to_name: 'Portfolio Owner' // Your name
+            };
+            
+            // Send email using your service and template IDs
+            emailjs.send('service_07zz9qs', 'template_zf7by47', templateParams)
+                .then(() => {
+                    btn.innerHTML = 'MESSAGE SENT! ✅';
+                    btn.style.background = 'linear-gradient(45deg, #00ff00, #00f5ff)';
+                    showNotification('Message sent successfully! I\'ll reply soon.', 'success');
+                    event.target.reset();
+                })
+                .catch((error) => {
+                    console.log('EmailJS Error:', error);
+                    
+                    // Fallback: mailto link
+                    const subject = encodeURIComponent('Portfolio Contact from ' + name);
+                    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+                    const mailtoLink = `mailto:haribhajananimestudio@gmail.com?subject=${subject}&body=${body}`;
+                    
+                    window.open(mailtoLink, '_blank');
+                    
+                    btn.innerHTML = 'OPENED EMAIL CLIENT! 📧';
+                    btn.style.background = 'linear-gradient(45deg, #ffaa00, #ff6600)';
+                    showNotification('Using backup method - Email client opened!', 'success');
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        btn.innerHTML = 'SEND MESSAGE';
+                        btn.style.background = 'linear-gradient(45deg, #00f5ff, #ff00f5)';
+                        btn.style.transform = 'scale(1)';
+                        btn.disabled = false;
+                    }, 3000);
+                });
+        }
+        
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? 'linear-gradient(45deg, #00ff00, #00f5ff)' : 'linear-gradient(45deg, #ff0000, #ff00f5)'};
+                color: white;
+                border-radius: 10px;
+                z-index: 1000;
+                font-weight: bold;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize everything
+        init();
+        animate();
+        createParticles();
+
+        // Add some extra interactivity
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                // Add space key interaction
+                if (planet) {
+                    planet.material.color.setHex(Math.random() * 0xffffff);
+                }
+            }
+        });
+
+        console.log('🚀 Advanced 3D Portfolio Loaded!');
+        console.log('Features: Rotating Planet, Interactive Stars, Hologram Effects');
+        console.log('Controls: Mouse movement, Navigation dots, Spacebar for color change');
+    </script>
+</body>
+</html>

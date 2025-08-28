@@ -1,0 +1,20 @@
+[
+  {
+    "date": "2024-08-20",
+    "name": "Finance Tracker with AI Insights", 
+    "description": "Smart finance tracker providing AI-powered insights for better money management.",
+    "link": "https://financeofaugust.netlify.app/",
+    "github": "https://github.com/priyans-86/finance-tracker",
+    "status": "completed",
+    "emoji": "💰"
+  },
+  {
+    "date": "2024-01-15",
+    "name": "3D Portfolio Website",
+    "description": "Advanced portfolio with Three.js animations and interactive 3D elements.",
+    "link": "#",
+    "github": "https://github.com/priyans-86/3d-portfolio",
+    "status": "ongoing", 
+    "emoji": "🚀"
+  }
+]

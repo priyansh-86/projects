@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather + Trip Planner</title>
+  <style>
+    /* --- Base --- */
+    :root {
+      --card-bg: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", system-ui, sans-serif;
+      background: black;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* --- Background effects --- */
+    .stars { position: fixed; inset: 0; z-index: -3; background: black; }
+    .star { position: absolute; width:2px; height:2px; background: #fff; border-radius:50%; opacity:0.8; animation: twinkle 2s infinite ease-in-out; }
+    @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+    .shooting-star { position:absolute; width:80px; height:2px; background: linear-gradient(-45deg, white, rgba(255,255,255,0)); opacity:0; animation: shooting 2s linear; }
+    @keyframes shooting { 0%{transform:translate(0,0);opacity:1} 100%{transform:translate(250px,120px);opacity:0} }
+
+    .overlay { position: fixed; inset: 0; z-index: -2; pointer-events:none; }
+
+    .overlay.clear { background: radial-gradient(circle at center, rgba(255,200,0,0.12), transparent 60%); }
+    .overlay.clouds { background: rgba(200,200,200,0.08); backdrop-filter: blur(2px); }
+    .overlay.rain { background: repeating-linear-gradient(transparent, transparent 10px, rgba(255,255,255,0.06) 11px); animation: rainMove 1s linear infinite; }
+    @keyframes rainMove { from { background-position: 0 0 } to { background-position: 0 20px } }
+    .overlay.snow { background: url('https://i.ibb.co/4pDNDk1/snow.png'); opacity: 0.16; animation: snowFall 10s linear infinite; }
+    @keyframes snowFall { from { background-position:0 0 } to { background-position:0 100% } }
+    .overlay.storm { background: rgba(255,255,255,0.04); animation: lightning 3s infinite; }
+    @keyframes lightning { 0%,95%,100%{opacity:0} 96%,97%{opacity:1} }
+
+    /* --- Layout --- */
+    header { z-index: 10; text-align:center; margin-bottom: 12px; }
+    h1 {
+      margin: 6px 0 10px;
+      font-size: 2.1rem;
+      background: linear-gradient(90deg,#00dbde,#fc00ff);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .container { width: min(980px, 96%); display: grid; gap: 16px; grid-template-columns: 1fr; align-items: start; z-index: 5; }
+
+    .search-wrap { display:flex; gap:12px; align-items:center; position:relative; }
+    input[type="text"] {
+      padding: 10px 12px; border-radius: 10px; border: none; outline: none; width: 100%;
+      background: rgba(255,255,255,0.03); color: #fff;
+    }
+    .btn { padding: 10px 14px; border-radius:10px; border:none; background:#2563eb; color:#fff; cursor:pointer; }
+    .btn:hover { background:#1d4ed8; }
+
+    .suggestions {
+      position: absolute; top:46px; left:0; width: 100%; max-height:260px; overflow:auto;
+      background: #0b0b0b; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.6); z-index:100;
+    }
+    .suggestions div { padding:10px 12px; cursor:pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .suggestions div:hover { background:#2563eb; }
+
+    /* Cards */
+    .card { background: var(--card-bg); border: 1px solid var(--glass-border); padding: 18px; border-radius: 14px; }
+    .weather-card { text-align:center; }
+    .temp { font-size: 2rem; font-weight:700; background: linear-gradient(90deg,#ff9966,#ff5e62); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .tip { margin-top: 10px; opacity:0.95; }
+
+    .places-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:8px; }
+    .place {
+      background: rgba(255,255,255,0.06); padding: 12px; border-radius: 12px; transition: transform .28s, box-shadow .28s;
+    }
+    .place:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 12px 30px rgba(0,0,0,0.6); }
+
+    footer { margin-top: 16px; color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+    /* Contact section */
+    #contact { margin-top: 36px; text-align:center; width:100%; }
+    #contact .card { max-width: 600px; margin: 0 auto; }
+    .contact-links { display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-top:12px; }
+    .contact-links a { color:#fff; background:#2563eb; padding:10px 16px; border-radius:10px; text-decoration:none; transition:.3s; }
+    .contact-links a:hover { background:#1d4ed8; }
+
+    /* Responsive tweaks */
+    @media (min-width:880px) {
+      .container { grid-template-columns: 1fr 380px; }
+      .search-wrap { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div id="overlay" class="overlay clear"></div>
+
+  <header>
+    <h1>🌍 Weather + Trip Planner</h1>
+    <div style="opacity:.9">Auto-detect location • city suggestions • TripAdvisor attractions</div>
+  </header>
+
+  <main class="container">
+    <!-- left: main content -->
+    <section style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Search -->
+      <div class="card search-wrap">
+        <input id="cityInput" type="text" placeholder="Enter city name (e.g., Mumbai, Surat)..." oninput="showSuggestions(this.value)" autocomplete="off" />
+        <button class="btn" onclick="manualSearch()">Search</button>
+        <div id="suggestions" class="suggestions" style="display:none;"></div>
+      </div>
+
+      <!-- Weather -->
+      <div id="weatherCard" class="card weather-card">
+        <h2 id="weatherTitle">Weather Info</h2>
+        <div id="weatherIcon" style="font-size:42px; margin:8px 0;">—</div>
+        <div class="temp" id="tempText">--°C</div>
+        <div id="condition">Condition: --</div>
+        <div id="humidity">Humidity: --%</div>
+        <div class="tip" id="weatherTip">Tip: —</div>
+      </div>
+
+      <!-- Places -->
+      <div id="placesCard" class="card">
+        <h3>Nearby Attractions</h3>
+        <div id="placesGrid" class="places-grid"></div>
+      </div>
+    </section>
+
+    <!-- right: summary / quick info -->
+    <aside style="display:flex; flex-direction:column; gap:12px;">
+      <div class="card">
+        <h3>Quick Info</h3>
+        <p id="quickLocation">Detecting location...</p>
+        <p style="font-size:.95rem; opacity:.9">Tip: If attractions don't appear, try increasing search area or try a larger nearby city name.</p>
+        <button class="btn" onclick="detectLocation()">Re-detect Location</button>
+      </div>
+
+      <div class="card">
+        <h3>How it works</h3>
+        <ol style="padding-left:18px; opacity:.95; margin:0;">
+          <li>Auto-detects your coordinates (browser prompt).</li>
+          <li>Fetches live weather from OpenWeather.</li>
+          <li>Finds attractions via TripAdvisor (RapidAPI).</li>
+        </ol>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <div class="card">
+      <h3>📩 Contact Me</h3>
+      <p style="opacity:.9">Want to collaborate or have questions? Connect with me below:</p>
+      <div class="contact-links">
+        <a href="mailto:priyanshrajbhar499@gmail.com">Email</a>
+        <a href="https://instagram.com/priyansh__.86" target="_blank">Instagram</a>
+        <a href="https://x.com/priyansh_86" target="_blank">Twitter</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>Made with ❤️ by Priyansh — Powered by OpenWeather & TripAdvisor (RapidAPI)</footer>
+
+  <script>
+    const OPENWEATHER_KEY = "1438b2c52672a711f94238a40a67568d";
+    const TRIP_API_KEY = "066ABE0ADDC046E7BAEF23F64EE7A702";
+    const RAPIDAPI_HOST = "travel-advisor.p.rapidapi.com";
+
+    function el(id) { return document.getElementById(id); }
+    function setOverlay(cond) {
+      const o = el('overlay');
+      o.className = 'overlay';
+      if (!cond) { o.classList.add('clear'); return; }
+      cond = cond.toLowerCase();
+      if (cond.includes('clear')) o.classList.add('clear');
+      else if (cond.includes('cloud')) o.classList.add('clouds');
+      else if (cond.includes('rain') || cond.includes('drizzle')) o.classList.add('rain');
+      else if (cond.includes('snow')) o.classList.add('snow');
+      else if (cond.includes('thunder')) o.classList.add('storm');
+      else o.classList.add('clear');
+    }
+    function emojiFor(cond) {
+      cond = (cond || "").toLowerCase();
+      if (cond.includes('clear')) return '☀️';
+      if (cond.includes('cloud')) return '☁️';
+      if (cond.includes('rain') || cond.includes('drizzle')) return '🌧️';
+      if (cond.includes('snow')) return '❄️';
+      if (cond.includes('thunder')) return '⚡';
+      return '🌡️';
+    }
+    function weatherTip(cond) {
+      cond = (cond || "").toLowerCase();
+      if (cond.includes('clear')) return "Sunny — Great for outdoor sightseeing!";
+      if (cond.includes('cloud')) return "Cloudy — Nice for museums & cafes.";
+      if (cond.includes('rain') || cond.includes('drizzle')) return "Rainy — Carry umbrella; enjoy indoor attractions.";
+      if (cond.includes('snow')) return "Snowy — Warm clothes & cozy cafes!";
+      if (cond.includes('thunder')) return "Stormy — Best to stay indoors.";
+      return "Explore & enjoy!";
+    }
+
+    let sugTimeout = null;
+    async function showSuggestions(q) {
+      const box = el('suggestions');
+      box.style.display = 'none';
+      box.innerHTML = '';
+      if (!q || q.length < 2) return;
+      clearTimeout(sugTimeout);
+      sugTimeout = setTimeout(async () => {
+        try {
+          const url = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(q)}&limit=6&appid=${OPENWEATHER_KEY}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) return;
+          data.forEach(item => {
+            const div = document.createElement('div');
+            const statePart = item.state ? (', ' + item.state) : '';
+            div.textContent = `${item.name}${statePart}, ${item.country}`;
+            div.onclick = () => {
+              el('cityInput').value = `${item.name}, ${item.country}`;
+              box.style.display = 'none';
+              searchByCoords(item.lat, item.lon, `${item.name}, ${item.country}`);
+            };
+            box.appendChild(div);
+          });
+          box.style.display = 'block';
+        } catch (err) { console.error("Suggestion error:", err); }
+      }, 220);
+    }
+
+    async function manualSearch() {
+      const q = el('cityInput').value.trim();
+      if (!q) return alert('Please type a city name first');
+      try {
+        const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(q)}&limit=1&appid=${OPENWEATHER_KEY}`);
+        const geo = await geoRes.json();
+        if (!Array.isArray(geo) || geo.length === 0) { alert('City not found.'); return; }
+        const first = geo[0];
+        searchByCoords(first.lat, first.lon, `${first.name}, ${first.country}`);
+      } catch (e) { alert('Error finding city coordinates'); }
+    }
+
+    async function searchByCoords(lat, lon, prettyName) {
+      try {
+        el('quickLocation').textContent = `Location: ${prettyName || `${lat.toFixed(3)}, ${lon.toFixed(3)}`}`;
+        const wRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_KEY}&units=metric`);
+        const w = await wRes.json();
+        if (!w || w.cod !== 200) { alert('Weather not found'); return; }
+        const cond = w.weather?.[0]?.main || '';
+        el('weatherTitle').textContent = `${w.name}, ${w.sys?.country || ''}`;
+        el('weatherIcon').textContent = emojiFor(cond);
+        el('tempText').textContent = `${Math.round(w.main.temp)}°C (Feels ${Math.round(w.main.feels_like)}°C)`;
+        el('condition').textContent = `${cond} — ${w.weather?.[0]?.description || ''}`;
+        el('humidity').textContent = `Humidity: ${w.main.humidity}%`;
+        el('weatherTip').textContent = weatherTip(cond);
+        setOverlay(cond);
+        loadTripAttractions(lat, lon);
+      } catch (err) { alert("Error fetching weather."); }
+    }
+
+    async function loadTripAttractions(lat, lon) {
+      const grid = el('placesGrid');
+      grid.innerHTML = `<div style="opacity:.9">Loading attractions...</div>`;
+      try {
+        const locUrl = `https://${RAPIDAPI_HOST}/locations/search?latitude=${lat}&longitude=${lon}&limit=1`;
+        const locRes = await fetch(locUrl, {
+          headers: { 'x-rapidapi-key': TRIP_API_KEY, 'x-rapidapi-host': RAPIDAPI_HOST }
+        });
+        const locJson = await locRes.json();
+        let location_id = null;
+        if (locJson?.data && locJson.data.length > 0) {
+          location_id = locJson.data[0].result_object?.location_id;
+        }
+        let attractions = null;
+        if (location_id) {
+          const attractionsUrl = `https://${RAPIDAPI_HOST}/attractions/list?location_id=${location_id}&currency=USD&limit=12`;
+          const aRes = await fetch(attractionsUrl, {
+            headers: { 'x-rapidapi-key': TRIP_API_KEY, 'x-rapidapi-host': RAPIDAPI_HOST }
+          });
+          const aJson = await aRes.json();
+          attractions = aJson?.data;
+        }
+        if (!attractions || attractions.length === 0) {
+          grid.innerHTML = `<div style="opacity:.9">No attractions found nearby.</div>`;
+          return;
+        }
+        grid.innerHTML = '';
+        attractions.slice(0,12).forEach(item => {
+          const name = item.name || item.title || "Attraction";
+          const rating = item.rating || item.num_reviews || "—";
+          const photo = item.photo?.images?.large?.url || null;
+          const address = item.address || item.address_obj?.street1 || "Address not available";
+          const card = document.createElement('div');
+          card.className = 'place';
+          card.innerHTML = `
+            ${photo ? `<img src="${photo}" alt="${name}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ''}
+            <strong>${name}</strong><br>
+            <small>${address}</small><br>
+            <span style="opacity:.8;">⭐ ${rating}</span>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (err) {
+        console.error("TripAdvisor error:", err);
+        grid.innerHTML = `<div style="opacity:.9">Error fetching attractions.</div>`;
+      }
+    }
+
+    function detectLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          searchByCoords(pos.coords.latitude, pos.coords.longitude, "Your Location");
+        }, err => {
+          alert('Location access denied. Please search manually.');
+        });
+      } else { alert('Geolocation not supported.'); }
+    }
+
+    window.onload = () => {
+      detectLocation();
+      for (let i=0;i<80;i++){ 
+        const s=document.createElement('div'); 
+        s.className='star'; 
+        s.style.left=Math.random()*100+'%'; 
+        s.style.top=Math.random()*100+'%'; 
+        s.style.animationDuration=(2+Math.random()*2)+'s'; 
+        document.querySelector('.stars').appendChild(s);
+      }
+      setInterval(()=>{
+        const ss=document.createElement('div'); 
+        ss.className='shooting-star'; 
+        ss.style.top=Math.random()*50+'%'; 
+        ss.style.left=Math.random()*50+'%'; 
+        document.body.appendChild(ss); 
+        setTimeout(()=>ss.remove(),2000);
+      },5000);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Weather App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: black;
+      color: white;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Background Stars */
+    .stars {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
+      background: black;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes shoot {
+      0% { transform: translate(0,0); opacity:1; }
+      100% { transform: translate(200px,100px); opacity:0; }
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(-45deg, white, rgba(255,255,255,0));
+      opacity: 0;
+      animation: shoot 2s linear infinite;
+    }
+
+    /* Weather Overlay Effects */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .overlay.clear { background: radial-gradient(circle at center, rgba(255,200,0,0.15), transparent 70%); }
+    .overlay.clouds { background: rgba(200,200,200,0.1); backdrop-filter: blur(2px); }
+    .overlay.rain { background: repeating-linear-gradient(transparent, transparent 10px, rgba(255,255,255,0.1) 11px); animation: rainMove 1s linear infinite; }
+    @keyframes rainMove { from { background-position: 0 0; } to { background-position: 0 20px; } }
+    .overlay.snow { background: url('https://i.ibb.co/4pDNDk1/snow.png'); opacity: 0.2; animation: snowFall 10s linear infinite; }
+    @keyframes snowFall { from { background-position: 0 0; } to { background-position: 0 100%; } }
+    .overlay.storm { background: rgba(255,255,255,0.05); animation: lightning 3s infinite; }
+    @keyframes lightning { 0%, 95%, 100% { opacity: 0; } 96%, 97% { opacity: 1; } }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: fadeIn 1.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2em;
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      width: 70%;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1d4ed8; }
+
+    .suggestions {
+      position: absolute;
+      background: #111;
+      width: 70%;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      margin-top: 2px;
+      z-index: 10;
+    }
+    .suggestions div {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .suggestions div:hover {
+      background: #2563eb;
+    }
+
+    .weather-info {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    .temp {
+      font-size: 2em;
+      font-weight: bold;
+      background: linear-gradient(90deg, #ff9966, #ff5e62);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tip {
+      margin-top: 15px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    /* Contact Section */
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
+      width: 90%;
+      text-align: left;
+    }
+    .contact-card h2 {
+      color: #ff4d6d;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .contact-card a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .contact-card p {
+      margin: 8px 0;
+      font-size: 0.95em;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9em;
+      background: rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    footer span {
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div id="overlay" class="overlay"></div>
+  <div class="container">
+    <!-- Weather Card -->
+    <div class="card">
+      <h1 id="typing"></h1>
+      <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Enter city..." oninput="showSuggestions(this.value)" autocomplete="off"/>
+        <button onclick="getWeather()">Search</button>
+        <div id="suggestions" class="suggestions"></div>
+      </div>
+      <div id="weather" class="weather-info"></div>
+      <div id="tip" class="tip"></div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-card">
+      <h2>📞 Contact</h2>
+      <p>📧 <a href="mailto:priyanshrajbhar499@gmail.com">priyanshrajbhar499@gmail.com</a></p>
+      <p>📸 <a href="https://instagram.com/priyansh__.86" target="_blank">@priyansh__.86</a></p>
+      <p>🐦 <a href="https://x.com/priyansh_86" target="_blank">@priyansh_86</a></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Made with ❤️ by <span>Priyansh</span>
+  </footer>
+
+  <script>
+    const apiKey = "1438b2c52672a711f94238a40a67568d"; 
+    const geoApi = "https://api.openweathermap.org/geo/1.0/direct";
+
+    // Typing effect
+    const text = "Live Weather Updates";
+    let i = 0;
+    function typing() {
+      if (i < text.length) {
+        document.getElementById("typing").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typing, 100);
+      }
+    }
+    typing();
+
+    // Suggestions
+    async function showSuggestions(query) {
+      const sugBox = document.getElementById("suggestions");
+      sugBox.innerHTML = "";
+      if (query.length < 2) return;
+
+      const url = `${geoApi}?q=${query}&limit=5&appid=${apiKey}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.length > 0) {
+          data.forEach(city => {
+            const div = document.createElement("div");
+            div.innerText = `${city.name}, ${city.state ? city.state + ', ' : ''}${city.country}`;
+            div.onclick = () => {
+              const cityFullName = `${city.name},${city.country}`;
+              document.getElementById("cityInput").value = cityFullName;
+              sugBox.innerHTML = "";
+              getWeather(cityFullName);
+            };
+            sugBox.appendChild(div);
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching suggestions", err);
+      }
+    }
+
+    // Weather Tips
+    function getWeatherTip(main) {
+      switch(main.toLowerCase()) {
+        case "clear": return "It's sunny 🌞 — Stay hydrated!";
+        case "clouds": return "Cloudy ☁️ — Perfect for a walk!";
+        case "rain": return "Rainy 🌧️ — Carry an umbrella ☂️";
+        case "snow": return "Snowy ❄️ — Wear warm clothes 🧥";
+        case "thunderstorm": return "Storm ⚡ — Better stay indoors!";
+        default: return "Have a great day ✨";
+      }
+    }
+
+    // Background overlay changer
+    function setOverlay(main) {
+      const overlay = document.getElementById("overlay");
+      overlay.className = "overlay"; 
+      switch(main.toLowerCase()) {
+        case "clear": overlay.classList.add("clear"); break;
+        case "clouds": overlay.classList.add("clouds"); break;
+        case "rain": overlay.classList.add("rain"); break;
+        case "snow": overlay.classList.add("snow"); break;
+        case "thunderstorm": overlay.classList.add("storm"); break;
+      }
+    }
+
+    // Emoji Mapper
+    function getEmoji(main) {
+      switch(main.toLowerCase()) {
+        case "clear": return "☀️";
+        case "clouds": return "☁️";
+        case "rain": return "🌧️";
+        case "snow": return "❄️";
+        case "thunderstorm": return "⚡";
+        default: return "🌡️";
+      }
+    }
+
+    // Get Weather
+    async function getWeather(cityName) {
+      const city = cityName || document.getElementById("cityInput").value;
+      if (!city) return;
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.cod === 200) {
+          const main = data.weather[0].main;
+          document.getElementById("weather").innerHTML = `
+            <div style="font-size:40px;">${getEmoji(main)}</div>
+            <div class="temp">${data.main.temp}°C (feels like ${data.main.feels_like}°C)</div>
+            <div>${data.name}, ${data.sys.country}</div>
+            <div>${main} (${data.weather[0].description})</div>
+            <div>Humidity: ${data.main.humidity}%</div>
+            <div>Wind: ${data.wind.speed} m/s</div>
+          `;
+          document.getElementById("tip").innerText = getWeatherTip(main);
+          setOverlay(main);
+        } else {
+          document.getElementById("weather").innerHTML = `<div>City not found.</div>`;
+        }
+      } catch (err) {
+        console.error("Error fetching weather", err);
+      }
+    }
+
+    // Auto-detect location
+    function detectLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          try {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.cod === 200) {
+              const main = data.weather[0].main;
+              document.getElementById("weather").innerHTML = `
+                <div style="font-size:40px;">${getEmoji(main)}</div>
+                <div class="temp">${data.main.temp}°C (feels like ${data.main.feels_like}°C)</div>
+                <div>${data.name}, ${data.sys.country}</div>
+                <div>${main} (${data.weather[0].description})</div>
+                <div>Humidity: ${data.main.humidity}%</div>
+                <div>Wind: ${data.wind.speed} m/s</div>
+              `;
+              document.getElementById("tip").innerText = getWeatherTip(main);
+              setOverlay(main);
+            }
+          } catch (err) {
+            console.error("Error fetching location weather", err);
+          }
+        });
+      }
+    }
+    window.onload = detectLocation;
+
+    // Background stars
+    const stars = document.querySelector('.stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      star.style.animationDuration = `${1 + Math.random() * 2}s`;
+      stars.appendChild(star);
+    }
+    setInterval(() => {
+      const shootingStar = document.createElement('div');
+      shootingStar.className = 'shooting-star';
+      shootingStar.style.top = `${Math.random() * window.innerHeight}px`;
+      shootingStar.style.left = `${Math.random() * window.innerWidth}px`;
+      stars.appendChild(shootingStar);
+      setTimeout(() => shootingStar.remove(), 2000);
+    }, 4000);
+  </script>
+</body>
+</html>

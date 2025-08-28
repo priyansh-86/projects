@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App - Your Digital Notebook</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%);
+            color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .dark-theme .header {
+            color: #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .auth-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .dark-theme .auth-section {
+            background: #2d3748;
+            color: #f0f0f0;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .dark-theme .form-group label {
+            color: #d0d0d0;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .dark-theme .form-group input {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .dark-theme .btn-secondary {
+            color: #a3bffa;
+            border-color: #a3bffa;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .dark-theme .btn-secondary:hover {
+            background: #a3bffa;
+            color: #2d3748;
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            color: #718096;
+            border: 2px solid #e2e8f0;
+        }
+
+        .dark-theme .btn-tertiary {
+            color: #cbd5e0;
+            border-color: #4a5568;
+        }
+
+        .btn-tertiary:hover {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .dark-theme .btn-tertiary:hover {
+            background: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .notes-section {
+            display: none;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-theme .user-info {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .stats-bar {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .dark-theme .stats-bar {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .note-input-area {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .dark-theme .note-input-area {
+            background: #2d3748;
+        }
+
+        .formatting-toolbar {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .dark-theme .note-input {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .note-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .dark-theme .color-option.active {
+            border-color: #f0f0f0;
+        }
+
+        .color-yellow { background: #fff740; }
+        .color-orange { background: #ffab40; }
+        .color-pink { background: #ff5722; }
+        .color-purple { background: #9c27b0; }
+        .color-blue { background: #2196f3; }
+        .color-green { background: #4caf50; }
+        .color-default { background: #f5f5f5; }
+
+        .dark-theme .color-default { background: #4a5568; }
+
+        .category-selector {
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid #e1e1e1;
+        }
+
+        .dark-theme .category-selector {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .dark-theme .note-card {
+            background: #2d3748;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .note-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .note-card.pinned::before {
+            content: '📌';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .note-category {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .dark-theme .note-category {
+            background: rgba(102, 126, 234, 0.4);
+            color: #a3bffa;
+        }
+
+        .note-content {
+            min-height: 60px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .dark-theme .note-actions {
+            border-top: 1px solid #4a5568;
+        }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .dark-theme .note-date {
+            color: #a0aec0;
+        }
+
+        .note-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .note-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .dark-theme .note-btn {
+            color: #a0aec0;
+        }
+
+        .note-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .dark-theme .note-btn:hover {
+            background: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+        }
+
+        .dark-theme .empty-state {
+            color: #cbd5e0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.1);
+            color: white;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+
+        .dark-theme .footer {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .made-with-love {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .my_name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(
+                45deg, 
+                #ff6b6b, 
+                #4ecdc4, 
+                #45b7d1, 
+                #96ceb4, 
+                #feca57, 
+                #ff9ff3,
+                #54a0ff
+            );
+            background-size: 300% 300%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 3s ease infinite;
+            text-shadow: none;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .dark-theme .loading {
+            color: #cbd5e0;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .dark-theme .error-message {
+            background: #422;
+            color: #ff5252;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .dark-theme .modal-content {
+            background: #2d3748;
+            color: #f0f0f0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .dark-theme .theme-toggle {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .analytics-chart {
+            width: 100%;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .template-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .template-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dark-theme .template-btn {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .template-btn:hover {
+            background: #f7fafc;
+        }
+
+        .dark-theme .template-btn:hover {
+            background: #2d3748;
+        }
+
+        .share-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .share-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .dark-theme .share-input {
+            background: #4a5568;
+            border-color: #4a5568;
+            color: #f0f0f0;
+        }
+
+        .encryption-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .note-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .social-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .color-picker {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-sticky-note"></i> Notes App</h1>
+            <p>Your personal digital notebook in the cloud</p>
+        </div>
+
+        <!-- Auth Section -->
+        <div id="authSection" class="auth-section">
+            <div id="loginForm" class="auth-form">
+                <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Welcome Back!</h2>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button class="btn btn-primary" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="btn btn-secondary" onclick="showSignup()">
+                    New here? Sign Up
+                </button>
+            </div>
+
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Create Account</h2>
+                <div id="signupError" class="error-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password (min. 6 characters)" required>
+                </div>
+                <button class="btn btn-primary" onclick="signup()">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </button>
+                <button class="btn btn-secondary" onclick="showLogin()">
+                    Already have account? Login
+                </button>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div id="notesSection" class="notes-section">
+            <div class="user-info">
+                <div>
+                    <i class="fas fa-user"></i> Welcome, <span id="userName">User</span>!
+                </div>
+                <div>
+                    <button class="btn btn-tertiary" onclick="showAnalytics()">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportNotes()" style="margin-left: 10px;">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 10px;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="totalNotes">0</div>
+                    <div>Total Notes</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="pinnedNotes">0</div>
+                    <div>Pinned</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="categoriesCount">0</div>
+                    <div>Categories</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="encryptedNotes">0</div>
+                    <div>Encrypted</div>
+                </div>
+            </div>
+
+            <div class="note-input-area">
+                <div class="template-selector">
+                    <button class="template-btn" onclick="applyTemplate('meeting')">
+                        <i class="fas fa-users"></i> Meeting Notes
+                    </button>
+                    <button class="template-btn" onclick="applyTemplate('todo')">
+                        <i class="fas fa-tasks"></i> To-Do List
+                    </button>
+                    <button class="template-btn" onclick="applyTemplate('idea')">
+                        <i class="fas fa-lightbulb"></i> Idea Template
+                    </button>
+                </div>
+                
+                <div class="formatting-toolbar">
+                    <button type="button" class="note-btn" onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="note-btn" onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="note-btn" onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                    <button type="button" class="note-btn" onclick="insertBullet()" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                </div>
+                <textarea id="noteInput" class="note-input" placeholder="Write your note here..." rows="4"></textarea>
+                <div class="note-controls">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="color-picker">
+                            <div class="color-option color-default active" data-color="default" onclick="selectColor('default')"></div>
+                            <div class="color-option color-yellow" data-color="yellow" onclick="selectColor('yellow')"></div>
+                            <div class="color-option color-orange" data-color="orange" onclick="selectColor('orange')"></div>
+                            <div class="color-option color-pink" data-color="pink" onclick="selectColor('pink')"></div>
+                            <div class="color-option color-purple" data-color="purple" onclick="selectColor('purple')"></div>
+                            <div class="color-option color-blue" data-color="blue" onclick="selectColor('blue')"></div>
+                            <div class="color-option color-green" data-color="green" onclick="selectColor('green')"></div>
+                        </div>
+                        <select id="noteCategory" class="category-selector">
+                            <option value="">Select Category</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Work">Work</option>
+                            <option value="Ideas">Ideas</option>
+                            <option value="Important">Important</option>
+                            <option value="To-Do">To-Do</option>
+                        </select>
+                        <div class="encryption-toggle">
+                            <input type="checkbox" id="encryptNote">
+                            <label for="encryptNote">Encrypt</label>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNote()">
+                        <i class="fas fa-plus"></i> Add Note
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingNotes" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading your notes...
+            </div>
+
+            <div id="notesContainer" class="notes-grid"></div>
+            
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-sticky-note"></i>
+                <h3>No notes yet</h3>
+                <p>Start writing your first note above!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Export Notes</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="btn btn-primary" onclick="exportAsJSON()">
+                    <i class="fas fa-file-code"></i> Export as JSON
+                </button>
+                <button class="btn btn-primary" onclick="exportAsTXT()">
+                    <i class="fas fa-file-alt"></i> Export as Text
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('exportModal')">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Notes Analytics</h2>
+            <div class="analytics-chart" id="analyticsChart">
+                <canvas id="notesChart"></canvas>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <div><strong>Total Notes:</strong> <span id="analyticsTotal">0</span></div>
+                <div><strong>By Category:</strong>
+                    <ul id="categoryStats" style="margin-left: 20px; margin-top: 5px;"></ul>
+                </div>
+                <div><strong>Average Note Length:</strong> <span id="avgNoteLength">0</span> characters</div>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('analyticsModal')" style="margin-top: 20px;">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Share Note</h2>
+            <div class="form-group">
+                <label>Share with (email)</label>
+                <input type="email" id="shareEmail" class="share-input" placeholder="Enter email address">
+            </div>
+            <div class="form-group">
+                <label>Permission</label>
+                <select id="sharePermission" class="category-selector">
+                    <option value="view">Can View</option>
+                    <option value="edit">Can Edit</option>
+                </select>
+            </div>
+            <div class="share-options">
+                <button class="btn btn-primary" onclick="shareNote()">
+                    <i class="fas fa-share"></i> Share
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('shareModal')">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="mailto:priyanshrajbhar499@gmail.com" class="social-link">
+                    <i class="fas fa-envelope"></i> Email
+                </a>
+                <a href="https://wa.me/919426781890" class="social-link" target="_blank">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="https://x.com/priyansh_86" class="social-link" target="_blank">
+                    <i class="fab fa-twitter"></i> Twitter
+                </a>
+                <a href="https://instagram.com/priyansh__.86" class="social-link" target="_blank">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="https://t.me/priyansh_dev" class="social-link" target="_blank">
+                    <i class="fab fa-telegram"></i> Telegram
+                </a>
+            </div>
+            <div class="made-with-love">
+                Made with ❤️ by <span class="my_name">PRIYANSH</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- CryptoJS for Encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <script>
+        // Firebase configuration and initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7X8j8rfY1fZa-3h80ZY4LzOEqBByP6As",
+            authDomain: "noteweb-747cf.firebaseapp.com",
+            projectId: "noteweb-747cf",
+            storageBucket: "noteweb-747cf.firebasestorage.app",
+            messagingSenderId: "1009671157502",
+            appId: "1:1009671157502:web:c83523f3c303cf923dd7af",
+            measurementId: "G-N8MB8DP4HQ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let notes = [];
+        let selectedColor = 'default';
+        let editingNoteId = null;
+        let notesUnsubscribe = null;
+        let notesChart = null;
+
+        // Color mapping
+        const colorMap = {
+            default: '#f5f5f5',
+            yellow: '#fff740',
+            orange: '#ffab40',
+            pink: '#ff5722',
+            purple: '#9c27b0',
+            blue: '#2196f3',
+            green: '#4caf50'
+        };
+
+        // Categories
+        const categories = ['Personal', 'Work', 'Ideas', 'Important', 'To-Do'];
+
+        // Note templates
+        const noteTemplates = {
+            meeting: "Meeting Notes\n\nDate: \nAttendees: \n\nAgenda:\n• \n• \n\nAction Items:\n1. \n2. ",
+            todo: "To-Do List\n\nPriority Tasks:\n☐ \n☐ \n\nOther Tasks:\n☐ \n☐ ",
+            idea: "Idea: \n\nDescription:\n\nPros:\n• \n• \n\nCons:\n• \n• "
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for saved theme preference
+            if (localStorage.getItem('darkTheme') === 'true') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('themeIcon').className = 'fas fa-sun';
+            }
+
+            // Listen for auth state changes
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    showNotesSection();
+                    startNotesListener();
+                    startBackupReminder();
+                } else {
+                    currentUser = null;
+                    if (notesUnsubscribe) {
+                        notesUnsubscribe();
+                        notesUnsubscribe = null;
+                    }
+                    document.getElementById('authSection').style.display = 'block';
+                    document.getElementById('notesSection').style.display = 'none';
+                    showLogin();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'n':
+                            e.preventDefault();
+                            document.getElementById('noteInput').focus();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            addNote();
+                            break;
+                        case 'd':
+                            e.preventDefault();
+                            toggleTheme();
+                            break;
+                    }
+                }
+                
+                if (e.key === 'Escape') {
+                    editingNoteId = null;
+                    document.getElementById('noteInput').value = '';
+                    document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
+                    selectColor('default');
+                    document.getElementById('noteCategory').value = '';
+                    document.getElementById('encryptNote').checked = false;
+                }
+                
+                if (e.ctrlKey && e.key === 'Enter') {
+                    addNote();
+                }
+            });
+        });
+
+        // Theme toggle function
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('darkTheme', isDark);
+        }
+
+        // Authentication functions
+        function showSignup() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'flex';
+            document.getElementById('signupError').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'flex';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showError('loginError', 'Please enter both email and password');
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    showError('loginError', error.message);
+                });
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!name || !email || !password) {
+                showError('signupError', 'Please fill all fields');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('signupError', 'Password should be at least 6 characters');
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Add user name to Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        name: name,
+                        email: email
+                    });
+                })
+                .catch((error) => {
+                    showError('signupError', error.message);
+                });
+        }
+
+        function logout() {
+            auth.signOut();
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Notes functions
+        function showNotesSection() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('notesSection').style.display = 'block';
+            document.getElementById('userName').textContent = currentUser.displayName || currentUser.email;
+        }
+
+        function startNotesListener() {
+            if (notesUnsubscribe) {
+                notesUnsubscribe();
+            }
+            
+            document.getElementById('loadingNotes').style.display = 'block';
+            document.getElementById('notesContainer').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            notesUnsubscribe = db.collection('notes')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .onSnapshot((querySnapshot) => {
+                    notes = [];
+                    querySnapshot.forEach((doc) => {
+                        notes.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    renderNotes();
+                    updateStats();
+                    document.getElementById('loadingNotes').style.display = 'none';
+                    
+                    if (notes.length === 0) {
+                        document.getElementById('emptyState').style.display = 'block';
+                    } else {
+                        document.getElementById('emptyState').style.display = 'none';
+                    }
+                }, (error) => {
+                    console.error("Error fetching notes: ", error);
+                    document.getElementById('loadingNotes').style.display = 'none';
+                });
+        }
+
+        function renderNotes() {
+            const notesContainer = document.getElementById('notesContainer');
+            notesContainer.innerHTML = '';
+            
+            notes.forEach(note => {
+                const noteCard = document.createElement('div');
+                noteCard.className = 'note-card';
+                noteCard.style.backgroundColor = colorMap[note.color] || colorMap.default;
+                
+                if (note.pinned) {
+                    noteCard.classList.add('pinned');
+                }
+                
+                let noteContent = note.content;
+                if (note.encrypted) {
+                    noteContent = '🔒 Encrypted content';
+                }
+                
+                noteCard.innerHTML = `
+                    ${note.category ? `<span class="note-category">${note.category}</span>` : ''}
+                    <div class="note-content">${noteContent}</div>
+                    <div class="note-actions">
+                        <div class="note-date">${formatDate(note.createdAt?.toDate())}</div>
+                        <div class="note-buttons">
+                            <button class="note-btn" onclick="togglePinNote('${note.id}', ${!note.pinned})" title="${note.pinned ? 'Unpin' : 'Pin'}">
+                                <i class="fas fa-thumbtack"></i>
+                            </button>
+                            ${note.encrypted ? `
+                                <button class="note-btn" onclick="decryptNote('${note.id}')" title="Decrypt">
+                                    <i class="fas fa-lock-open"></i>
+                                </button>
+                            ` : ''}
+                            <button class="note-btn" onclick="editNote('${note.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="note-btn" onclick="shareNoteModal('${note.id}')" title="Share">
+                                <i class="fas fa-share"></i>
+                            </button>
+                            <button class="note-btn" onclick="deleteNote('${note.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                notesContainer.appendChild(noteCard);
+            });
+        }
+
+        function addNote() {
+            const content = document.getElementById('noteInput').value.trim();
+            const category = document.getElementById('noteCategory').value;
+            const encrypt = document.getElementById('encryptNote').checked;
+            
+            if (!content) {
+                alert('Please write something in your note');
+                return;
+            }
+            
+            let noteData = {
+                content: content,
+                color: selectedColor,
+                category: category,
+                pinned: false,
+                userId: currentUser.uid,
+                createdAt: new Date(),
+                encrypted: encrypt
+            };
+            
+            if (encrypt) {
+                const encryptionKey = prompt('Set an encryption key for this note:');
+                if (!encryptionKey) {
+                    alert('Encryption key is required for encrypted notes');
+                    return;
+                }
+                
+                noteData.content = CryptoJS.AES.encrypt(content, encryptionKey).toString();
+            }
+            
+            if (editingNoteId) {
+                // Update existing note
+                db.collection('notes').doc(editingNoteId).update(noteData)
+                    .then(() => {
+                        resetForm();
+                    })
+                    .catch((error) => {
+                        console.error("Error updating note: ", error);
+                        alert('Error updating note');
+                    });
+            } else {
+                // Add new note
+                db.collection('notes').add(noteData)
+                    .then(() => {
+                        resetForm();
+                    })
+                    .catch((error) => {
+                        console.error("Error adding note: ", error);
+                        alert('Error adding note');
+                    });
+            }
+        }
+
+        function editNote(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            
+            let content = note.content;
+            if (note.encrypted) {
+                const key = prompt('Enter encryption key to edit this note:');
+                if (!key) return;
+                
+                try {
+                    content = CryptoJS.AES.decrypt(note.content, key).toString(CryptoJS.enc.Utf8);
+                    if (!content) {
+                        alert('Invalid encryption key');
+                        return;
+                    }
+                } catch (e) {
+                    alert('Error decrypting note');
+                    return;
+                }
+            }
+            
+            document.getElementById('noteInput').value = content;
+            document.getElementById('noteCategory').value = note.category || '';
+            selectColor(note.color || 'default');
+            document.getElementById('encryptNote').checked = note.encrypted || false;
+            editingNoteId = noteId;
+            
+            document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-save"></i> Update Note';
+            document.getElementById('noteInput').focus();
+        }
+
+        function decryptNote(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note || !note.encrypted) return;
+            
+            const key = prompt('Enter encryption key:');
+            if (!key) return;
+            
+            try {
+                const decrypted = CryptoJS.AES.decrypt(note.content, key).toString(CryptoJS.enc.Utf8);
+                if (!decrypted) {
+                    alert('Invalid encryption key');
+                    return;
+                }
+                
+                alert('Decrypted content:\n\n' + decrypted);
+            } catch (e) {
+                alert('Error decrypting note');
+            }
+        }
+
+        function deleteNote(noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) return;
+            
+            db.collection('notes').doc(noteId).delete()
+                .catch((error) => {
+                    console.error("Error deleting note: ", error);
+                    alert('Error deleting note');
+                });
+        }
+
+        function togglePinNote(noteId, pinned) {
+            db.collection('notes').doc(noteId).update({ pinned: pinned })
+                .catch((error) => {
+                    console.error("Error pinning note: ", error);
+                });
+        }
+
+        function resetForm() {
+            document.getElementById('noteInput').value = '';
+            document.getElementById('noteCategory').value = '';
+            selectColor('default');
+            document.getElementById('encryptNote').checked = false;
+            editingNoteId = null;
+            document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            document.querySelectorAll('.color-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`.color-option[data-color="${color}"]`).classList.add('active');
+        }
+
+        function formatText(format) {
+            const textarea = document.getElementById('noteInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            let formattedText = '';
+            
+            switch(format) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    break;
+                case 'italic':
+                    formattedText = `_${selectedText}_`;
+                    break;
+                case 'underline':
+                    formattedText = `__${selectedText}__`;
+                    break;
+            }
+            
+            textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+        }
+
+        function insertBullet() {
+            const textarea = document.getElementById('noteInput');
+            const start = textarea.selectionStart;
+            
+            textarea.value = textarea.value.substring(0, start) + '• ' + textarea.value.substring(start);
+            textarea.focus();
+            textarea.setSelectionRange(start + 2, start + 2);
+        }
+
+        function applyTemplate(templateName) {
+            document.getElementById('noteInput').value = noteTemplates[templateName] || '';
+            document.getElementById('noteInput').focus();
+        }
+
+        function updateStats() {
+            document.getElementById('totalNotes').textContent = notes.length;
+            document.getElementById('pinnedNotes').textContent = notes.filter(n => n.pinned).length;
+            
+            const categories = [...new Set(notes.map(n => n.category).filter(Boolean))];
+            document.getElementById('categoriesCount').textContent = categories.length;
+            
+            document.getElementById('encryptedNotes').textContent = notes.filter(n => n.encrypted).length;
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} min ago`;
+            if (diffHours < 24) return `${diffHours} hr ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        // Analytics functions
+        function showAnalytics() {
+            // Calculate analytics data
+            const totalNotes = notes.length;
+            const categoryStats = {};
+            let totalChars = 0;
+            
+            notes.forEach(note => {
+                if (note.category) {
+                    categoryStats[note.category] = (categoryStats[note.category] || 0) + 1;
+                }
+                
+                if (!note.encrypted) {
+                    totalChars += note.content.length;
+                }
+            });
+            
+            document.getElementById('analyticsTotal').textContent = totalNotes;
+            document.getElementById('avgNoteLength').textContent = totalNotes > 0 ? Math.round(totalChars / totalNotes) : 0;
+            
+            const categoryStatsElement = document.getElementById('categoryStats');
+            categoryStatsElement.innerHTML = '';
+            
+            for (const [category, count] of Object.entries(categoryStats)) {
+                const li = document.createElement('li');
+                li.textContent = `${category}: ${count} notes (${Math.round((count / totalNotes) * 100)}%)`;
+                categoryStatsElement.appendChild(li);
+            }
+            
+            // Create chart
+            const ctx = document.getElementById('notesChart').getContext('2d');
+            
+            if (notesChart) {
+                notesChart.destroy();
+            }
+            
+            notesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(categoryStats),
+                    datasets: [{
+                        data: Object.values(categoryStats),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4ecdc4', '#c0c0c0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Notes by Category'
+                        }
+                    }
+                }
+            });
+            
+            openModal('analyticsModal');
+        }
+
+        // Export functions
+        function exportNotes() {
+            openModal('exportModal');
+        }
+
+        function exportAsJSON() {
+            const dataStr = JSON.stringify(notes, null, 2);
+            downloadFile(dataStr, 'notes.json', 'application/json');
+            closeModal('exportModal');
+        }
+
+        function exportAsTXT() {
+            let text = '';
+            notes.forEach(note => {
+                text += `Category: ${note.category || 'None'}\n`;
+                text += `Date: ${note.createdAt?.toDate().toLocaleString() || 'Unknown'}\n`;
+                text += `Pinned: ${note.pinned ? 'Yes' : 'No'}\n`;
+                text += `Encrypted: ${note.encrypted ? 'Yes' : 'No'}\n`;
+                text += 'Content:\n';
+                text += note.encrypted ? '🔒 Encrypted content\n' : note.content;
+                text += '\n\n' + '='.repeat(50) + '\n\n';
+            });
+            
+            downloadFile(text, 'notes.txt', 'text/plain');
+            closeModal('exportModal');
+        }
+
+        function downloadFile(content, fileName, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Sharing functions
+        function shareNoteModal(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            
+            window.currentSharedNoteId = noteId;
+            openModal('shareModal');
+        }
+
+        function shareNote() {
+            const email = document.getElementById('shareEmail').value;
+            const permission = document.getElementById('sharePermission').value;
+            const noteId = window.currentSharedNoteId;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            // In a real app, you would create a share record in Firestore
+            // and send an email notification to the recipient
+            
+            alert(`Note shared with ${email} (${permission} permission)`);
+            closeModal('shareModal');
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Backup reminder
+        function startBackupReminder() {
+            // Show backup reminder once a week
+            const lastBackupReminder = localStorage.getItem('lastBackupReminder');
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            if (!lastBackupReminder || new Date(lastBackupReminder) < oneWeekAgo) {
+                setTimeout(() => {
+                    if (confirm("It's a good time to backup your notes. Would you like to export them now?")) {
+                        exportNotes();
+                    }
+                    localStorage.setItem('lastBackupReminder', new Date().toISOString());
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
