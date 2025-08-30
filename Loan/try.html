@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google API Test - Fixed</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4285F4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .loading {
+            background-color: #FFF8E1;
+            border-left: 4px solid #FFC107;
+            color: #7D6608;
+        }
+        .success {
+            background-color: #E8F5E9;
+            border-left: 4px solid #4CAF50;
+            color: #2E7D32;
+        }
+        .error {
+            background-color: #FFEBEE;
+            border-left: 4px solid #F44336;
+            color: #C62828;
+        }
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        button:hover {
+            background-color: #3367D6;
+        }
+        button:disabled {
+            background-color: #9E9E9E;
+            cursor: not-allowed;
+        }
+        .details {
+            background-color: #F5F5F5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .step {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .instructions {
+            background-color: #E3F2FD;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="icon">📊</i> Google API Test - Fixed</h1>
+        
+        <div class="instructions">
+            <h3>How to use this test:</h3>
+            <ol>
+                <li>Click "Load Google APIs" to initialize the libraries</li>
+                <li>After APIs are loaded, click "Authenticate with Google"</li>
+                <li>Once authenticated, test the connection to Google Sheets</li>
+            </ol>
+        </div>
+        
+        <div class="step">
+            <h3>Step 1: Load Google APIs</h3>
+            <button id="loadApiBtn">Load Google APIs</button>
+            <div id="apiStatus" class="status-box">
+                <i class="icon">ℹ️</i> Google APIs not loaded yet.
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Authentication</h3>
+            <button id="authBtn" disabled>Authenticate with Google</button>
+            <div id="authStatus" class="status-box">
+                <i class="icon">ℹ️</i> Waiting for API initialization...
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Test Connection</h3>
+            <button id="testConnectionBtn" disabled>Test Google Sheets Connection</button>
+            <div id="testResult"></div>
+        </div>
+        
+        <div class="details">
+            <h3>Configuration Details:</h3>
+            <p><strong>Client ID:</strong> 893953549229-77mhk8me4r4lkomv5jo1gba7qb9ef9a6.apps.googleusercontent.com</p>
+            <p><strong>API Key:</strong> AIzaSyASNTy5UqShIgGsFf-AGO4Ioi-r4Gj-OD4</p>
+        </div>
+    </div>
+
+    <!-- Load Google API scripts manually instead of using onload -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script>
+        const CLIENT_ID = '893953549229-77mhk8me4r4lkomv5jo1gba7qb9ef9a6.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyASNTy5UqShIgGsFf-AGO4Ioi-r4Gj-OD4';
+        const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+        const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        // DOM elements
+        const loadApiBtn = document.getElementById('loadApiBtn');
+        const authBtn = document.getElementById('authBtn');
+        const testConnectionBtn = document.getElementById('testConnectionBtn');
+        const apiStatus = document.getElementById('apiStatus');
+        const authStatus = document.getElementById('authStatus');
+        const testResult = document.getElementById('testResult');
+
+        function updateStatus(element, message, status) {
+            element.innerHTML = `<i class="icon">${status === 'success' ? '✅' : status === 'error' ? '❌' : 'ℹ️'}</i> ${message}`;
+            element.className = `status-box ${status}`;
+        }
+
+        function enableButton(button, enabled) {
+            button.disabled = !enabled;
+            button.style.opacity = enabled ? '1' : '0.6';
+            button.style.cursor = enabled ? 'pointer' : 'not-allowed';
+        }
+
+        // Load Google APIs when button is clicked
+        loadApiBtn.addEventListener('click', function() {
+            updateStatus(apiStatus, 'Loading Google APIs...', 'loading');
+            
+            // Load gapi client
+            gapi.load('client', function() {
+                gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: DISCOVERY_DOCS,
+                }).then(function() {
+                    gapiInited = true;
+                    updateStatus(apiStatus, 'Google API client initialized successfully!', 'success');
+                    
+                    // Initialize GIS
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        callback: (tokenResponse) => {
+                            if (tokenResponse && tokenResponse.access_token) {
+                                updateStatus(authStatus, 'Authentication successful!', 'success');
+                                enableButton(testConnectionBtn, true);
+                            } else {
+                                updateStatus(authStatus, 'Authentication failed or was canceled.', 'error');
+                            }
+                        },
+                    });
+                    
+                    gisInited = true;
+                    updateStatus(authStatus, 'Google Identity Services initialized. Click "Authenticate with Google".', 'success');
+                    enableButton(authBtn, true);
+                }).catch(function(error) {
+                    console.error("Error initializing gapi.client:", error);
+                    updateStatus(apiStatus, `Error initializing Google API client: ${error.message}`, 'error');
+                });
+            });
+        });
+
+        // Handle authentication
+        authBtn.addEventListener('click', function() {
+            updateStatus(authStatus, 'Requesting authentication token...', 'loading');
+            tokenClient.requestAccessToken();
+        });
+
+        // Test Sheets connection
+        testConnectionBtn.addEventListener('click', function() {
+            updateStatus(testResult, 'Testing Sheets API connection...', 'loading');
+            
+            // Try to list spreadsheets (a simple API call to test connection)
+            gapi.client.sheets.spreadsheets.get({
+                spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', // A public sample spreadsheet
+            }).then(function(response) {
+                updateStatus(testResult, `Connection successful!<br>Accessed spreadsheet: ${response.result.properties.title}`, 'success');
+            }).catch(function(error) {
+                console.error("Sheets API error:", error);
+                updateStatus(testResult, `Sheets API Error: ${error.result?.error?.message || error.message}`, 'error');
+            });
+        });
+
+        // Initial setup
+        updateStatus(apiStatus, 'Click "Load Google APIs" to initialize', 'loading');
+        updateStatus(authStatus, 'Waiting for API initialization...', 'loading');
+        enableButton(authBtn, false);
+        enableButton(testConnectionBtn, false);
+    </script>
+</body>
+</html>
