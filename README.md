@@ -1,10 +1,15 @@
 <h1 align="center">Hi 👋, I'm PRIYANSH R RAJBHAR</h1>
 <h3 align="center">A Student of logic, Artist of syntax 💡 from GJ</h3>
 
+- 🔭 I’m currently working on [https://priyanshrajbhar.vercel.app/](https://priyanshrajbhar.vercel.app/)
+
+- 📫 How to reach me **priyanshrajbhar499@gmail.com**
+
 <h3 align="left">Connect with me:</h3>
 <p align="left">
 <a href="https://twitter.com/priyansh_86" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/twitter.svg" alt="priyansh_86" height="30" width="40" /></a>
 <a href="https://instagram.com/priyansh__.86/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/instagram.svg" alt="priyansh__.86/" height="30" width="40" /></a>
+<a href="https://www.leetcode.com/priyansh_86/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/leet-code.svg" alt="priyansh_86/" height="30" width="40" /></a>
 </p>
 
 <h3 align="left">Languages and Tools:</h3>
