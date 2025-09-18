@@ -1,5 +1,5 @@
 <h1 align="center">Hi 👋, I'm PRIYANSH R RAJBHAR</h1>
-<h3 align="center">A passionate frontend developer from GJ</h3>
+<h3 align="center">A Student of logic, Artist of syntax 💡 from GJ</h3>
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
