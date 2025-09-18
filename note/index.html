@@ -93,13 +93,11 @@
             border-radius: 10px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: #f9f9f9;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
             box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
         }
 
@@ -159,11 +157,6 @@
             backdrop-filter: blur(10px);
         }
 
-        .notes-header h2 {
-            color: #333;
-            margin: 0;
-        }
-
         .user-info {
             display: flex;
             align-items: center;
@@ -215,32 +208,6 @@
             backdrop-filter: blur(10px);
         }
 
-        .note-input {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            transition: all 0.3s ease;
-            background: #f9f9f9;
-            color: #333;
-        }
-
-        .note-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .note-input::placeholder {
-            color: #999;
-        }
-
-        /* Text Formatting Toolbar */
         .formatting-toolbar {
             display: flex;
             gap: 10px;
@@ -257,18 +224,13 @@
             transition: all 0.3s ease;
             color: #666;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .format-btn:hover {
             border-color: #667eea;
             color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
         }
 
-        /* Color Selector */
         .color-selector {
             display: flex;
             gap: 10px;
@@ -288,7 +250,6 @@
         .color-option.active {
             border-color: #333;
             transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
         }
 
         .color-option[data-color="default"] { background: #f5f5f5; }
@@ -299,11 +260,29 @@
         .color-option[data-color="blue"] { background: #2196f3; }
         .color-option[data-color="green"] { background: #4caf50; }
 
-        /* Input Controls */
+        .note-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
+        }
+
         .input-controls {
             display: flex;
             gap: 15px;
             align-items: center;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
@@ -313,7 +292,6 @@
             border-radius: 10px;
             font-size: 14px;
             background: white;
-            color: #333;
             cursor: pointer;
         }
 
@@ -330,7 +308,7 @@
             margin-bottom: 30px;
         }
 
-        /* Improved Note Cards with Better Text Contrast */
+        /* FIXED Note Cards with Better Text Visibility */
         .note-card {
             border-radius: 15px;
             padding: 20px;
@@ -338,7 +316,6 @@
             transition: all 0.3s ease;
             position: relative;
             border: 1px solid rgba(0,0,0,0.1);
-            backdrop-filter: blur(5px);
         }
 
         .note-card:hover {
@@ -348,7 +325,6 @@
 
         .note-card.pinned {
             border: 2px solid #667eea;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
         }
 
         .note-card.pinned::before {
@@ -359,77 +335,47 @@
             font-size: 16px;
         }
 
-        /* Enhanced Note Content with Better Visibility */
+        /* IMPROVED Note Content - Only Text Fixes */
         .note-content {
             margin-bottom: 15px;
             line-height: 1.6;
             font-size: 16px;
             word-wrap: break-word;
             white-space: pre-wrap;
-            /* Dynamic text color based on background */
-            color: #1a1a1a !important;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+            color: #2c3e50; /* Dark readable text */
             font-weight: 500;
-            background: rgba(255,255,255,0.7);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.8); /* Light shadow for readability */
         }
 
-        /* Dark background cards need light text */
-        .note-card[style*="#9c27b0"] .note-content,
-        .note-card[style*="#2196f3"] .note-content {
-            color: #ffffff !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .note-card[style*="#4caf50"] .note-content {
-            color: #ffffff !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .note-card[style*="#ff5722"] .note-content {
-            color: #ffffff !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        /* Improved Text Formatting Display */
+        /* Enhanced formatting styles */
         .note-content strong,
         .note-content b {
             font-weight: 700;
-            color: inherit;
+            color: #1a1a1a;
         }
 
         .note-content em,
         .note-content i {
             font-style: italic;
-            color: inherit;
+            color: #34495e;
         }
 
         .note-content u {
             text-decoration: underline;
             text-decoration-thickness: 2px;
-            color: inherit;
+            color: #2980b9;
         }
 
-        .note-content ul,
-        .note-content ol {
+        .note-content ul {
             margin: 10px 0;
             padding-left: 20px;
         }
 
         .note-content li {
             margin: 5px 0;
-            line-height: 1.5;
+            color: #2c3e50;
         }
 
-        /* Enhanced Note Category */
         .note-category {
             background: rgba(102, 126, 234, 0.9);
             color: white;
@@ -440,10 +386,8 @@
             position: absolute;
             top: -8px;
             left: 20px;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
-        /* Note Actions */
         .note-actions {
             display: flex;
             justify-content: space-between;
@@ -456,9 +400,6 @@
         .note-date {
             font-size: 12px;
             color: #666;
-            background: rgba(255,255,255,0.8);
-            padding: 4px 8px;
-            border-radius: 12px;
             font-weight: 500;
         }
 
@@ -470,13 +411,12 @@
         .note-btn {
             padding: 6px 10px;
             border: none;
-            background: rgba(255,255,255,0.9);
+            background: rgba(102, 126, 234, 0.1);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
-            color: #666;
+            color: #667eea;
             font-size: 12px;
-            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .note-btn:hover {
@@ -500,7 +440,6 @@
             font-size: 18px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
         }
 
         /* Modal Styles */
@@ -515,7 +454,6 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
 
         .modal-content {
@@ -589,32 +527,9 @@
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
             
-            .formatting-toolbar,
-            .color-selector,
-            .input-controls {
-                justify-content: center;
-            }
-            
             .notes-container {
                 grid-template-columns: 1fr;
             }
-        }
-
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mt-20 {
-            margin-top: 20px;
-        }
-
-        .mb-20 {
-            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -673,7 +588,7 @@
         </div>
 
         <!-- Notes Section -->
-        <div id="notesSection" class="hidden">
+        <div id="notesSection" style="display: none;">
             <!-- Notes Header -->
             <div class="notes-header">
                 <div>
@@ -709,13 +624,13 @@
             <div class="note-input-container">
                 <!-- Text Formatting Toolbar -->
                 <div class="formatting-toolbar">
-                    <button class="format-btn" onclick="formatText('bold')" title="Bold (Ctrl+B)">
+                    <button class="format-btn" onclick="formatText('bold')" title="Bold">
                         <i class="fas fa-bold"></i> Bold
                     </button>
-                    <button class="format-btn" onclick="formatText('italic')" title="Italic (Ctrl+I)">
+                    <button class="format-btn" onclick="formatText('italic')" title="Italic">
                         <i class="fas fa-italic"></i> Italic
                     </button>
-                    <button class="format-btn" onclick="formatText('underline')" title="Underline (Ctrl+U)">
+                    <button class="format-btn" onclick="formatText('underline')" title="Underline">
                         <i class="fas fa-underline"></i> Underline
                     </button>
                     <button class="format-btn" onclick="insertBullet()" title="Bullet List">
@@ -752,7 +667,7 @@
             </div>
 
             <!-- Loading State -->
-            <div id="loadingNotes" class="loading-notes hidden">
+            <div id="loadingNotes" class="loading-notes" style="display: none;">
                 <i class="fas fa-spinner fa-spin"></i> Loading your notes...
             </div>
 
@@ -760,7 +675,7 @@
             <div id="notesContainer" class="notes-container"></div>
 
             <!-- Empty State -->
-            <div id="emptyState" class="empty-state hidden">
+            <div id="emptyState" class="empty-state" style="display: none;">
                 <i class="fas fa-sticky-note" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
                 <h3>No notes yet</h3>
                 <p>Start writing your first note above!</p>
@@ -790,11 +705,11 @@
     <!-- Footer -->
     <div class="footer">
         <div class="social-links">
-            <a href="mailto:priyanshrajbhar499@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
-            <a href="9426781890" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://x.com/Priyansh_86" title="Twitter"><i class="fab fa-twitter"></i></a>
-            <a href="https://www.instagram.com/priyansh__.86/" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://t.me/priyansh_dev" title="Telegram"><i class="fab fa-telegram"></i></a>
+            <a href="mailto:" title="Email"><i class="fas fa-envelope"></i></a>
+            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
         </div>
         <p>Made with ❤️ by <strong>PRIYANSH</strong></p>
     </div>
@@ -809,15 +724,15 @@
     let notesUnsubscribe = null;
     let isFirebaseInitialized = false;
 
-    // Enhanced Color mapping with better contrast
+    // Color mapping (original colors)
     const colorMap = {
-        default: '#f8f9fa',
-        yellow: '#fff3cd',
-        orange: '#ffeaa7',
-        pink: '#fd79a8',
-        purple: '#a29bfe',
-        blue: '#74b9ff',
-        green: '#00b894'
+        default: '#f5f5f5',
+        yellow: '#fff740',
+        orange: '#ffab40',
+        pink: '#ff5722',
+        purple: '#9c27b0',
+        blue: '#2196f3',
+        green: '#4caf50'
     };
 
     // Categories
@@ -875,7 +790,7 @@
                     notesUnsubscribe = null;
                 }
                 document.getElementById('authSection').style.display = 'flex';
-                document.getElementById('notesSection').classList.add('hidden');
+                document.getElementById('notesSection').style.display = 'none';
                 showLogin();
             }
         });
@@ -890,7 +805,6 @@
         
         // Setup keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Text formatting shortcuts
             if (e.ctrlKey || e.metaKey) {
                 switch(e.key) {
                     case 'n':
@@ -1029,7 +943,7 @@
 
     function showNotesSection() {
         document.getElementById('authSection').style.display = 'none';
-        document.getElementById('notesSection').classList.remove('hidden');
+        document.getElementById('notesSection').style.display = 'block';
         document.getElementById('userName').textContent = currentUser.displayName || 'User';
     }
 
@@ -1040,9 +954,9 @@
         }
 
         // Show loading state
-        document.getElementById('loadingNotes').classList.remove('hidden');
+        document.getElementById('loadingNotes').style.display = 'block';
         document.getElementById('notesContainer').style.display = 'none';
-        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('emptyState').style.display = 'none';
 
         // Set up real-time listener for notes
         notesUnsubscribe = db.collection('notes')
@@ -1058,12 +972,12 @@
                 });
                 
                 // Hide loading state
-                document.getElementById('loadingNotes').classList.add('hidden');
+                document.getElementById('loadingNotes').style.display = 'none';
                 renderNotes();
                 updateStats();
             }, (error) => {
                 console.error("Error getting notes: ", error);
-                document.getElementById('loadingNotes').classList.add('hidden');
+                document.getElementById('loadingNotes').style.display = 'none';
                 alert('Error loading notes: ' + error.message);
             });
     }
@@ -1199,12 +1113,12 @@
 
         if (notes.length === 0) {
             container.style.display = 'none';
-            emptyState.classList.remove('hidden');
+            emptyState.style.display = 'block';
             return;
         }
 
         container.style.display = 'grid';
-        emptyState.classList.add('hidden');
+        emptyState.style.display = 'none';
 
         // Sort notes: pinned first, then by updated date
         const sortedNotes = [...notes].sort((a, b) => {
@@ -1222,8 +1136,16 @@
             // Convert Firestore timestamp to Date
             const updatedAt = note.updatedAt ? convertFirestoreTimestamp(note.updatedAt) : new Date();
             
-            // Process markdown-like formatting
-            const formattedContent = processMarkdown(note.content);
+            // SIMPLE text processing - only basic formatting
+            const formattedContent = note.content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/<u>(.*?)<\/u>/g, '<u>$1</u>')
+                .replace(/\n/g, '<br>')
+                .replace(/^[•-]\s+(.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>(\s*<br>\s*<li>.*<\/li>)*)/gs, '<ul>$1</ul>')
+                .replace(/<br>\s*<ul>/g, '<ul>')
+                .replace(/<\/ul>\s*<br>/g, '</ul>');
             
             return `
             <div class="note-card ${note.pinned ? 'pinned' : ''}" style="background-color: ${colorMap[note.color] || colorMap.default}">
@@ -1253,32 +1175,7 @@
         }).join('');
     }
 
-    // Enhanced Text formatting functions with better markdown processing
-    function processMarkdown(text) {
-        if (!text) return '';
-        
-        let processed = text
-            // Bold: **text** or __text__
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/__(.*?)__/g, '<strong>$1</strong>')
-            // Italic: *text* or _text_
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/(?<!_)_([^_]+?)_(?!_)/g, '<em>$1</em>')
-            // Underline: <u>text</u>
-            .replace(/<u>(.*?)<\/u>/g, '<u>$1</u>')
-            // Convert line breaks
-            .replace(/\n/g, '<br>')
-            // Bullet points: lines starting with • or -
-            .replace(/^[•-]\s+(.+)$/gm, '<li>$1</li>')
-            // Wrap consecutive list items
-            .replace(/(<li>.*<\/li>(\s*<br>\s*<li>.*<\/li>)*)/gs, '<ul>$1</ul>')
-            // Clean up extra <br> tags around lists
-            .replace(/<br>\s*<ul>/g, '<ul>')
-            .replace(/<\/ul>\s*<br>/g, '</ul>');
-        
-        return processed;
-    }
-
+    // Text formatting functions - SIMPLE and WORKING
     function formatText(format) {
         const textarea = document.getElementById('noteInput');
         const start = textarea.selectionStart;
@@ -1289,58 +1186,38 @@
         
         switch(format) {
             case 'bold':
-                if (selectedText) {
-                    formattedText = `**${selectedText}**`;
-                } else {
-                    formattedText = '**bold text**';
-                }
+                formattedText = selectedText ? `**${selectedText}**` : '**bold text**';
                 break;
             case 'italic':
-                if (selectedText) {
-                    formattedText = `*${selectedText}*`;
-                } else {
-                    formattedText = '*italic text*';
-                }
+                formattedText = selectedText ? `*${selectedText}*` : '*italic text*';
                 break;
             case 'underline':
-                if (selectedText) {
-                    formattedText = `<u>${selectedText}</u>`;
-                } else {
-                    formattedText = '<u>underlined text</u>';
-                }
+                formattedText = selectedText ? `<u>${selectedText}</u>` : '<u>underlined text</u>';
                 break;
         }
         
         textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
         textarea.focus();
-        
-        // Set cursor position after formatted text
-        const newPos = start + formattedText.length;
-        textarea.setSelectionRange(newPos, newPos);
+        textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
     }
 
     function insertBullet() {
         const textarea = document.getElementById('noteInput');
         const start = textarea.selectionStart;
         const textBefore = textarea.value.substring(0, start);
-        const textAfter = textarea.value.substring(start);
-        
-        // Check if we're at the beginning of a line
         const needsNewline = textBefore.length > 0 && !textBefore.endsWith('\n');
         const bulletText = (needsNewline ? '\n' : '') + '• ';
         
-        textarea.value = textBefore + bulletText + textAfter;
+        textarea.value = textBefore + bulletText + textarea.value.substring(start);
         textarea.focus();
         textarea.setSelectionRange(start + bulletText.length, start + bulletText.length);
     }
 
     // Utility functions
     function convertFirestoreTimestamp(timestamp) {
-        // Check if it's a Firestore Timestamp object
         if (timestamp && typeof timestamp.toDate === 'function') {
             return timestamp.toDate();
         }
-        // If it's already a Date object or string representation
         return new Date(timestamp);
     }
 
@@ -1366,7 +1243,6 @@
         document.getElementById('totalNotes').textContent = notes.length;
         document.getElementById('pinnedNotes').textContent = notes.filter(note => note.pinned).length;
         
-        // Count unique categories
         const uniqueCategories = new Set(notes.map(note => note.category).filter(Boolean));
         document.getElementById('categoriesCount').textContent = uniqueCategories.size;
     }
@@ -1379,7 +1255,6 @@
     function exportAsJSON() {
         const dataStr = JSON.stringify(notes, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
         const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.json`;
         
         const linkElement = document.createElement('a');
@@ -1428,7 +1303,7 @@
             if (currentUser && notes.length > 0) {
                 showBackupReminder();
             }
-        }, 3600000); // Every 1 hour
+        }, 3600000);
     }
 
     function showBackupReminder() {
