@@ -657,575 +657,586 @@
     
 
 <script>
+    // Global variables
+    let auth, db;
+    let currentUser = null;
+    let notes = [];
+    let selectedColor = 'default';
+    let editingNoteId = null;
+    let notesUnsubscribe = null;
+    let isFirebaseInitialized = false;
 
-// Replace the existing initFirebase function in your HTML with this updated version
+    // Color mapping
+    const colorMap = {
+        default: '#f5f5f5',
+        yellow: '#fff740',
+        orange: '#ffab40',
+        pink: '#ff5722',
+        purple: '#9c27b0',
+        blue: '#2196f3',
+        green: '#4caf50'
+    };
 
-let auth, db;
-let isFirebaseInitialized = false;
+    // Categories
+    const categories = ['Personal', 'Work', 'Ideas', 'Important', 'To-Do'];
 
-async function initFirebase() {
-    try {
-        const response = await fetch('/api/config');
-        if (!response.ok) throw new Error('Failed to fetch config');
-        const firebaseConfig = await response.json();
-
-        firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
-
-        // Remove or comment out these lines if 'status' element doesn't exist
-        // document.getElementById('status').textContent = 'Ready!';
-        setupAuth();
-
-    } catch (error) {
-        console.error('Firebase init failed:', error);
-        // Remove or comment out if 'status' element doesn't exist
-        // document.getElementById('status').textContent = 'Failed to load';
-        alert('Firebase initialization failed. Please check your config and API.');
-    }
-}
-
-
-function setupAuthStateListener() {
-    // Listen for auth state changes
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            currentUser = user;
-            showNotesSection();
-            startNotesListener();
-            startBackupReminder();
-        } else {
-            currentUser = null;
-            if (notesUnsubscribe) {
-                notesUnsubscribe();
-                notesUnsubscribe = null;
+    // Initialize Firebase
+    async function initFirebase() {
+        try {
+            console.log('Starting Firebase initialization...');
+            
+            const response = await fetch('/api/config');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch config: ${response.status}`);
             }
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('notesSection').style.display = 'none';
-            showLogin();
+            
+            const firebaseConfig = await response.json();
+            console.log('Firebase config loaded successfully');
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            
+            isFirebaseInitialized = true;
+            console.log('Firebase initialized successfully');
+            
+            // Setup authentication listener AFTER Firebase is initialized
+            setupAuthStateListener();
+            
+        } catch (error) {
+            console.error('Firebase init failed:', error);
+            alert('Firebase initialization failed. Please check your config and API.');
         }
+    }
+
+    // Setup auth state listener
+    function setupAuthStateListener() {
+        if (!auth) {
+            console.error('Auth not initialized');
+            return;
+        }
+        
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                showNotesSection();
+                startNotesListener();
+                startBackupReminder();
+            } else {
+                currentUser = null;
+                // Clean up listeners
+                if (notesUnsubscribe) {
+                    notesUnsubscribe();
+                    notesUnsubscribe = null;
+                }
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('notesSection').style.display = 'none';
+                showLogin();
+            }
+        });
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing Firebase...');
+        
+        // Initialize Firebase first
+        initFirebase();
+        
+        // Setup keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        document.getElementById('noteInput').focus();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        addNote();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                editingNoteId = null;
+                document.getElementById('noteInput').value = '';
+                document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
+                selectColor('default');
+                document.getElementById('noteCategory').value = '';
+            }
+            
+            if (e.ctrlKey && e.key === 'Enter') {
+                addNote();
+            }
+        });
     });
-}
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initFirebase();
-    
-    // Rest of your existing DOMContentLoaded code stays the same...
-    // (keyboard shortcuts, etc.)
-});
+    // Authentication functions
+    function showSignup() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'flex';
+        document.getElementById('signupError').style.display = 'none';
+    }
 
+    function showLogin() {
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'flex';
+        document.getElementById('loginError').style.display = 'none';
+    }
 
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
 
+    function signup() {
+        if (!isFirebaseInitialized) {
+            alert('Firebase is still initializing. Please wait a moment.');
+            return;
+        }
 
+        const name = document.getElementById('signupName').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
 
+        if (!name || !email || !password) {
+            showError('signupError', 'Please fill all fields');
+            return;
+        }
 
+        if (password.length < 6) {
+            showError('signupError', 'Password must be at least 6 characters long');
+            return;
+        }
 
-
-
-
-
-
-
-
-
-        let currentUser = null;
-        let notes = [];
-        let selectedColor = 'default';
-        let editingNoteId = null;
-        let notesUnsubscribe = null;
-
-        // Color mapping
-        const colorMap = {
-            default: '#f5f5f5',
-            yellow: '#fff740',
-            orange: '#ffab40',
-            pink: '#ff5722',
-            purple: '#9c27b0',
-            blue: '#2196f3',
-            green: '#4caf50'
-        };
-
-        // Categories
-        const categories = ['Personal', 'Work', 'Ideas', 'Important', 'To-Do'];
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Listen for auth state changes
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    currentUser = user;
-                    showNotesSection();
-                    startNotesListener();
-                    startBackupReminder();
-                } else {
-                    currentUser = null;
-                    if (notesUnsubscribe) {
-                        notesUnsubscribe();
-                        notesUnsubscribe = null;
-                    }
-                    document.getElementById('authSection').style.display = 'block';
-                    document.getElementById('notesSection').style.display = 'none';
-                    showLogin();
-                }
+        // Create user with Firebase Auth
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Update profile with display name
+                return userCredential.user.updateProfile({
+                    displayName: name
+                }).then(() => {
+                    // Add user data to Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        name: name,
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+            })
+            .then(() => {
+                alert('Account created successfully! You are now logged in.');
+            })
+            .catch((error) => {
+                showError('signupError', error.message);
             });
+    }
 
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey || e.metaKey) {
-                    switch(e.key) {
-                        case 'n':
-                            e.preventDefault();
-                            document.getElementById('noteInput').focus();
-                            break;
-                        case 's':
-                            e.preventDefault();
-                            addNote();
-                            break;
-                    }
-                }
+    function login() {
+        if (!isFirebaseInitialized) {
+            alert('Firebase is still initializing. Please wait a moment.');
+            return;
+        }
+
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            showError('loginError', 'Please fill all fields');
+            return;
+        }
+
+        auth.signInWithEmailAndPassword(email, password)
+            .catch((error) => {
+                showError('loginError', error.message);
+            });
+    }
+
+    function logout() {
+        if (!isFirebaseInitialized) {
+            return;
+        }
+
+        auth.signOut()
+            .then(() => {
+                notes = [];
+                editingNoteId = null;
+            })
+            .catch((error) => {
+                alert('Error signing out: ' + error.message);
+            });
+    }
+
+    function showNotesSection() {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('notesSection').style.display = 'block';
+        document.getElementById('userName').textContent = currentUser.displayName || 'User';
+    }
+
+    // Notes functions
+    function startNotesListener() {
+        if (!isFirebaseInitialized || !currentUser) {
+            return;
+        }
+
+        // Show loading state
+        document.getElementById('loadingNotes').style.display = 'block';
+        document.getElementById('notesContainer').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        // Set up real-time listener for notes
+        notesUnsubscribe = db.collection('notes')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('updatedAt', 'desc')
+            .onSnapshot((snapshot) => {
+                notes = [];
+                snapshot.forEach((doc) => {
+                    notes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
                 
-                if (e.key === 'Escape') {
-                    editingNoteId = null;
+                // Hide loading state
+                document.getElementById('loadingNotes').style.display = 'none';
+                renderNotes();
+                updateStats();
+            }, (error) => {
+                console.error("Error getting notes: ", error);
+                document.getElementById('loadingNotes').style.display = 'none';
+                alert('Error loading notes: ' + error.message);
+            });
+    }
+
+    function selectColor(color) {
+        selectedColor = color;
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        document.querySelector(`[data-color="${color}"]`).classList.add('active');
+    }
+
+    function addNote() {
+        if (!isFirebaseInitialized || !currentUser) {
+            alert('Please wait for Firebase to initialize or log in.');
+            return;
+        }
+
+        const content = document.getElementById('noteInput').value.trim();
+        const category = document.getElementById('noteCategory').value;
+        
+        if (!content) {
+            alert('Please write something in your note');
+            return;
+        }
+
+        if (editingNoteId) {
+            // Update existing note
+            db.collection('notes').doc(editingNoteId).update({
+                content: content,
+                color: selectedColor,
+                category: category,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                editingNoteId = null;
+                document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
+                document.getElementById('noteInput').value = '';
+                document.getElementById('noteCategory').value = '';
+                selectColor('default');
+            })
+            .catch((error) => {
+                alert('Error updating note: ' + error.message);
+            });
+        } else {
+            // Add new note
+            const newNote = {
+                content: content,
+                color: selectedColor,
+                category: category,
+                pinned: false,
+                userId: currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('notes').add(newNote)
+                .then(() => {
                     document.getElementById('noteInput').value = '';
-                    document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
-                    selectColor('default');
                     document.getElementById('noteCategory').value = '';
-                }
-                
-                if (e.ctrlKey && e.key === 'Enter') {
-                    addNote();
-                }
+                    selectColor('default');
+                })
+                .catch((error) => {
+                    alert('Error adding note: ' + error.message);
+                });
+        }
+    }
+
+    function editNote(id) {
+        const note = notes.find(n => n.id === id);
+        if (note) {
+            document.getElementById('noteInput').value = note.content;
+            selectColor(note.color || 'default');
+            document.getElementById('noteCategory').value = note.category || '';
+            editingNoteId = id;
+            document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-save"></i> Update Note';
+            document.getElementById('noteInput').focus();
+        }
+    }
+
+    function deleteNote(id) {
+        if (!isFirebaseInitialized) {
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this note?')) {
+            db.collection('notes').doc(id).delete()
+                .catch((error) => {
+                    alert('Error deleting note: ' + error.message);
+                });
+        }
+    }
+
+    function togglePin(id) {
+        if (!isFirebaseInitialized) {
+            return;
+        }
+
+        const note = notes.find(n => n.id === id);
+        if (note) {
+            const newPinnedState = !note.pinned;
+            db.collection('notes').doc(id).update({
+                pinned: newPinnedState,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .catch((error) => {
+                alert('Error updating note: ' + error.message);
             });
+        }
+    }
+
+    function archiveNote(id) {
+        if (!isFirebaseInitialized) {
+            return;
+        }
+
+        const note = notes.find(n => n.id === id);
+        if (note) {
+            const newArchivedState = !note.archived;
+            db.collection('notes').doc(id).update({
+                archived: newArchivedState,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .catch((error) => {
+                alert('Error archiving note: ' + error.message);
+            });
+        }
+    }
+
+    function renderNotes() {
+        const container = document.getElementById('notesContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        if (notes.length === 0) {
+            container.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        container.style.display = 'grid';
+        emptyState.style.display = 'none';
+
+        // Sort notes: pinned first, then by updated date
+        const sortedNotes = [...notes].sort((a, b) => {
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            
+            // Convert Firestore timestamps to Date objects for comparison
+            const aDate = a.updatedAt ? convertFirestoreTimestamp(a.updatedAt) : new Date(0);
+            const bDate = b.updatedAt ? convertFirestoreTimestamp(b.updatedAt) : new Date(0);
+            
+            return bDate - aDate;
         });
 
-        // Authentication functions
-        function showSignup() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('signupForm').style.display = 'flex';
-            document.getElementById('signupError').style.display = 'none';
-        }
-
-        function showLogin() {
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'flex';
-            document.getElementById('loginError').style.display = 'none';
-        }
-
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
-
-        function signup() {
-            const name = document.getElementById('signupName').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-
-            if (!name || !email || !password) {
-                showError('signupError', 'Please fill all fields');
-                return;
-            }
-
-            if (password.length < 6) {
-                showError('signupError', 'Password must be at least 6 characters long');
-                return;
-            }
-
-            // Create user with Firebase Auth
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Update profile with display name
-                    return userCredential.user.updateProfile({
-                        displayName: name
-                    }).then(() => {
-                        // Add user data to Firestore
-                        return db.collection('users').doc(userCredential.user.uid).set({
-                            name: name,
-                            email: email,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    });
-                })
-                .then(() => {
-                    alert('Account created successfully! You are now logged in.');
-                })
-                .catch((error) => {
-                    showError('signupError', error.message);
-                });
-        }
-
-        function login() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showError('loginError', 'Please fill all fields');
-                return;
-            }
-
-            auth.signInWithEmailAndPassword(email, password)
-                .catch((error) => {
-                    showError('loginError', error.message);
-                });
-        }
-
-        function logout() {
-            auth.signOut()
-                .then(() => {
-                    notes = [];
-                    editingNoteId = null;
-                })
-                .catch((error) => {
-                    alert('Error signing out: ' + error.message);
-                });
-        }
-
-        function showNotesSection() {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('notesSection').style.display = 'block';
-            document.getElementById('userName').textContent = currentUser.displayName || 'User';
-        }
-
-        // Notes functions
-        function startNotesListener() {
-            // Show loading state
-            document.getElementById('loadingNotes').style.display = 'block';
-            document.getElementById('notesContainer').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'none';
-
-            // Set up real-time listener for notes
-            notesUnsubscribe = db.collection('notes')
-                .where('userId', '==', currentUser.uid)
-                .orderBy('updatedAt', 'desc')
-                .onSnapshot((snapshot) => {
-                    notes = [];
-                    snapshot.forEach((doc) => {
-                        notes.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    
-                    // Hide loading state
-                    document.getElementById('loadingNotes').style.display = 'none';
-                    renderNotes();
-                    updateStats();
-                }, (error) => {
-                    console.error("Error getting notes: ", error);
-                    document.getElementById('loadingNotes').style.display = 'none';
-                    alert('Error loading notes: ' + error.message);
-                });
-        }
-
-        function selectColor(color) {
-            selectedColor = color;
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            document.querySelector(`[data-color="${color}"]`).classList.add('active');
-        }
-
-        function addNote() {
-            const content = document.getElementById('noteInput').value.trim();
-            const category = document.getElementById('noteCategory').value;
-            
-            if (!content) {
-                alert('Please write something in your note');
-                return;
-            }
-
-            if (editingNoteId) {
-                // Update existing note
-                db.collection('notes').doc(editingNoteId).update({
-                    content: content,
-                    color: selectedColor,
-                    category: category,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .then(() => {
-                    editingNoteId = null;
-                    document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-plus"></i> Add Note';
-                    document.getElementById('noteInput').value = '';
-                    document.getElementById('noteCategory').value = '';
-                    selectColor('default');
-                })
-                .catch((error) => {
-                    alert('Error updating note: ' + error.message);
-                });
-            } else {
-                // Add new note
-                const newNote = {
-                    content: content,
-                    color: selectedColor,
-                    category: category,
-                    pinned: false,
-                    userId: currentUser.uid,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
+        container.innerHTML = sortedNotes.map(note => {
+            // Convert Firestore timestamp to Date
+            const updatedAt = note.updatedAt ? convertFirestoreTimestamp(note.updatedAt) : new Date();
                 
-                db.collection('notes').add(newNote)
-                    .then(() => {
-                        document.getElementById('noteInput').value = '';
-                        document.getElementById('noteCategory').value = '';
-                        selectColor('default');
-                    })
-                    .catch((error) => {
-                        alert('Error adding note: ' + error.message);
-                    });
-            }
-        }
-
-        function editNote(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                document.getElementById('noteInput').value = note.content;
-                selectColor(note.color || 'default');
-                document.getElementById('noteCategory').value = note.category || '';
-                editingNoteId = id;
-                document.querySelector('.btn-primary').innerHTML = '<i class="fas fa-save"></i> Update Note';
-                document.getElementById('noteInput').focus();
-            }
-        }
-
-        function deleteNote(id) {
-            if (confirm('Are you sure you want to delete this note?')) {
-                db.collection('notes').doc(id).delete()
-                    .catch((error) => {
-                        alert('Error deleting note: ' + error.message);
-                    });
-            }
-        }
-
-        function togglePin(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                const newPinnedState = !note.pinned;
-                db.collection('notes').doc(id).update({
-                    pinned: newPinnedState,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .catch((error) => {
-                    alert('Error updating note: ' + error.message);
-                });
-            }
-        }
-
-        function archiveNote(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                const newArchivedState = !note.archived;
-                db.collection('notes').doc(id).update({
-                    archived: newArchivedState,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                })
-                .catch((error) => {
-                    alert('Error archiving note: ' + error.message);
-                });
-            }
-        }
-
-        function renderNotes() {
-            const container = document.getElementById('notesContainer');
-            const emptyState = document.getElementById('emptyState');
-
-            if (notes.length === 0) {
-                container.style.display = 'none';
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            container.style.display = 'grid';
-            emptyState.style.display = 'none';
-
-            // Sort notes: pinned first, then by updated date
-            const sortedNotes = [...notes].sort((a, b) => {
-                if (a.pinned && !b.pinned) return -1;
-                if (!a.pinned && b.pinned) return 1;
-                
-                // Convert Firestore timestamps to Date objects for comparison
-                const aDate = a.updatedAt ? convertFirestoreTimestamp(a.updatedAt) : new Date(0);
-                const bDate = b.updatedAt ? convertFirestoreTimestamp(b.updatedAt) : new Date(0);
-                
-                return bDate - aDate;
-            });
-
-            container.innerHTML = sortedNotes.map(note => {
-                // Convert Firestore timestamp to Date
-                const updatedAt = note.updatedAt ? convertFirestoreTimestamp(note.updatedAt) : new Date();
-                    
-                return `
-                <div class="note-card ${note.pinned ? 'pinned' : ''}" style="background-color: ${colorMap[note.color] || colorMap.default}">
-                    ${note.category ? `<span class="note-category">${note.category}</span>` : ''}
-                    <div class="note-content">${note.content.replace(/\n/g, '<br>')}</div>
-                    <div class="note-actions">
-                        <div class="note-date">
-                            ${formatDate(updatedAt)}
-                        </div>
-                        <div class="note-buttons">
-                            <button class="note-btn" onclick="togglePin('${note.id}')" title="${note.pinned ? 'Unpin' : 'Pin'} note">
-                                <i class="fas fa-thumbtack"></i>
-                            </button>
-                            <button class="note-btn" onclick="editNote('${note.id}')" title="Edit note">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="note-btn" onclick="archiveNote('${note.id}')" title="Archive note">
-                                <i class="fas fa-archive"></i>
-                            </button>
-                            <button class="note-btn" onclick="deleteNote('${note.id}')" title="Delete note">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+            return `
+            <div class="note-card ${note.pinned ? 'pinned' : ''}" style="background-color: ${colorMap[note.color] || colorMap.default}">
+                ${note.category ? `<span class="note-category">${note.category}</span>` : ''}
+                <div class="note-content">${note.content.replace(/\n/g, '<br>')}</div>
+                <div class="note-actions">
+                    <div class="note-date">
+                        ${formatDate(updatedAt)}
+                    </div>
+                    <div class="note-buttons">
+                        <button class="note-btn" onclick="togglePin('${note.id}')" title="${note.pinned ? 'Unpin' : 'Pin'} note">
+                            <i class="fas fa-thumbtack"></i>
+                        </button>
+                        <button class="note-btn" onclick="editNote('${note.id}')" title="Edit note">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="note-btn" onclick="archiveNote('${note.id}')" title="Archive note">
+                            <i class="fas fa-archive"></i>
+                        </button>
+                        <button class="note-btn" onclick="deleteNote('${note.id}')" title="Delete note">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-                `;
-            }).join('');
-        }
+            </div>
+            `;
+        }).join('');
+    }
 
-        // Text formatting functions
-        function formatText(format) {
-            const textarea = document.getElementById('noteInput');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selectedText = textarea.value.substring(start, end);
-            
-            let formattedText = '';
-            
-            switch(format) {
-                case 'bold':
-                    formattedText = `**${selectedText}**`;
-                    break;
-                case 'italic':
-                    formattedText = `_${selectedText}_`;
-                    break;
-                case 'underline':
-                    formattedText = `<u>${selectedText}</u>`;
-                    break;
+    // Text formatting functions
+    function formatText(format) {
+        const textarea = document.getElementById('noteInput');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        
+        let formattedText = '';
+        
+        switch(format) {
+            case 'bold':
+                formattedText = `**${selectedText}**`;
+                break;
+            case 'italic':
+                formattedText = `_${selectedText}_`;
+                break;
+            case 'underline':
+                formattedText = `<u>${selectedText}</u>`;
+                break;
+        }
+        
+        textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+    }
+
+    function insertBullet() {
+        const textarea = document.getElementById('noteInput');
+        const start = textarea.selectionStart;
+        
+        textarea.value = textarea.value.substring(0, start) + '\n• ' + textarea.value.substring(start);
+        textarea.focus();
+        textarea.setSelectionRange(start + 3, start + 3);
+    }
+
+    // Utility functions
+    function convertFirestoreTimestamp(timestamp) {
+        // Check if it's a Firestore Timestamp object
+        if (timestamp && typeof timestamp.toDate === 'function') {
+            return timestamp.toDate();
+        }
+        // If it's already a Date object or string representation
+        return new Date(timestamp);
+    }
+
+    function formatDate(date) {
+        if (!(date instanceof Date) || isNaN(date)) {
+            return 'Unknown date';
+        }
+        
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) {
+            return 'Today at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        } else if (diffDays === 1) {
+            return 'Yesterday at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        } else {
+            return date.toLocaleDateString('en-IN') + ' at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('totalNotes').textContent = notes.length;
+        document.getElementById('pinnedNotes').textContent = notes.filter(note => note.pinned).length;
+        
+        // Count unique categories
+        const uniqueCategories = new Set(notes.map(note => note.category).filter(Boolean));
+        document.getElementById('categoriesCount').textContent = uniqueCategories.size;
+    }
+
+    // Export functions
+    function exportNotes() {
+        openModal('exportModal');
+    }
+
+    function exportAsJSON() {
+        const dataStr = JSON.stringify(notes, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        closeModal('exportModal');
+    }
+
+    function exportAsTXT() {
+        let textData = `Notes Export - ${new Date().toLocaleDateString()}\n\n`;
+        
+        notes.forEach((note, index) => {
+            textData += `Note ${index + 1}:\n`;
+            textData += `Created: ${note.createdAt ? convertFirestoreTimestamp(note.createdAt).toLocaleString() : 'N/A'}\n`;
+            textData += `Category: ${note.category || 'None'}\n`;
+            textData += `Pinned: ${note.pinned ? 'Yes' : 'No'}\n`;
+            textData += `Content:\n${note.content}\n`;
+            textData += '─'.repeat(50) + '\n\n';
+        });
+        
+        const dataUri = 'data:text/plain;charset=utf-8,'+ encodeURIComponent(textData);
+        const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.txt`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        closeModal('exportModal');
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Backup reminder
+    function startBackupReminder() {
+        setInterval(() => {
+            if (currentUser && notes.length > 0) {
+                showBackupReminder();
             }
-            
-            textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-            textarea.focus();
-            textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
-        }
+        }, 3600000); // Every 1 hour
+    }
 
-        function insertBullet() {
-            const textarea = document.getElementById('noteInput');
-            const start = textarea.selectionStart;
+    function showBackupReminder() {
+        if (!localStorage.getItem('lastBackupReminder') || 
+            Date.now() - localStorage.getItem('lastBackupReminder') > 86400000) {
             
-            textarea.value = textarea.value.substring(0, start) + '\n• ' + textarea.value.substring(start);
-            textarea.focus();
-            textarea.setSelectionRange(start + 3, start + 3);
-        }
-
-        // Utility functions
-        function convertFirestoreTimestamp(timestamp) {
-            // Check if it's a Firestore Timestamp object
-            if (timestamp && typeof timestamp.toDate === 'function') {
-                return timestamp.toDate();
+            if (confirm('Your notes are important! Would you like to export a backup?')) {
+                exportNotes();
             }
-            // If it's already a Date object or string representation
-            return new Date(timestamp);
+            localStorage.setItem('lastBackupReminder', Date.now());
         }
+    }
+</script>
 
-        function formatDate(date) {
-            if (!(date instanceof Date) || isNaN(date)) {
-                return 'Unknown date';
-            }
-            
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 0) {
-                return 'Today at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            } else if (diffDays === 1) {
-                return 'Yesterday at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            } else {
-                return date.toLocaleDateString('en-IN') + ' at ' + date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            }
-        }
-
-        function updateStats() {
-            document.getElementById('totalNotes').textContent = notes.length;
-            document.getElementById('pinnedNotes').textContent = notes.filter(note => note.pinned).length;
-            
-            // Count unique categories
-            const uniqueCategories = new Set(notes.map(note => note.category).filter(Boolean));
-            document.getElementById('categoriesCount').textContent = uniqueCategories.size;
-        }
-
-        // Export functions
-        function exportNotes() {
-            openModal('exportModal');
-        }
-
-        function exportAsJSON() {
-            const dataStr = JSON.stringify(notes, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            closeModal('exportModal');
-        }
-
-        function exportAsTXT() {
-            let textData = `Notes Export - ${new Date().toLocaleDateString()}\n\n`;
-            
-            notes.forEach((note, index) => {
-                textData += `Note ${index + 1}:\n`;
-                textData += `Created: ${note.createdAt ? convertFirestoreTimestamp(note.createdAt).toLocaleString() : 'N/A'}\n`;
-                textData += `Category: ${note.category || 'None'}\n`;
-                textData += `Pinned: ${note.pinned ? 'Yes' : 'No'}\n`;
-                textData += `Content:\n${note.content}\n`;
-                textData += '─'.repeat(50) + '\n\n';
-            });
-            
-            const dataUri = 'data:text/plain;charset=utf-8,'+ encodeURIComponent(textData);
-            const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.txt`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-            
-            closeModal('exportModal');
-        }
-
-        // Modal functions
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Backup reminder
-        function startBackupReminder() {
-            setInterval(() => {
-                if (currentUser && notes.length > 0) {
-                    showBackupReminder();
-                }
-            }, 3600000); // Every 1 hour
-        }
-
-        function showBackupReminder() {
-            if (!localStorage.getItem('lastBackupReminder') || 
-                Date.now() - localStorage.getItem('lastBackupReminder') > 86400000) {
-                
-                if (confirm('Your notes are important! Would you like to export a backup?')) {
-                    exportNotes();
-                }
-                localStorage.setItem('lastBackupReminder', Date.now());
-            }
-        }
-    </script>
 </body>
 </html>
