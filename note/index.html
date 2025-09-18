@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes App - Your Digital Notebook</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- v2 Firebase App (core Firebase SDK) -->
+    <!-- default Firebase App (core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <!-- Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -51,82 +49,69 @@
             opacity: 0.9;
         }
 
-        /* Auth Section - RESTORED ORIGINAL */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 60vh;
+        .auth-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 0 auto 30px;
         }
 
         .auth-form {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            backdrop-filter: blur(10px);
-        }
-
-        .auth-form h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-            font-weight: 500;
+            font-weight: 600;
+            color: #555;
         }
 
         .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
         }
 
         .btn {
-            width: 100%;
-            padding: 14px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
         .btn-secondary {
             background: transparent;
             color: #667eea;
             border: 2px solid #667eea;
-            margin-top: 10px;
         }
 
         .btn-secondary:hover {
@@ -134,108 +119,74 @@
             color: white;
         }
 
-        .error-message {
+        .notes-section {
             display: none;
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            border-left: 4px solid #e74c3c;
-        }
-
-        /* Notes Section */
-        .notes-header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
         }
 
         .user-info {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
         }
 
-        .notes-actions {
+        .stats-bar {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             display: flex;
-            gap: 10px;
-        }
-
-        /* Stats Section */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
+            justify-content: space-around;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-            display: block;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* Note Input Section */
-        .note-input-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
+        .note-input-area {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .formatting-toolbar {
+            margin-bottom: 10px;
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 5px;
         }
 
-        .format-btn {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #666;
-            font-size: 14px;
+        .note-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
         }
 
-        .format-btn:hover {
+        .note-input:focus {
+            outline: none;
             border-color: #667eea;
-            color: #667eea;
         }
 
-        .color-selector {
+        .note-controls {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
             flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
         }
 
         .color-option {
@@ -244,183 +195,92 @@
             border-radius: 50%;
             cursor: pointer;
             border: 3px solid transparent;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .color-option.active {
             border-color: #333;
-            transform: scale(1.2);
+            transform: scale(1.1);
         }
 
-        .color-option[data-color="default"] { background: #f5f5f5; }
-        .color-option[data-color="yellow"] { background: #fff740; }
-        .color-option[data-color="orange"] { background: #ffab40; }
-        .color-option[data-color="pink"] { background: #ff5722; }
-        .color-option[data-color="purple"] { background: #9c27b0; }
-        .color-option[data-color="blue"] { background: #2196f3; }
-        .color-option[data-color="green"] { background: #4caf50; }
+        .color-yellow { background: #fff740; }
+        .color-orange { background: #ffab40; }
+        .color-pink { background: #ff5722; }
+        .color-purple { background: #9c27b0; }
+        .color-blue { background: #2196f3; }
+        .color-green { background: #4caf50; }
+        .color-default { background: #f5f5f5; }
 
-        .note-input {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            transition: all 0.3s ease;
+        .category-selector {
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid #e1e1e1;
         }
 
-        .note-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .input-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .category-select {
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .category-select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        /* Notes Container - PERFECT GRID */
-        .notes-container {
+        .notes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
         }
 
-        /* PERFECT Note Cards with EXCELLENT Text Visibility */
         .note-card {
-            border-radius: 15px;
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
             position: relative;
-            border: 1px solid rgba(0,0,0,0.1);
+            word-wrap: break-word;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .note-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-
-        .note-card.pinned {
-            border: 2px solid #667eea;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
         .note-card.pinned::before {
-            content: "📌";
+            content: '📌';
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size: 16px;
-        }
-
-        /* PERFECT Note Content with EXCELLENT Readability */
-        .note-content {
-            margin-bottom: 15px;
-            line-height: 1.6;
-            font-size: 16px;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            
-            /* PERFECT TEXT VISIBILITY FOR ALL BACKGROUNDS */
-            color: #1a1a1a !important;
-            font-weight: 600;
-            text-shadow: 
-                0 0 3px rgba(255,255,255,0.9),
-                0 0 5px rgba(255,255,255,0.8),
-                1px 1px 2px rgba(255,255,255,0.7);
-            
-            /* Semi-transparent background for better readability */
-            background: rgba(255,255,255,0.85);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(0,0,0,0.1);
-            backdrop-filter: blur(2px);
-        }
-
-        /* Enhanced formatting styles with perfect visibility */
-        .note-content strong,
-        .note-content b {
-            font-weight: 800 !important;
-            color: #000000 !important;
-        }
-
-        .note-content em,
-        .note-content i {
-            font-style: italic;
-            color: #2c3e50 !important;
-            font-weight: 600;
-        }
-
-        .note-content u {
-            text-decoration: underline;
-            text-decoration-thickness: 2px;
-            color: #e74c3c !important;
-            font-weight: 600;
-        }
-
-        .note-content ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-
-        .note-content li {
-            margin: 5px 0;
-            color: #1a1a1a !important;
-            font-weight: 600;
+            font-size: 1.2rem;
         }
 
         .note-category {
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
             font-weight: 600;
-            position: absolute;
-            top: -8px;
-            left: 20px;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .note-content {
+            min-height: 60px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
         }
 
         .note-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
+            border-top: 1px solid #eee;
         }
 
         .note-date {
-            font-size: 12px;
-            color: #555;
-            font-weight: 600;
-            background: rgba(255,255,255,0.9);
-            padding: 4px 8px;
-            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #666;
         }
 
         .note-buttons {
@@ -429,42 +289,128 @@
         }
 
         .note-btn {
-            padding: 6px 10px;
+            background: none;
             border: none;
-            background: rgba(102, 126, 234, 0.15);
-            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            color: #667eea;
-            font-size: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            color: #666;
         }
 
         .note-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        /* Loading and Empty States */
-        .loading-notes {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
-            font-size: 18px;
+            background: #f0f0f0;
+            color: #333;
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
             color: white;
-            font-size: 18px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+            padding: 60px 20px;
         }
 
-        /* Modal Styles */
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.1);
+            color: white;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .made-with-love {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .my_name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(
+                45deg, 
+                #ff6b6b, 
+                #4ecdc4, 
+                #45b7d1, 
+                #96ceb4, 
+                #feca57, 
+                #ff9ff3,
+                #54a0ff
+            );
+            background-size: 300% 300%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 3s ease infinite;
+            text-shadow: none;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -472,92 +418,63 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
 
         .modal-content {
             background: white;
-            border-radius: 20px;
             padding: 30px;
-            max-width: 400px;
+            border-radius: 15px;
+            max-width: 500px;
             width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .modal h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .modal-buttons .btn {
-            flex: 1;
-            padding: 12px;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .social-links a {
-            color: rgba(255,255,255,0.8);
-            font-size: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .social-links a:hover {
-            color: white;
-            transform: scale(1.2);
-        }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 10px;
             }
             
             .header h1 {
                 font-size: 2rem;
             }
             
-            .notes-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .stats-container {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            }
-            
-            .notes-container {
+            .notes-grid {
                 grid-template-columns: 1fr;
             }
             
-            .formatting-toolbar,
-            .color-selector,
-            .input-controls {
+            .note-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .social-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .color-picker {
                 justify-content: center;
             }
         }
@@ -570,18 +487,18 @@
             <p>Your personal digital notebook in the cloud</p>
         </div>
 
-        <!-- Authentication Section -->
-        <div id="authSection" class="auth-container">
-            <!-- Login Form -->
+        <!-- Auth Section -->
+        <div id="authSection" class="auth-section">
             <div id="loginForm" class="auth-form">
-                <h2><i class="fas fa-sign-in-alt"></i> Welcome Back!</h2>
+                <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Welcome Back!</h2>
+                <div id="loginError" class="error-message" style="display: none;"></div>
                 <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
                 </div>
                 <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" required>
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 </div>
                 <button class="btn btn-primary" onclick="login()">
                     <i class="fas fa-sign-in-alt"></i> Login
@@ -589,23 +506,22 @@
                 <button class="btn btn-secondary" onclick="showSignup()">
                     New here? Sign Up
                 </button>
-                <div id="loginError" class="error-message"></div>
             </div>
 
-            <!-- Signup Form -->
             <div id="signupForm" class="auth-form" style="display: none;">
-                <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Create Account</h2>
+                <div id="signupError" class="error-message" style="display: none;"></div>
                 <div class="form-group">
-                    <label for="signupName">Full Name</label>
-                    <input type="text" id="signupName" required>
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your full name" required>
                 </div>
                 <div class="form-group">
-                    <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" required>
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
                 </div>
                 <div class="form-group">
-                    <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" required>
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password (min. 6 characters)" required>
                 </div>
                 <button class="btn btn-primary" onclick="signup()">
                     <i class="fas fa-user-plus"></i> Sign Up
@@ -613,136 +529,132 @@
                 <button class="btn btn-secondary" onclick="showLogin()">
                     Already have account? Login
                 </button>
-                <div id="signupError" class="error-message"></div>
             </div>
         </div>
 
         <!-- Notes Section -->
-        <div id="notesSection" style="display: none;">
-            <!-- Notes Header -->
-            <div class="notes-header">
+        <div id="notesSection" class="notes-section">
+            <div class="user-info">
                 <div>
-                    <h2><i class="fas fa-sticky-note"></i> Welcome, <span id="userName">User</span>!</h2>
+                    <i class="fas fa-user"></i> Welcome, <span id="userName">User</span>!
                 </div>
-                <div class="notes-actions">
-                    <button class="btn btn-secondary" onclick="exportNotes()" style="padding: 10px 20px; width: auto;">
+                <div>
+                    <button class="btn btn-secondary" onclick="exportNotes()">
                         <i class="fas fa-download"></i> Export
                     </button>
-                    <button class="btn btn-secondary" onclick="logout()" style="padding: 10px 20px; width: auto;">
+                    <button class="btn btn-secondary" onclick="logout()" style="margin-left: 10px;">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                 </div>
             </div>
 
-            <!-- Stats Section -->
-            <div class="stats-container">
-                <div class="stat-card">
-                    <span id="totalNotes" class="stat-number">0</span>
-                    <div class="stat-label">Total Notes</div>
+            <div class="stats-bar">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="totalNotes">0</div>
+                    <div>Total Notes</div>
                 </div>
-                <div class="stat-card">
-                    <span id="pinnedNotes" class="stat-number">0</span>
-                    <div class="stat-label">Pinned</div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="pinnedNotes">0</div>
+                    <div>Pinned</div>
                 </div>
-                <div class="stat-card">
-                    <span id="categoriesCount" class="stat-number">0</span>
-                    <div class="stat-label">Categories</div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: bold;" id="categoriesCount">0</div>
+                    <div>Categories</div>
                 </div>
             </div>
 
-            <!-- Note Input -->
-            <div class="note-input-container">
-                <!-- Text Formatting Toolbar -->
+            <div class="note-input-area">
                 <div class="formatting-toolbar">
-                    <button class="format-btn" onclick="formatText('bold')" title="Bold (Ctrl+B)">
-                        <i class="fas fa-bold"></i> Bold
-                    </button>
-                    <button class="format-btn" onclick="formatText('italic')" title="Italic (Ctrl+I)">
-                        <i class="fas fa-italic"></i> Italic
-                    </button>
-                    <button class="format-btn" onclick="formatText('underline')" title="Underline (Ctrl+U)">
-                        <i class="fas fa-underline"></i> Underline
-                    </button>
-                    <button class="format-btn" onclick="insertBullet()" title="Bullet List">
-                        <i class="fas fa-list-ul"></i> Bullet
-                    </button>
+                    <button type="button" class="note-btn" onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="note-btn" onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="note-btn" onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                    <button type="button" class="note-btn" onclick="insertBullet()" title="Bullet List"><i class="fas fa-list-ul"></i></button>
                 </div>
-
-                <!-- Color Selector -->
-                <div class="color-selector">
-                    <div class="color-option active" data-color="default" onclick="selectColor('default')" title="Default"></div>
-                    <div class="color-option" data-color="yellow" onclick="selectColor('yellow')" title="Yellow"></div>
-                    <div class="color-option" data-color="orange" onclick="selectColor('orange')" title="Orange"></div>
-                    <div class="color-option" data-color="pink" onclick="selectColor('pink')" title="Pink"></div>
-                    <div class="color-option" data-color="purple" onclick="selectColor('purple')" title="Purple"></div>
-                    <div class="color-option" data-color="blue" onclick="selectColor('blue')" title="Blue"></div>
-                    <div class="color-option" data-color="green" onclick="selectColor('green')" title="Green"></div>
-                </div>
-
-                <textarea id="noteInput" class="note-input" placeholder="Start writing your note here... Use **bold**, *italic*, __underline__ for formatting!"></textarea>
-                
-                <div class="input-controls">
-                    <select id="noteCategory" class="category-select">
-                        <option value="">Select Category</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Work">Work</option>
-                        <option value="Ideas">Ideas</option>
-                        <option value="Important">Important</option>
-                        <option value="To-Do">To-Do</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="addNote()" style="width: auto; padding: 12px 25px;">
+                <textarea id="noteInput" class="note-input" placeholder="Write your note here..." rows="4"></textarea>
+                <div class="note-controls">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="color-picker">
+                            <div class="color-option color-default active" data-color="default" onclick="selectColor('default')"></div>
+                            <div class="color-option color-yellow" data-color="yellow" onclick="selectColor('yellow')"></div>
+                            <div class="color-option color-orange" data-color="orange" onclick="selectColor('orange')"></div>
+                            <div class="color-option color-pink" data-color="pink" onclick="selectColor('pink')"></div>
+                            <div class="color-option color-purple" data-color="purple" onclick="selectColor('purple')"></div>
+                            <div class="color-option color-blue" data-color="blue" onclick="selectColor('blue')"></div>
+                            <div class="color-option color-green" data-color="green" onclick="selectColor('green')"></div>
+                        </div>
+                        <select id="noteCategory" class="category-selector">
+                            <option value="">Select Category</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Work">Work</option>
+                            <option value="Ideas">Ideas</option>
+                            <option value="Important">Important</option>
+                            <option value="To-Do">To-Do</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNote()">
                         <i class="fas fa-plus"></i> Add Note
                     </button>
                 </div>
             </div>
 
-            <!-- Loading State -->
-            <div id="loadingNotes" class="loading-notes" style="display: none;">
+            <div id="loadingNotes" class="loading" style="display: none;">
                 <i class="fas fa-spinner fa-spin"></i> Loading your notes...
             </div>
 
-            <!-- Notes Container -->
-            <div id="notesContainer" class="notes-container"></div>
-
-            <!-- Empty State -->
-            <div id="emptyState" class="empty-state" style="display: none;">
-                <i class="fas fa-sticky-note" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+            <div id="notesContainer" class="notes-grid"></div>
+            
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-sticky-note"></i>
                 <h3>No notes yet</h3>
                 <p>Start writing your first note above!</p>
             </div>
         </div>
+    </div>
 
-        <!-- Export Modal -->
-        <div id="exportModal" class="modal">
-            <div class="modal-content">
-                <h3><i class="fas fa-download"></i> Export Notes</h3>
-                <p>Choose your export format:</p>
-                <div class="modal-buttons">
-                    <button class="btn btn-primary" onclick="exportAsJSON()">
-                        <i class="fas fa-file-code"></i> Export as JSON
-                    </button>
-                    <button class="btn btn-primary" onclick="exportAsTXT()">
-                        <i class="fas fa-file-alt"></i> Export as Text
-                    </button>
-                    <button class="btn btn-secondary" onclick="closeModal('exportModal')">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                </div>
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Export Notes</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="btn btn-primary" onclick="exportAsJSON()">
+                    <i class="fas fa-file-code"></i> Export as JSON
+                </button>
+                <button class="btn btn-primary" onclick="exportAsTXT()">
+                    <i class="fas fa-file-alt"></i> Export as Text
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('exportModal')">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
-        <div class="social-links">
-            <a href="mailto:" title="Email"><i class="fas fa-envelope"></i></a>
-            <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="mailto:priyanshrajbhar499@gmail.com" class="social-link">
+                    <i class="fas fa-envelope"></i> Email
+                </a>
+                <a href="https://wa.me/919426781890" class="social-link" target="_blank">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="https://x.com/priyansh_86" class="social-link" target="_blank">
+                    <i class="fab fa-twitter"></i> Twitter
+                </a>
+                <a href="https://instagram.com/priyansh__.86" class="social-link" target="_blank">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="https://t.me/priyansh_dev" class="social-link" target="_blank">
+                    <i class="fab fa-telegram"></i> Telegram
+                </a>
+            </div>
+            <div class="made-with-love">
+                Made with ❤️ by <span class="my_name">PRIYANSH</span>
+            </div>
         </div>
-        <p>Made with ❤️ by <strong>PRIYANSH</strong></p>
     </div>
+
+    
 
 <script>
     // Global variables
@@ -754,7 +666,7 @@
     let notesUnsubscribe = null;
     let isFirebaseInitialized = false;
 
-    // Color mapping (original colors)
+    // Color mapping
     const colorMap = {
         default: '#f5f5f5',
         yellow: '#fff740',
@@ -819,7 +731,7 @@
                     notesUnsubscribe();
                     notesUnsubscribe = null;
                 }
-                document.getElementById('authSection').style.display = 'flex';
+                document.getElementById('authSection').style.display = 'block';
                 document.getElementById('notesSection').style.display = 'none';
                 showLogin();
             }
@@ -844,18 +756,6 @@
                     case 's':
                         e.preventDefault();
                         addNote();
-                        break;
-                    case 'b':
-                        e.preventDefault();
-                        formatText('bold');
-                        break;
-                    case 'i':
-                        e.preventDefault();
-                        formatText('italic');
-                        break;
-                    case 'u':
-                        e.preventDefault();
-                        formatText('underline');
                         break;
                 }
             }
@@ -1165,22 +1065,11 @@
         container.innerHTML = sortedNotes.map(note => {
             // Convert Firestore timestamp to Date
             const updatedAt = note.updatedAt ? convertFirestoreTimestamp(note.updatedAt) : new Date();
-            
-            // PERFECT text processing with excellent formatting
-            const formattedContent = note.content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/<u>(.*?)<\/u>/g, '<u>$1</u>')
-                .replace(/\n/g, '<br>')
-                .replace(/^[•-]\s+(.+)$/gm, '<li>$1</li>')
-                .replace(/(<li>.*<\/li>(\s*<br>\s*<li>.*<\/li>)*)/gs, '<ul>$1</ul>')
-                .replace(/<br>\s*<ul>/g, '<ul>')
-                .replace(/<\/ul>\s*<br>/g, '</ul>');
-            
+                
             return `
             <div class="note-card ${note.pinned ? 'pinned' : ''}" style="background-color: ${colorMap[note.color] || colorMap.default}">
                 ${note.category ? `<span class="note-category">${note.category}</span>` : ''}
-                <div class="note-content">${formattedContent}</div>
+                <div class="note-content">${note.content.replace(/\n/g, '<br>')}</div>
                 <div class="note-actions">
                     <div class="note-date">
                         ${formatDate(updatedAt)}
@@ -1205,7 +1094,7 @@
         }).join('');
     }
 
-    // Text formatting functions - PERFECT and WORKING
+    // Text formatting functions
     function formatText(format) {
         const textarea = document.getElementById('noteInput');
         const start = textarea.selectionStart;
@@ -1216,13 +1105,13 @@
         
         switch(format) {
             case 'bold':
-                formattedText = selectedText ? `**${selectedText}**` : '**bold text**';
+                formattedText = `**${selectedText}**`;
                 break;
             case 'italic':
-                formattedText = selectedText ? `*${selectedText}*` : '*italic text*';
+                formattedText = `_${selectedText}_`;
                 break;
             case 'underline':
-                formattedText = selectedText ? `<u>${selectedText}</u>` : '<u>underlined text</u>';
+                formattedText = `<u>${selectedText}</u>`;
                 break;
         }
         
@@ -1234,20 +1123,19 @@
     function insertBullet() {
         const textarea = document.getElementById('noteInput');
         const start = textarea.selectionStart;
-        const textBefore = textarea.value.substring(0, start);
-        const needsNewline = textBefore.length > 0 && !textBefore.endsWith('\n');
-        const bulletText = (needsNewline ? '\n' : '') + '• ';
         
-        textarea.value = textBefore + bulletText + textarea.value.substring(start);
+        textarea.value = textarea.value.substring(0, start) + '\n• ' + textarea.value.substring(start);
         textarea.focus();
-        textarea.setSelectionRange(start + bulletText.length, start + bulletText.length);
+        textarea.setSelectionRange(start + 3, start + 3);
     }
 
     // Utility functions
     function convertFirestoreTimestamp(timestamp) {
+        // Check if it's a Firestore Timestamp object
         if (timestamp && typeof timestamp.toDate === 'function') {
             return timestamp.toDate();
         }
+        // If it's already a Date object or string representation
         return new Date(timestamp);
     }
 
@@ -1273,6 +1161,7 @@
         document.getElementById('totalNotes').textContent = notes.length;
         document.getElementById('pinnedNotes').textContent = notes.filter(note => note.pinned).length;
         
+        // Count unique categories
         const uniqueCategories = new Set(notes.map(note => note.category).filter(Boolean));
         document.getElementById('categoriesCount').textContent = uniqueCategories.size;
     }
@@ -1285,6 +1174,7 @@
     function exportAsJSON() {
         const dataStr = JSON.stringify(notes, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
         const exportFileDefaultName = `notes_export_${new Date().toISOString().slice(0,10)}.json`;
         
         const linkElement = document.createElement('a');
@@ -1333,7 +1223,7 @@
             if (currentUser && notes.length > 0) {
                 showBackupReminder();
             }
-        }, 3600000);
+        }, 3600000); // Every 1 hour
     }
 
     function showBackupReminder() {
