@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/config.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/google-photos-upload.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
