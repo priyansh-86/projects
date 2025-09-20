@@ -639,7 +639,11 @@
         </div>
     </footer>
 
+<<<<<<< HEAD
 <script>
+=======
+    <script>
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
         // Advanced Photo Editor JavaScript
         let canvas, ctx;
         let originalImageData = null;
@@ -649,13 +653,20 @@
         let cropStartX, cropStartY, cropEndX, cropEndY;
         let isDragging = false;
 
+<<<<<<< HEAD
         // Configuration and initialization variables
+=======
+        // Configuration loaded from serverless function
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
         let CONFIG = null;
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
+<<<<<<< HEAD
         let configLoaded = false;
         let gisScriptLoaded = false;
+=======
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
 
         // Load configuration from serverless function
         async function loadConfiguration() {
@@ -673,6 +684,7 @@
                     throw new Error('Invalid configuration received');
                 }
                 
+<<<<<<< HEAD
                 configLoaded = true;
                 console.log('✅ Configuration loaded successfully');
                 showAuthStatus('Configuration loaded successfully', 'success');
@@ -682,6 +694,13 @@
                 
             } catch (error) {
                 console.error('❌ Failed to load configuration:', error);
+=======
+                showAuthStatus('Configuration loaded successfully', 'success');
+                initializeGoogleAPIs();
+                
+            } catch (error) {
+                console.error('Failed to load configuration:', error);
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 showAuthStatus('❌ Failed to load configuration: ' + error.message, 'error');
                 document.getElementById('authButton').textContent = '❌ Config Error';
                 document.getElementById('authButton').disabled = true;
@@ -1037,6 +1056,7 @@
             link.click();
         }
 
+<<<<<<< HEAD
         // Google APIs initialization - FIXED VERSION
         function initializeGoogleAPIs() {
             if (!configLoaded || !CONFIG) {
@@ -1052,29 +1072,54 @@
             
             // Load GIS script
             loadGIS();
+=======
+        // Google APIs initialization
+        function initializeGoogleAPIs() {
+            if (!CONFIG) {
+                console.error('Configuration not loaded');
+                return;
+            }
+            
+            gapi.load('client', initializeGapiClient);
+            google.accounts.id.disableAutoSelect();
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
         }
 
         async function initializeGapiClient() {
             if (!CONFIG) {
+<<<<<<< HEAD
                 console.error('❌ Configuration not available for GAPI client');
+=======
+                console.error('Configuration not available for GAPI client');
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 return;
             }
             
             try {
+<<<<<<< HEAD
                 console.log('🔧 Initializing GAPI client...');
+=======
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 await gapi.client.init({
                     apiKey: CONFIG.apiKey,
                     discoveryDocs: [CONFIG.discoveryDocDrive, CONFIG.discoveryDocPhotos],
                 });
                 gapiInited = true;
+<<<<<<< HEAD
                 console.log('✅ GAPI client initialized');
                 maybeEnableButtons();
             } catch (error) {
                 console.error('❌ Failed to initialize GAPI client:', error);
+=======
+                maybeEnableButtons();
+            } catch (error) {
+                console.error('Failed to initialize GAPI client:', error);
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 showAuthStatus('❌ Failed to initialize Google APIs', 'error');
             }
         }
 
+<<<<<<< HEAD
         function loadGIS() {
             if (gisScriptLoaded) {
                 return;
@@ -1114,26 +1159,42 @@
             if (typeof google === 'undefined' || !google.accounts) {
                 console.log('⏳ Waiting for Google accounts to be available...');
                 setTimeout(gisLoaded, 200);
+=======
+        function gisLoaded() {
+            if (!CONFIG) {
+                console.error('Configuration not available for GIS');
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 return;
             }
             
             try {
+<<<<<<< HEAD
                 console.log('🔐 Initializing Google Identity Services...');
+=======
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CONFIG.clientId,
                     scope: CONFIG.scopes,
                     callback: handleAuthResult,
                 });
                 gisInited = true;
+<<<<<<< HEAD
                 console.log('✅ Google Identity Services initialized');
                 maybeEnableButtons();
             } catch (error) {
                 console.error('❌ Failed to initialize GIS:', error);
                 showAuthStatus('❌ Failed to initialize Google Sign-In: ' + error.message, 'error');
+=======
+                maybeEnableButtons();
+            } catch (error) {
+                console.error('Failed to initialize GIS:', error);
+                showAuthStatus('❌ Failed to initialize Google Sign-In', 'error');
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
             }
         }
 
         function maybeEnableButtons() {
+<<<<<<< HEAD
             console.log('🔍 Checking if buttons can be enabled...', {
                 gapiInited,
                 gisInited,
@@ -1146,6 +1207,12 @@
                 document.getElementById('authButton').textContent = '🔐 Login to Google';
                 showAuthStatus('✅ Ready to authenticate', 'success');
                 console.log('✅ Authentication ready!');
+=======
+            if (gapiInited && gisInited && CONFIG) {
+                document.getElementById('authButton').disabled = false;
+                document.getElementById('authButton').textContent = '🔐 Login to Google';
+                showAuthStatus('Ready to authenticate', 'success');
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
             }
         }
 
@@ -1346,7 +1413,20 @@
                 canvas.toBlob(resolve, 'image/png');
             });
         }
+<<<<<<< HEAD
 </script>
 
+=======
+
+        function loadGIS() {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.onload = gisLoaded;
+            document.head.appendChild(script);
+        }
+
+        window.addEventListener('load', loadGIS);
+    </script>
+>>>>>>> f2f3e13 (Initial commit: Cloud expense tracker with Firebase)
 </body>
 </html>
