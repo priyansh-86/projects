@@ -639,7 +639,7 @@
         </div>
     </footer>
 
-    <script>
+<script>
         // Advanced Photo Editor JavaScript
         let canvas, ctx;
         let originalImageData = null;
@@ -649,11 +649,13 @@
         let cropStartX, cropStartY, cropEndX, cropEndY;
         let isDragging = false;
 
-        // Configuration loaded from serverless function
+        // Configuration and initialization variables
         let CONFIG = null;
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
+        let configLoaded = false;
+        let gisScriptLoaded = false;
 
         // Load configuration from serverless function
         async function loadConfiguration() {
@@ -671,11 +673,15 @@
                     throw new Error('Invalid configuration received');
                 }
                 
+                configLoaded = true;
+                console.log('✅ Configuration loaded successfully');
                 showAuthStatus('Configuration loaded successfully', 'success');
+                
+                // Initialize Google APIs after config is loaded
                 initializeGoogleAPIs();
                 
             } catch (error) {
-                console.error('Failed to load configuration:', error);
+                console.error('❌ Failed to load configuration:', error);
                 showAuthStatus('❌ Failed to load configuration: ' + error.message, 'error');
                 document.getElementById('authButton').textContent = '❌ Config Error';
                 document.getElementById('authButton').disabled = true;
@@ -1031,61 +1037,115 @@
             link.click();
         }
 
-        // Google APIs initialization
+        // Google APIs initialization - FIXED VERSION
         function initializeGoogleAPIs() {
-            if (!CONFIG) {
-                console.error('Configuration not loaded');
+            if (!configLoaded || !CONFIG) {
+                console.log('⏳ Waiting for configuration to load...');
+                setTimeout(initializeGoogleAPIs, 200);
                 return;
             }
             
+            console.log('🚀 Initializing Google APIs...');
+            
+            // Initialize GAPI
             gapi.load('client', initializeGapiClient);
-            google.accounts.id.disableAutoSelect();
+            
+            // Load GIS script
+            loadGIS();
         }
 
         async function initializeGapiClient() {
             if (!CONFIG) {
-                console.error('Configuration not available for GAPI client');
+                console.error('❌ Configuration not available for GAPI client');
                 return;
             }
             
             try {
+                console.log('🔧 Initializing GAPI client...');
                 await gapi.client.init({
                     apiKey: CONFIG.apiKey,
                     discoveryDocs: [CONFIG.discoveryDocDrive, CONFIG.discoveryDocPhotos],
                 });
                 gapiInited = true;
+                console.log('✅ GAPI client initialized');
                 maybeEnableButtons();
             } catch (error) {
-                console.error('Failed to initialize GAPI client:', error);
+                console.error('❌ Failed to initialize GAPI client:', error);
                 showAuthStatus('❌ Failed to initialize Google APIs', 'error');
             }
         }
 
+        function loadGIS() {
+            if (gisScriptLoaded) {
+                return;
+            }
+            
+            console.log('📥 Loading Google Identity Services...');
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.onload = function() {
+                gisScriptLoaded = true;
+                console.log('✅ GIS script loaded');
+                
+                // Wait a moment for script to fully initialize
+                setTimeout(() => {
+                    if (typeof google !== 'undefined' && google.accounts) {
+                        google.accounts.id.disableAutoSelect();
+                        gisLoaded();
+                    } else {
+                        console.error('❌ Google accounts not available after script load');
+                    }
+                }, 100);
+            };
+            script.onerror = function() {
+                console.error('❌ Failed to load Google Identity Services script');
+                showAuthStatus('❌ Failed to load authentication script', 'error');
+            };
+            document.head.appendChild(script);
+        }
+
         function gisLoaded() {
-            if (!CONFIG) {
-                console.error('Configuration not available for GIS');
+            if (!configLoaded || !CONFIG) {
+                console.log('⏳ Waiting for configuration before initializing GIS...');
+                setTimeout(gisLoaded, 200);
+                return;
+            }
+            
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.log('⏳ Waiting for Google accounts to be available...');
+                setTimeout(gisLoaded, 200);
                 return;
             }
             
             try {
+                console.log('🔐 Initializing Google Identity Services...');
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CONFIG.clientId,
                     scope: CONFIG.scopes,
                     callback: handleAuthResult,
                 });
                 gisInited = true;
+                console.log('✅ Google Identity Services initialized');
                 maybeEnableButtons();
             } catch (error) {
-                console.error('Failed to initialize GIS:', error);
-                showAuthStatus('❌ Failed to initialize Google Sign-In', 'error');
+                console.error('❌ Failed to initialize GIS:', error);
+                showAuthStatus('❌ Failed to initialize Google Sign-In: ' + error.message, 'error');
             }
         }
 
         function maybeEnableButtons() {
-            if (gapiInited && gisInited && CONFIG) {
+            console.log('🔍 Checking if buttons can be enabled...', {
+                gapiInited,
+                gisInited,
+                configLoaded,
+                hasConfig: !!CONFIG
+            });
+            
+            if (gapiInited && gisInited && configLoaded && CONFIG) {
                 document.getElementById('authButton').disabled = false;
                 document.getElementById('authButton').textContent = '🔐 Login to Google';
-                showAuthStatus('Ready to authenticate', 'success');
+                showAuthStatus('✅ Ready to authenticate', 'success');
+                console.log('✅ Authentication ready!');
             }
         }
 
@@ -1286,15 +1346,7 @@
                 canvas.toBlob(resolve, 'image/png');
             });
         }
+</script>
 
-        function loadGIS() {
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.onload = gisLoaded;
-            document.head.appendChild(script);
-        }
-
-        window.addEventListener('load', loadGIS);
-    </script>
 </body>
 </html>
