@@ -123,15 +123,16 @@ const priyansh = {
 ## 📈 Contribution Graph
 
 <div align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=priyanshrajbhar&theme=tokyo-night&hide_border=true&area=true" width="100%"/>
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=priyansh-86&theme=tokyo-night&hide_border=true&area=true" width="100%"/>
 </div>
+
 
 ---
 
 ## 🌟 GitHub Achievements
 
 <div align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=priyanshrajbhar&theme=tokyonight&no-frame=true&margin-w=15&margin-h=15&column=6" />
+  <img src="https://github-profile-trophy.vercel.app/?username=priyansh-86&theme=tokyonight&no-frame=true&margin-w=15&margin-h=15&column=6" />
 </div>
 
 ---
@@ -169,7 +170,7 @@ const priyansh = {
 
 ### 🐍 Watch my contributions get eaten by the snake!
 
-![Snake animation](https://github.com/priyanshrajbhar/priyanshrajbhar/blob/output/github-contribution-grid-snake.svg)
+![Snake animation](https://github.com/priyansh-86/projects/blob/output/github-contribution-grid-snake.svg)
 
 </div>
 
