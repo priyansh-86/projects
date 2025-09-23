@@ -172,9 +172,12 @@ const priyansh = {
 
 ### 🐍 Watch my contributions get eaten by the snake!
 
-![Snake animation](https://github.com/priyansh-86/projects/blob/output/github-contribution-grid-snake.svg)
+<!-- Dark Theme Snake -->
+<img src="https://raw.githubusercontent.com/platane/snk/output/github-contribution-grid-snake-dark.svg" alt="Snake Animation" />
 
-</div>
+<!-- Light Theme Snake -->
+<!-- <img src="https://raw.githubusercontent.com/platane/snk/output/github-contribution-grid-snake.svg" alt="Snake Animation" /> -->
+
 
 ---
 
