@@ -27,7 +27,7 @@ const priyansh = {
 };
 ```
 
-- 🔭 I'm currently working on **[My Portfolio](https://priyanshrajbhar.vercel.app/)**
+- 🔭 I'm currently working on **[My Project](https://priyanshrajbhar.vercel.app/)**
 - 🌱 I'm currently learning **Advanced React Patterns & Three.js**
 - 💬 Ask me about **React, Node.js, MongoDB, and Web Development**
 - 📫 How to reach me: **priyanshrajbhar499@gmail.com**
@@ -91,15 +91,15 @@ const priyansh = {
 | Project | Description | Tech Stack | Live Link |
 |---------|-------------|-----------|-----------|
 | **🏠 Portfolio** | Personal portfolio showcasing my work | React, Three.js, CSS | [View Live](https://priyanshrajbhar.vercel.app/) |
-| **💰 AI Finance Dashboard** | Smart expense tracking with AI insights | React, AI APIs, Charts | [View Live](https://expenseofaugust.vercel.app/) |
-| **🧮 Loan Calculator** | Advanced loan calculation tool | JavaScript, CSS, Math.js | [View Live](https://loanofaugust.vercel.app/) |
+| **💰 AI Finance Dashboard** | Smart expense tracking with AI insights | React, AI APIs, Charts | [View Live](https://cashcurve.vercel.app/) |
+| **🧮 Loan Calculator** | Advanced loan calculation tool | JavaScript, CSS, Math.js | [View Live](https://interestink.vercel.app) |
 | **🎨 Photo Editor** | Online photo editing application | Canvas API, JavaScript | [View Live](https://editorofaugust.vercel.app/) |
-| **🌙 Midnight Events** | Event management for late-night activities | React, Node.js, MongoDB | [View Live](https://midnightofaugust.vercel.app/) |
-| **📸 Selfie Clicker** | Fun selfie capture application | WebRTC, JavaScript | [View Live](https://selfieofaugust.vercel.app/) |
-| **💬 WhatsApp Lite** | Lightweight messaging application | React, Socket.io, Node.js | [View Live](https://messengerofaugust.vercel.app/) |
-| **📝 Note Cloud** | Cloud-based note taking app | React, Firebase, PWA | [View Live](https://notesofaugust.vercel.app/) |
-| **🏠 Maintenance Tracker** | Household maintenance management | React, Local Storage | [View Live](https://householdproject.vercel.app/) |
-| **⚡ Light Bill Manager** | Electricity bill tracking system | JavaScript, Charts.js | [View Live](https://lightbillmanager.vercel.app/) |
+| **🌙 Midnight Events** | Event management for late-night activities | React, Node.js, MongoDB | [View Live](https://nightnexus.vercel.app/) |
+| **📸 Selfie Clicker** | Fun selfie capture application | WebRTC, JavaScript | [View Live](https://frameflash.vercel.app/) |
+| **💬 WhatsApp Lite** | Lightweight messaging application | React, Socket.io, Node.js | [View Live](https://messagemix.vercel.app/) |
+| **📝 Note Cloud** | Cloud-based note taking app | React, Firebase, PWA | [View Live](https://noteknot.vercel.app/) |
+| **🏠 Maintenance Tracker** | Household maintenance management | React, Local Storage | [View Live](https://househarmony.vercel.app/) |
+| **⚡ Light Bill Manager** | Electricity bill tracking system | JavaScript, Charts.js | [View Live](https://powerprint.vercel.app/) |
 
 </div>
 
