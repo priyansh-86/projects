@@ -160,8 +160,10 @@ const priyansh = {
 ---
 
 <div align="center">
-  <h3>🎵 Now Playing</h3>
-  <img src="https://spotify-github-profile.vercel.app/api/spotify?background_color=0d1117&border_color=ffffff" />
+  <h3>🎵 Music Status</h3>
+  <img src="https://img.shields.io/badge/🎧%20Currently-Vibing%20to%20Music-1DB954?style=for-the-badge&logoColor=white" alt="Music Status" />
+  <br/>
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&color=1DB954&center=true&vCenter=true&width=300&lines=🎵+Music+Lover;🎧+Always+Jamming;🎶+Beats+%26+Code" alt="Music Typing" />
 </div>
 
 ---
