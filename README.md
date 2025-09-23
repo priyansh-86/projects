@@ -72,13 +72,10 @@ const priyansh = {
 ## 📊 GitHub Statistics
 
 <div align="center">
-  <img width="48%" src="https://github-readme-stats.vercel.app/api?username=priyanshrajbhar&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" />
-  <img width="48%" src="https://github-readme-streak-stats.herokuapp.com/?user=priyanshrajbhar&theme=tokyonight&hide_border=true" />
+  <img width="48%" src="https://github-readme-stats.vercel.app/api?username=priyansh-86&show_icons=true&theme=vue-dark&hide_border=true&count_private=true&include_all_commits=true&cache_seconds=1800" alt="GitHub Stats" />
+  <img width="48%" src="https://github-readme-streak-stats-eight.vercel.app?user=priyansh-86&theme=vue-dark&hide_border=true" alt="GitHub Streak" />
 </div>
 
-<div align="center">
-  <img width="50%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=priyanshrajbhar&layout=compact&theme=tokyonight&hide_border=true" />
-</div>
 
 ---
 
