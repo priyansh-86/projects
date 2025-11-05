@@ -11,10 +11,12 @@ const joinRoomInput = document.getElementById('joinRoomInput');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 
 const roomScreen = document.getElementById('roomScreen');
+const videoContainer = document.getElementById('videoContainer');
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
 
+const controlsContainer = document.getElementById('controlsContainer');
 const muteBtn = document.getElementById('muteBtn');
 const videoBtn = document.getElementById('videoBtn');
 const switchCameraBtn = document.getElementById('switchCameraBtn');
@@ -33,22 +35,27 @@ const copyUrlBtn = document.getElementById('copyUrlBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const qrcodeDiv = document.getElementById('qrcode');
 
+// NEW: Get Tooltip & Peer Status Elements
+const tooltip = document.getElementById('tooltip');
+const peerStatus = document.getElementById('peerStatus');
+const peerVideoStatus = document.getElementById('peerVideoStatus');
+const peerAudioStatus = document.getElementById('peerAudioStatus');
+
 // --- Global Variables ---
-let currentStream; // Use this instead of localStream
+let currentStream;
 let remoteStream;
 let peerConnection;
 let dataChannel;
 let roomId;
 let userName = 'Guest';
-let facingMode = 'user'; // 'user' = front camera, 'environment' = back camera
-
-// Firebase instance
+let facingMode = 'user';
 let db;
 
 // Listeners
 let unsubscribeRoom;
 let unsubscribeOfferCandidates;
 let unsubscribeAnswerCandidates;
+let controlsTimer;
 
 // Google ke free STUN servers
 const servers = {
@@ -59,7 +66,6 @@ const servers = {
 };
 
 // --- Initialization ---
-// NEW: App starts by fetching config
 document.addEventListener('DOMContentLoaded', fetchConfigAndInitialize);
 
 async function fetchConfigAndInitialize() {
@@ -70,11 +76,9 @@ async function fetchConfigAndInitialize() {
         }
         const firebaseConfig = await response.json();
         
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
 
-        // Config loaded, enable the "Continue" button
         loadingConfig.innerText = 'Config loaded. Please enter your name.';
         continueBtn.disabled = false;
         continueBtn.onclick = setupWelcomeScreen;
@@ -93,7 +97,6 @@ function setupWelcomeScreen() {
     welcomeScreen.classList.add('hidden');
     homeScreen.classList.remove('hidden');
 
-    // Now set up the home screen listeners
     initHome();
     checkUrlForRoom();
 }
@@ -102,11 +105,7 @@ function initHome() {
     createRoomBtn.onclick = createRoom;
     joinRoomBtn.onclick = () => joinRoom(joinRoomInput.value);
     
-    // Setup room listeners (they are not attached to buttons)
-    muteBtn.onclick = toggleAudio;
-    videoBtn.onclick = toggleVideo;
-    switchCameraBtn.onclick = switchCamera;
-    hangupBtn.onclick = hangUp;
+    setupControlListeners();
 
     sendChatBtn.onclick = sendChatMessage;
     chatInput.onkeydown = (e) => {
@@ -118,7 +117,6 @@ function initHome() {
     copyUrlBtn.onclick = copyShareUrl;
 }
 
-// Check if user is joining via URL
 function checkUrlForRoom() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomFromUrl = urlParams.get('room');
@@ -126,6 +124,71 @@ function checkUrlForRoom() {
         joinRoomInput.value = roomFromUrl;
     }
 }
+
+// --- NEW: Tooltip Function ---
+function showTooltip(message, type = 'success') {
+    tooltip.innerText = message;
+    
+    // Set color based on type
+    if (type === 'error') {
+        tooltip.classList.add('bg-red-500');
+        tooltip.classList.remove('bg-green-500');
+    } else {
+        tooltip.classList.add('bg-green-500');
+        tooltip.classList.remove('bg-red-500');
+    }
+
+    // Show and hide
+    tooltip.classList.add('tooltip-visible');
+    setTimeout(() => {
+        tooltip.classList.remove('tooltip-visible');
+    }, 3000);
+}
+
+// --- Control Visibility Functions ---
+function setupControlListeners() {
+    videoContainer.onclick = toggleControls;
+    muteBtn.onclick = () => {
+        toggleAudio();
+        restartControlsTimer();
+    };
+    videoBtn.onclick = () => {
+        toggleVideo();
+        restartControlsTimer();
+    };
+    switchCameraBtn.onclick = () => {
+        switchCamera();
+        restartControlsTimer();
+    };
+    hangupBtn.onclick = hangUp;
+}
+
+function toggleControls() {
+    if (controlsContainer.classList.contains('controls-visible')) {
+        hideControls();
+    } else {
+        showControls();
+    }
+}
+
+function showControls() {
+    clearTimeout(controlsTimer);
+    controlsContainer.classList.remove('controls-hidden');
+    controlsContainer.classList.add('controls-visible');
+    controlsTimer = setTimeout(hideControls, 4000);
+}
+
+function hideControls() {
+    clearTimeout(controlsTimer);
+    controlsContainer.classList.remove('controls-visible');
+    controlsContainer.classList.add('controls-hidden');
+}
+
+function restartControlsTimer() {
+    clearTimeout(controlsTimer);
+    controlsTimer = setTimeout(hideControls, 4000);
+}
+
 
 // --- Core Functions ---
 
@@ -140,14 +203,13 @@ async function startMedia() {
             audio: true 
         });
         localVideo.srcObject = currentStream;
-        checkCameraDevices(); // Check if switch button should be shown
+        checkCameraDevices(); 
     } catch (e) {
         console.error('Error accessing media devices.', e);
         alert('Could not access camera or mic. Please allow permissions.');
     }
 }
 
-// NEW: Check for multiple cameras
 async function checkCameraDevices() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -160,19 +222,17 @@ async function checkCameraDevices() {
     }
 }
 
-// NEW: Switch Camera Function
 async function switchCamera() {
     facingMode = (facingMode === 'user') ? 'environment' : 'user';
-    
-    // Get new stream with new facingMode
     await startMedia();
 
-    // Replace the track in the peer connection
     if (peerConnection) {
         const videoTrack = currentStream.getVideoTracks()[0];
         const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
         if (sender) {
             sender.replaceTrack(videoTrack);
+            // NEW: Send status update after switching
+            sendPeerStatus('video', videoTrack.enabled);
         }
     }
 }
@@ -308,32 +368,73 @@ function setupDataChannelEvents(channel) {
         console.log('Data channel open');
         chatInput.disabled = false;
         sendChatBtn.disabled = false;
+        showTooltip('User connected!', 'success'); // <-- NEW
+        
+        // NEW: Send current status on connect
+        sendPeerStatus('audio', currentStream.getAudioTracks()[0].enabled);
+        sendPeerStatus('video', currentStream.getVideoTracks()[0].enabled);
     };
     channel.onclose = () => {
         console.log('Data channel closed');
         chatInput.disabled = true;
         sendChatBtn.disabled = true;
+        showTooltip('User disconnected.', 'error'); // <-- NEW
+        
+        // NEW: Hide peer status on disconnect
+        peerStatus.classList.add('hidden');
+        peerVideoStatus.classList.add('hidden');
+        peerAudioStatus.classList.add('hidden');
     };
-    // UPDATED: Handle JSON data
+    // UPDATED: Handle different message types
     channel.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        displayChatMessage(data.message, data.sender);
+        if (data.type === 'chat') {
+            displayChatMessage(data.message, data.sender);
+        } else if (data.type === 'status') {
+            handlePeerStatus(data.media, data.enabled);
+        }
     };
+}
+
+// NEW: Send Peer Status Function
+function sendPeerStatus(media, enabled) {
+    if (dataChannel && dataChannel.readyState === 'open') {
+        const data = {
+            type: 'status',
+            media: media,
+            enabled: enabled
+        };
+        dataChannel.send(JSON.stringify(data));
+    }
+}
+
+// NEW: Handle Peer Status UI
+function handlePeerStatus(media, enabled) {
+    if (media === 'video') {
+        peerVideoStatus.classList.toggle('hidden', enabled);
+    } else if (media === 'audio') {
+        peerAudioStatus.classList.toggle('hidden', enabled);
+    }
+    
+    // Show container if either is off
+    const isVideoOff = !peerVideoStatus.classList.contains('hidden');
+    const isAudioOff = !peerAudioStatus.classList.contains('hidden');
+    peerStatus.classList.toggle('hidden', !isVideoOff && !isAudioOff);
 }
 
 function sendChatMessage() {
     const message = chatInput.value;
     if (message.trim() === '') return;
 
-    // UPDATED: Send JSON object with name
     const data = {
+        type: 'chat', // <-- NEW: Specify type
         sender: userName,
         message: message
     };
 
     if (dataChannel && dataChannel.readyState === 'open') {
         dataChannel.send(JSON.stringify(data));
-        displayChatMessage(message, 'You'); // Display 'You' locally
+        displayChatMessage(message, 'You');
         chatInput.value = '';
     }
 }
@@ -347,11 +448,10 @@ function displayChatMessage(message, sender) {
         msgDiv.innerHTML = `<span class="font-bold">You:</span> ${message}`;
     } else {
         msgDiv.classList.add('bg-gray-600', 'text-white', 'self-start', 'mr-auto');
-        // UPDATED: Show sender's name
         msgDiv.innerHTML = `<span class="font-bold">${sender}:</span> ${message}`;
     }
     chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // --- UI & Control Functions ---
@@ -362,13 +462,14 @@ function setupRoomUI() {
     chatInput.disabled = true;
     sendChatBtn.disabled = true;
     remoteVideoPlaceholder.classList.remove('hidden');
+    showControls(); // Show controls first time
 }
 
 function updateShareModal(id) {
     const url = `${window.location.origin}${window.location.pathname}?room=${id}`;
     shareUrl.value = url;
 
-    qrcodeDiv.innerHTML = ''; // Clear previous QR
+    qrcodeDiv.innerHTML = '';
     new QRCode(qrcodeDiv, {
         text: url,
         width: 192,
@@ -378,28 +479,24 @@ function updateShareModal(id) {
 
 function toggleAudio() {
     const audioTrack = currentStream.getAudioTracks()[0];
-    if (audioTrack.enabled) {
-        audioTrack.enabled = false;
-        muteBtn.innerHTML = '🔇';
-        muteBtn.classList.replace('bg-blue-600', 'bg-gray-600');
-    } else {
-        audioTrack.enabled = true;
-        muteBtn.innerHTML = '🔈';
-        muteBtn.classList.replace('bg-gray-600', 'bg-blue-600');
-    }
+    audioTrack.enabled = !audioTrack.enabled; // Toggle
+    
+    muteBtn.innerHTML = audioTrack.enabled ? '🔈' : '🔇';
+    muteBtn.classList.toggle('bg-blue-600', audioTrack.enabled);
+    muteBtn.classList.toggle('bg-gray-600', !audioTrack.enabled);
+
+    sendPeerStatus('audio', audioTrack.enabled); // <-- NEW
 }
 
 function toggleVideo() {
     const videoTrack = currentStream.getVideoTracks()[0];
-    if (videoTrack.enabled) {
-        videoTrack.enabled = false;
-        videoBtn.innerHTML = '🚫';
-        videoBtn.classList.replace('bg-blue-600', 'bg-gray-600');
-    } else {
-        videoTrack.enabled = true;
-        videoBtn.innerHTML = '📹';
-        videoBtn.classList.replace('bg-gray-600', 'bg-blue-600');
-    }
+    videoTrack.enabled = !videoTrack.enabled; // Toggle
+    
+    videoBtn.innerHTML = videoTrack.enabled ? '📹' : '🚫';
+    videoBtn.classList.toggle('bg-blue-600', videoTrack.enabled);
+    videoBtn.classList.toggle('bg-gray-600', !videoTrack.enabled);
+
+    sendPeerStatus('video', videoTrack.enabled); // <-- NEW
 }
 
 async function hangUp() {
@@ -410,7 +507,7 @@ async function hangUp() {
     if (peerConnection) {
         peerConnection.close();
     }
-    if (currentStream) { // Use currentStream
+    if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
     }
 
@@ -427,7 +524,6 @@ async function hangUp() {
         }
     }
 
-    // Go back to the 'index.html' which will restart the flow
     window.location.href = 'index.html';
 }
 
