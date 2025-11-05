@@ -15,6 +15,30 @@
         video { transform: scaleX(-1); object-fit: cover; }
         /* Don't mirror remote video */
         #remoteVideo { transform: scaleX(1); }
+
+        /* Controls Auto-Hide */
+        #controlsContainer {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .controls-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .controls-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* NEW: Tooltip Style */
+        #tooltip {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(100px);
+            opacity: 0;
+        }
+        .tooltip-visible {
+            transform: translateY(-20px); /* Move up 20px from bottom */
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center font-sans">
@@ -49,23 +73,28 @@
 
     <div id="roomScreen" class="hidden w-full h-screen p-4 flex flex-col lg:flex-row gap-4 overflow-hidden">
         
-        <div class="flex-1 flex flex-col gap-4 lg:relative"> 
-        
-            <div class="bg-gray-800 rounded-lg w-full flex-1 lg:h-full flex items-center justify-center overflow-hidden shadow-2xl relative">
+        <div class="flex-1 flex flex-col gap-4"> 
+            <div id="videoContainer" class="bg-gray-800 rounded-lg w-full flex-1 lg:h-full flex items-center justify-center overflow-hidden shadow-2xl relative">
                 <video id="remoteVideo" autoplay playsinline class="h-full w-full"></video>
                 <p id="remoteVideoPlaceholder" class="absolute text-gray-400">Waiting for other user...</p>
                 
+                <div id="peerStatus" class="hidden absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-60">
+                    <div class="text-center text-white">
+                        <p id="peerVideoStatus" class="hidden text-4xl mb-2">🚫📹</p>
+                        <p id="peerAudioStatus" class="hidden text-4xl">🚫🔇</p>
+                    </div>
+                </div>
+
                 <div class="absolute bottom-4 right-4 w-40 h-32 md:w-60 md:h-44 bg-gray-700 rounded-lg overflow-hidden shadow-lg border-2 border-blue-500">
                     <video id="localVideo" autoplay playsinline muted class="h-full w-full"></video>
                 </div>
-            </div>
 
-            <div class="flex gap-4 bg-gray-800 bg-opacity-70 p-3 rounded-full shadow-lg justify-center
-                        lg:absolute lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2 lg:w-auto">
-                <button id="muteBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">🔇</button>
-                <button id="videoBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">📹</button>
-                <button id="switchCameraBtn" class="hidden w-12 h-12 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center">🔄</button>
-                <button id="hangupBtn" class="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center">📞</button>
+                <div id="controlsContainer" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-70 p-3 rounded-full shadow-lg justify-center controls-hidden">
+                    <button id="muteBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">🔇</button>
+                    <button id="videoBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">📹</button>
+                    <button id="switchCameraBtn" class="hidden w-12 h-12 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center">🔄</button>
+                    <button id="hangupBtn" class="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center">📞</button>
+                </div>
             </div>
         </div>
 
@@ -87,6 +116,7 @@
             </div>
         </div>
     </div>
+
     <div id="shareModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div class="bg-gray-800 p-8 rounded-lg shadow-2xl text-center w-11/12 max-w-sm">
             <h2 class="text-2xl font-bold mb-4">Share Room</h2>
@@ -97,6 +127,9 @@
             <button id="closeModalBtn" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg">Close</button>
         </div>
     </div>
+
+    <div id="tooltip" class="fixed bottom-0 left-1/2 -translate-x-1/2 p-3 px-5 rounded-lg shadow-lg text-white">
+        </div>
 
     <script src="script.js"></script>
 </body>
