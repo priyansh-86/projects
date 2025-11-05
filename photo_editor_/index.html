@@ -7,11 +7,15 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        /* Aapka poora CSS code (jaisa tha waisa hi) */
+        /* Advanced Photo Editor Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -19,6 +23,33 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            /* Disable Text Selection */
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* Standard syntax */
+        }
+
+        /* Allow selection on inputs */
+        input, textarea {
+            -webkit-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fcf, #673ca1);
         }
 
         .container {
@@ -91,8 +122,18 @@
             align-items: center;
             justify-content: center;
         }
+        
+        #canvasPlaceholder {
+            text-align: center;
+            font-size: 1.2em;
+            color: #aaa;
+            line-height: 1.6;
+            padding: 20px;
+            display: block; /* Show by default */
+        }
 
         #canvas {
+            display: none; 
             max-width: 100%;
             max-height: 70vh;
             border: 2px solid #e9ecef;
@@ -168,6 +209,15 @@
             font-weight: 500;
             color: #495057;
         }
+        
+        /* UPDATED: Add label styling for other groups */
+        .resize-group label,
+        .compress-group label,
+        .text-group label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em; /* Smaller label */
+        }
 
         .slider-group input[type="range"] {
             width: 100%;
@@ -189,13 +239,20 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        .resize-group {
+        /* Generic group for inputs */
+        .resize-group,
+        .compress-group,
+        .text-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .resize-group input {
+        .resize-group input,
+        .compress-group input,
+        .text-group input[type="text"],
+        .text-group input[type="number"],
+        .compress-group select {
             padding: 8px 12px;
             border: 2px solid #e9ecef;
             border-radius: 6px;
@@ -203,12 +260,18 @@
             transition: border-color 0.3s ease;
         }
 
-        .resize-group input:focus {
+        .resize-group input:focus,
+        .compress-group input:focus,
+        .text-group input[type="text"]:focus,
+        .text-group input[type="number"]:focus,
+        .compress-group select:focus {
             border-color: #4facfe;
             outline: none;
         }
 
-        .resize-group button {
+        .resize-group button,
+        .compress-group button,
+        .text-group button {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
@@ -219,10 +282,38 @@
             transition: all 0.3s ease;
         }
 
-        .resize-group button:hover {
+        .resize-group button:hover,
+        .compress-group button:hover,
+        .text-group button:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
+
+        /* UPDATED: Removed compress-group specific row/flex styles */
+        
+        /* Styles for text-group */
+        .text-group {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .text-group input[type="text"] {
+            flex: 1 1 100%;
+        }
+        .text-group input[type="number"] {
+            flex: 1;
+        }
+        .text-group .color-input {
+            padding: 4px;
+            flex-basis: 50px;
+            height: 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .text-group button {
+            flex: 1 1 100%;
+        }
+
 
         .auth-section {
             margin-bottom: 15px;
@@ -244,6 +335,18 @@
         #authButton:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(238, 90, 111, 0.4);
+        }
+
+        /* Button Click Effect */
+        .upload-btn:active,
+        .button-group button:active,
+        .resize-group button:active,
+        .compress-group button:active,
+        .text-group button:active,
+        #authButton:active,
+        .social-link:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
         }
 
         .auth-status {
@@ -271,7 +374,7 @@
             font-style: italic;
         }
 
-        /* Baaki ka CSS (Contact aur Footer) */
+        /* Contact Us Section */
         .contact-section {
             margin-top: 60px;
             padding: 60px 20px;
@@ -380,6 +483,7 @@
             background: linear-gradient(45deg, #667eea, #764ba2);
         }
 
+        /* Footer */
         .footer {
             margin-top: 40px;
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
@@ -506,6 +610,9 @@
 
         <div class="editor-container" id="editorContainer" style="display: none;">
             <div class="canvas-wrapper">
+                <div id="canvasPlaceholder">
+                    🖼️<br>Please upload a photo<br>to start editing
+                </div>
                 <canvas id="canvas"></canvas>
             </div>
 
@@ -523,9 +630,10 @@
                 <div class="control-section">
                     <h3>Filters</h3>
                     <div class="button-group">
-                        <button onclick="applyGrayscale()">⚫ Black & White</button>
+                        <button onclick="applyGrayscale()">⚫ B&W</button>
                         <button onclick="applySepia()">🟤 Sepia</button>
                         <button onclick="applyInvert()">🔄 Invert</button>
+                        <button onclick="applyVignette()">🌆 Vignette</button>
                         <button onclick="resetImage()">↩ Reset</button>
                     </div>
                 </div>
@@ -545,7 +653,7 @@
                 </div>
 
                 <div class="control-section">
-                    <h3>Resize</h3>
+                    <h3>Resize (Pixels)</h3>
                     <div class="resize-group">
                         <label>Width:</label>
                         <input type="number" id="newWidth" placeholder="Width">
@@ -554,6 +662,30 @@
                         <button onclick="resizeImage()">📐 Resize</button>
                         <button onclick="resizeByPercentage(0.5)">50%</button>
                         <button onclick="resizeByPercentage(2)">200%</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Compress (File Size)</h3>
+                    <div class="compress-group">
+                        <label>Target Size:</label>
+                        <input type="number" id="targetSize" placeholder="Size" value="100">
+                        <label>Unit:</label>
+                        <select id="sizeUnit">
+                            <option value="KB">KB</option>
+                            <option value="MB">MB</option>
+                        </select>
+                        <button onclick="compressImage()">📦 Compress & Download</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Add Text</h3>
+                    <div class="text-group">
+                        <input type="text" id="textContent" placeholder="Enter text..." value="Hello">
+                        <input type="number" id="textSize" value="50" title="Font Size">
+                        <input type="color" id="textColor" value="#FFFFFF" class="color-input" title="Text Color">
+                        <button onclick="addText()">✍️ Add Text to Center</button>
                     </div>
                 </div>
 
@@ -574,7 +706,7 @@
                     </div>
 
                     <div class="button-group">
-                        <button onclick="downloadImage()">💾 Download</button>
+                        <button onclick="downloadImage()">💾 Download (PNG)</button>
                         <button onclick="saveToGoogleDrive()" id="driveBtn" disabled>🗂 Save to Drive</button>
                         <button onclick="saveToGooglePhotos()" id="photosBtn" disabled>📷 Save to Photos</button>
                     </div>
@@ -636,7 +768,12 @@
     </footer>
 
 <script>
-    // 1. YEH GOOGLE KO BATAATA HAI KI HUMEIN KYA PERMISSIONS CHAHIYE
+    // --- Disable Right-Click Context Menu ---
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+
+    // Google API Scopes
     const SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/photoslibrary.appendonly";
 
     // --- Global Variables ---
@@ -662,32 +799,23 @@
         imageUpload.addEventListener('change', handleImageUpload);
         
         setupCropHandlers();
-
-        // **NAYA:** Ab hum pehle config fetch karenge
         fetchConfigAndInitialize();
     });
 
-    // **NAYA FUNCTION:** Server se Client ID laane ke liye
+    // Server se Client ID laane ke liye
     async function fetchConfigAndInitialize() {
         try {
             updateAuthStatus("Loading config...", "success");
-            
-            // Apni serverless function ko call karo
             const response = await fetch('/api/config');
-            
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             
             const config = await response.json();
-            
-            CLIENT_ID = config.clientId; // Client ID ko set karo
+            CLIENT_ID = config.clientId;
             
             if (!CLIENT_ID || config.error) {
                 throw new Error(config.error || 'Client ID not received from server.');
             }
             
-            // Ab jab hamare paas ID hai, tab Google Auth setup karo
             initializeGis(); 
             updateAuthStatus("Ready to authenticate", "success");
 
@@ -717,13 +845,17 @@
                 document.getElementById('editorContainer').style.display = 'flex';
                 document.getElementById('newWidth').value = img.width;
                 document.getElementById('newHeight').value = img.height;
+
+                // Show canvas, hide placeholder
+                document.getElementById('canvasPlaceholder').style.display = 'none';
+                document.getElementById('canvas').style.display = 'block';
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 
-    // --- Image editing functions (Yeh aapke purane code se same hain) ---
+    // --- Image editing functions ---
     function rotateImage(degrees) {
         if (!currentImageData) return;
         const tempCanvas = document.createElement('canvas');
@@ -863,15 +995,21 @@
         canvas.height = originalImageData.height;
         ctx.putImageData(originalImageData, 0, 0);
         currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
         document.getElementById('brightness').value = 0;
         document.getElementById('contrast').value = 0;
         document.getElementById('saturation').value = 0;
         document.getElementById('newWidth').value = canvas.width;
         document.getElementById('newHeight').value = canvas.height;
+
+        document.getElementById('canvasPlaceholder').style.display = 'none';
+        document.getElementById('canvas').style.display = 'block';
     }
     function updateCurrentImageData() {
         currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
+    
+    // --- CROP FUNCTIONS ---
     function setupCropHandlers() {
         canvas.addEventListener('mousedown', startCrop);
         canvas.addEventListener('mousemove', updateCrop);
@@ -929,6 +1067,63 @@
         ctx.putImageData(currentImageData, 0, 0);
         cropStartX = cropStartY = cropEndX = cropEndY = null;
     }
+
+    // --- NEW EDITING FUNCTIONS ---
+
+    function applyVignette() {
+        if (!currentImageData) return;
+        ctx.putImageData(currentImageData, 0, 0); // Start from current state
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const outerRadius = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
+
+        const gradient = ctx.createRadialGradient(
+            width / 2, height / 2, outerRadius * 0.2, 
+            width / 2, height / 2, outerRadius * 0.9
+        );
+
+        gradient.addColorStop(0, 'rgba(0,0,0,0)'); // Center is transparent
+        gradient.addColorStop(1, 'rgba(0,0,0,0.6)'); // Edges are dark
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        updateCurrentImageData();
+    }
+
+    function addText() {
+        if (!currentImageData) return;
+        ctx.putImageData(currentImageData, 0, 0); // Start from current state
+
+        const text = document.getElementById('textContent').value;
+        const size = document.getElementById('textSize').value;
+        const color = document.getElementById('textColor').value;
+
+        ctx.fillStyle = color;
+        ctx.font = `bold ${size}px 'Segoe UI', Tahoma, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Add a subtle shadow for readability
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        updateCurrentImageData();
+    }
+
+    // --- SAVE/DOWNLOAD FUNCTIONS ---
+
     function downloadImage() {
         if (!currentImageData) return;
         const link = document.createElement('a');
@@ -937,27 +1132,95 @@
         link.click();
     }
 
-    // --- GOOGLE API FUNCTIONS (Updated) ---
+    // Helper function to download a blob
+    function downloadBlob(blob, filename) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href); // Free up memory
+    }
 
-    // 3. Google Sign-In ko initialize karta hai
-    // Yeh ab `fetchConfigAndInitialize` se call hota hai
-    function initializeGis() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID, // Yahaan fetched ID use ho raha hai
-            scope: SCOPES,
-            callback: handleAuthCallback, // Jab login ho jaaye, toh yeh function call hoga
+    // Helper function to get a blob from canvas
+    function getBlob(quality) {
+        return new Promise((resolve) => {
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/jpeg', quality);
         });
     }
 
-    // 4. Login button (handleAuth) ka function
+    // Compress Image function
+    async function compressImage() {
+        if (!currentImageData) {
+            alert("Please upload an image first.");
+            return;
+        }
+
+        const size = parseFloat(document.getElementById('targetSize').value);
+        const unit = document.getElementById('sizeUnit').value;
+
+        if (!size || size <= 0) {
+            alert("Please enter a valid target size.");
+            return;
+        }
+
+        let targetSizeBytes = unit === 'KB' ? size * 1024 : size * 1024 * 1024;
+
+        updateAuthStatus("Compressing...", "success");
+
+        let minQuality = 0.0;
+        let maxQuality = 1.0;
+        let compressedBlob = null;
+        let bestQualityBlob = await getBlob(0); // Get smallest possible size
+
+        if (bestQualityBlob.size > targetSizeBytes) {
+            alert(`Cannot compress to target size. Minimum size is ${(bestQualityBlob.size / 1024).toFixed(0)} KB.`);
+            updateAuthStatus(`❌ Failed. Min size is ${(bestQualityBlob.size / 1024).toFixed(0)} KB.`, "error");
+            downloadBlob(bestQualityBlob, `compressed-photo-min.jpg`);
+            return;
+        }
+
+        // Binary search for 10 iterations (fast and accurate)
+        for (let i = 0; i < 10; i++) {
+            let quality = (minQuality + maxQuality) / 2;
+            const blob = await getBlob(quality);
+
+            if (blob.size <= targetSizeBytes) {
+                compressedBlob = blob; // This is a *good* candidate
+                minQuality = quality; // Try for better quality
+            } else {
+                maxQuality = quality; // Quality is too high
+            }
+        }
+
+        if (!compressedBlob) {
+            // Failsafe, should not happen if we check min size first
+            compressedBlob = bestQualityBlob;
+        }
+
+        const finalSizeKB = (compressedBlob.size / 1024).toFixed(0);
+        downloadBlob(compressedBlob, `compressed-photo-${finalSizeKB}KB.jpg`);
+        updateAuthStatus(`✅ Compressed to ${finalSizeKB} KB`, "success");
+    }
+
+
+    // --- GOOGLE API FUNCTIONS ---
+
+    function initializeGis() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID, 
+            scope: SCOPES,
+            callback: handleAuthCallback, 
+        });
+    }
+
     function handleAuth() {
         if (!CLIENT_ID) {
             alert("Configuration is still loading or failed. Please wait.");
             return;
         }
-
         if (isAuthenticated) {
-            // Logout
             google.accounts.oauth2.revoke(accessToken, () => {
                 isAuthenticated = false;
                 accessToken = null;
@@ -967,12 +1230,10 @@
                 document.getElementById('photosBtn').disabled = true;
             });
         } else {
-            // Login
             tokenClient.requestAccessToken();
         }
     }
 
-    // 5. Jab login successful hoga (Callback)
     function handleAuthCallback(tokenResponse) {
         accessToken = tokenResponse.access_token;
         isAuthenticated = true;
@@ -982,7 +1243,6 @@
         document.getElementById('photosBtn').disabled = false;
     }
 
-    // 6. Canvas image ko file (Blob) mein convert karne ka helper
     function canvasToBlob(canvas) {
         return new Promise((resolve) => {
             canvas.toBlob((blob) => {
@@ -991,24 +1251,15 @@
         });
     }
 
-    // 7. Google Drive par save karne ka function
     async function saveToGoogleDrive() {
         if (!isAuthenticated || !currentImageData) {
             alert("Please login first and upload an image.");
             return;
         }
-
         updateAuthStatus("Saving to Google Drive...", "success");
-
         const blob = await canvasToBlob(canvas);
         const fileName = "edited-photo-" + Date.now() + ".png";
-
-        const metadata = {
-            name: fileName,
-            mimeType: 'image/png',
-            parents: ['root']
-        };
-
+        const metadata = { name: fileName, mimeType: 'image/png', parents: ['root'] };
         const formData = new FormData();
         formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
         formData.append('file', blob);
@@ -1016,38 +1267,29 @@
         try {
             const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                },
+                headers: { 'Authorization': `Bearer ${accessToken}` },
                 body: formData
             });
-
             if (response.ok) {
                 const file = await response.json();
                 updateAuthStatus(`✅ Saved to Drive as ${file.name}`, "success");
-            } else {
-                throw new Error('Failed to upload to Drive');
-            }
+            } else { throw new Error('Failed to upload to Drive'); }
         } catch (error) {
             console.error(error);
             updateAuthStatus("❌ Error saving to Drive.", "error");
         }
     }
 
-    // 8. Google Photos par save karne ka function
     async function saveToGooglePhotos() {
         if (!isAuthenticated || !currentImageData) {
             alert("Please login first and upload an image.");
             return;
         }
-
         updateAuthStatus("Saving to Google Photos...", "success");
-
         const blob = await canvasToBlob(canvas);
         const fileName = "edited-photo-" + Date.now() + ".png";
 
         try {
-            // Step 1: Upload token
             const uploadResponse = await fetch('https://photoslibrary.googleapis.com/v1/uploads', {
                 method: 'POST',
                 headers: {
@@ -1058,12 +1300,9 @@
                 },
                 body: blob
             });
-
             if (!uploadResponse.ok) throw new Error('Failed to get upload token');
-            
             const uploadToken = await uploadResponse.text();
 
-            // Step 2: Media item create
             const createResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate', {
                 method: 'POST',
                 headers: {
@@ -1073,27 +1312,19 @@
                 body: JSON.stringify({
                     newMediaItems: [{
                         description: "Edited with Advanced Photo Editor",
-                        simpleMediaItem: {
-                            uploadToken: uploadToken,
-                            fileName: fileName
-                        }
+                        simpleMediaItem: { uploadToken: uploadToken, fileName: fileName }
                     }]
                 })
             });
-
             if (createResponse.ok) {
                 updateAuthStatus("✅ Saved to Google Photos!", "success");
-            } else {
-                throw new Error('Failed to create media item');
-            }
-
+            } else { throw new Error('Failed to create media item'); }
         } catch (error) {
             console.error(error);
             updateAuthStatus("❌ Error saving to Photos.", "error");
         }
     }
 
-    // 9. Status message dikhane ka helper
     function updateAuthStatus(message, type) {
         const authStatus = document.getElementById('authStatus');
         authStatus.innerText = message;
