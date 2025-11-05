@@ -35,7 +35,6 @@ const copyUrlBtn = document.getElementById('copyUrlBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const qrcodeDiv = document.getElementById('qrcode');
 
-// NEW: Get Tooltip & Peer Status Elements
 const tooltip = document.getElementById('tooltip');
 const peerStatus = document.getElementById('peerStatus');
 const peerVideoStatus = document.getElementById('peerVideoStatus');
@@ -55,7 +54,7 @@ let db;
 let unsubscribeRoom;
 let unsubscribeOfferCandidates;
 let unsubscribeAnswerCandidates;
-let controlsTimer;
+// REMOVED: controlsTimer
 
 // Google ke free STUN servers
 const servers = {
@@ -105,7 +104,11 @@ function initHome() {
     createRoomBtn.onclick = createRoom;
     joinRoomBtn.onclick = () => joinRoom(joinRoomInput.value);
     
-    setupControlListeners();
+    // RE-ADDED: Simple button listeners (no auto-hide)
+    muteBtn.onclick = toggleAudio;
+    videoBtn.onclick = toggleVideo;
+    switchCameraBtn.onclick = switchCamera;
+    hangupBtn.onclick = hangUp;
 
     sendChatBtn.onclick = sendChatMessage;
     chatInput.onkeydown = (e) => {
@@ -125,11 +128,10 @@ function checkUrlForRoom() {
     }
 }
 
-// --- NEW: Tooltip Function ---
+// --- Tooltip Function ---
 function showTooltip(message, type = 'success') {
     tooltip.innerText = message;
     
-    // Set color based on type
     if (type === 'error') {
         tooltip.classList.add('bg-red-500');
         tooltip.classList.remove('bg-green-500');
@@ -138,57 +140,13 @@ function showTooltip(message, type = 'success') {
         tooltip.classList.remove('bg-red-500');
     }
 
-    // Show and hide
     tooltip.classList.add('tooltip-visible');
     setTimeout(() => {
         tooltip.classList.remove('tooltip-visible');
     }, 3000);
 }
 
-// --- Control Visibility Functions ---
-function setupControlListeners() {
-    videoContainer.onclick = toggleControls;
-    muteBtn.onclick = () => {
-        toggleAudio();
-        restartControlsTimer();
-    };
-    videoBtn.onclick = () => {
-        toggleVideo();
-        restartControlsTimer();
-    };
-    switchCameraBtn.onclick = () => {
-        switchCamera();
-        restartControlsTimer();
-    };
-    hangupBtn.onclick = hangUp;
-}
-
-function toggleControls() {
-    if (controlsContainer.classList.contains('controls-visible')) {
-        hideControls();
-    } else {
-        showControls();
-    }
-}
-
-function showControls() {
-    clearTimeout(controlsTimer);
-    controlsContainer.classList.remove('controls-hidden');
-    controlsContainer.classList.add('controls-visible');
-    controlsTimer = setTimeout(hideControls, 4000);
-}
-
-function hideControls() {
-    clearTimeout(controlsTimer);
-    controlsContainer.classList.remove('controls-visible');
-    controlsContainer.classList.add('controls-hidden');
-}
-
-function restartControlsTimer() {
-    clearTimeout(controlsTimer);
-    controlsTimer = setTimeout(hideControls, 4000);
-}
-
+// REMOVED: Auto-hide control functions (toggleControls, showControls, hideControls, restartControlsTimer)
 
 // --- Core Functions ---
 
@@ -231,7 +189,6 @@ async function switchCamera() {
         const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
         if (sender) {
             sender.replaceTrack(videoTrack);
-            // NEW: Send status update after switching
             sendPeerStatus('video', videoTrack.enabled);
         }
     }
@@ -368,9 +325,8 @@ function setupDataChannelEvents(channel) {
         console.log('Data channel open');
         chatInput.disabled = false;
         sendChatBtn.disabled = false;
-        showTooltip('User connected!', 'success'); // <-- NEW
+        showTooltip('User connected!', 'success'); 
         
-        // NEW: Send current status on connect
         sendPeerStatus('audio', currentStream.getAudioTracks()[0].enabled);
         sendPeerStatus('video', currentStream.getVideoTracks()[0].enabled);
     };
@@ -378,25 +334,26 @@ function setupDataChannelEvents(channel) {
         console.log('Data channel closed');
         chatInput.disabled = true;
         sendChatBtn.disabled = true;
-        showTooltip('User disconnected.', 'error'); // <-- NEW
+        showTooltip('User disconnected.', 'error');
         
-        // NEW: Hide peer status on disconnect
         peerStatus.classList.add('hidden');
         peerVideoStatus.classList.add('hidden');
         peerAudioStatus.classList.add('hidden');
     };
+    
     // UPDATED: Handle different message types
     channel.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === 'chat') {
-            displayChatMessage(data.message, data.sender);
+            // *** BUG FIX: Use renamed variables ***
+            displayChatMessage(data.chatMessage, data.senderName);
         } else if (data.type === 'status') {
             handlePeerStatus(data.media, data.enabled);
         }
     };
 }
 
-// NEW: Send Peer Status Function
+// Send Peer Status Function
 function sendPeerStatus(media, enabled) {
     if (dataChannel && dataChannel.readyState === 'open') {
         const data = {
@@ -408,7 +365,7 @@ function sendPeerStatus(media, enabled) {
     }
 }
 
-// NEW: Handle Peer Status UI
+// Handle Peer Status UI
 function handlePeerStatus(media, enabled) {
     if (media === 'video') {
         peerVideoStatus.classList.toggle('hidden', enabled);
@@ -416,7 +373,6 @@ function handlePeerStatus(media, enabled) {
         peerAudioStatus.classList.toggle('hidden', enabled);
     }
     
-    // Show container if either is off
     const isVideoOff = !peerVideoStatus.classList.contains('hidden');
     const isAudioOff = !peerAudioStatus.classList.contains('hidden');
     peerStatus.classList.toggle('hidden', !isVideoOff && !isAudioOff);
@@ -427,9 +383,10 @@ function sendChatMessage() {
     if (message.trim() === '') return;
 
     const data = {
-        type: 'chat', // <-- NEW: Specify type
-        sender: userName,
-        message: message
+        type: 'chat',
+        // *** BUG FIX: Use renamed variables ***
+        senderName: userName,
+        chatMessage: message
     };
 
     if (dataChannel && dataChannel.readyState === 'open') {
@@ -462,7 +419,8 @@ function setupRoomUI() {
     chatInput.disabled = true;
     sendChatBtn.disabled = true;
     remoteVideoPlaceholder.classList.remove('hidden');
-    showControls(); // Show controls first time
+    
+    // REMOVED: showControls();
 }
 
 function updateShareModal(id) {
@@ -485,7 +443,7 @@ function toggleAudio() {
     muteBtn.classList.toggle('bg-blue-600', audioTrack.enabled);
     muteBtn.classList.toggle('bg-gray-600', !audioTrack.enabled);
 
-    sendPeerStatus('audio', audioTrack.enabled); // <-- NEW
+    sendPeerStatus('audio', audioTrack.enabled);
 }
 
 function toggleVideo() {
@@ -496,7 +454,7 @@ function toggleVideo() {
     videoBtn.classList.toggle('bg-blue-600', videoTrack.enabled);
     videoBtn.classList.toggle('bg-gray-600', !videoTrack.enabled);
 
-    sendPeerStatus('video', videoTrack.enabled); // <-- NEW
+    sendPeerStatus('video', videoTrack.enabled);
 }
 
 async function hangUp() {
