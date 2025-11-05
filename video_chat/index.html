@@ -16,20 +16,7 @@
         /* Don't mirror remote video */
         #remoteVideo { transform: scaleX(1); }
 
-        /* Controls Auto-Hide */
-        #controlsContainer {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .controls-hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .controls-visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* NEW: Tooltip Style */
+        /* Tooltip Style */
         #tooltip {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
             transform: translateY(100px);
@@ -89,7 +76,8 @@
                     <video id="localVideo" autoplay playsinline muted class="h-full w-full"></video>
                 </div>
 
-                <div id="controlsContainer" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-70 p-3 rounded-full shadow-lg justify-center controls-hidden">
+                <div id="controlsContainer" class="flex gap-4 bg-gray-800 bg-opacity-70 p-3 rounded-full shadow-lg justify-center 
+                            lg:absolute lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2">
                     <button id="muteBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">🔇</button>
                     <button id="videoBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">📹</button>
                     <button id="switchCameraBtn" class="hidden w-12 h-12 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center">🔄</button>
