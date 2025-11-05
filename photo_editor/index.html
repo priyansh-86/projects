@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Photo Editor by PRIYANSH</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <style>
+        /* Advanced Photo Editor Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #imageUpload {
+            display: none;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 90, 111, 0.4);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 111, 0.6);
+        }
+
+        .editor-container {
+            display: flex;
+            gap: 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas {
+            max-width: 100%;
+            max-height: 70vh;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .controls-panel {
+            width: 300px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .control-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .button-group button {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .button-group button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+
+        .button-group button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slider-group label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .slider-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .resize-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .resize-group input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: border-color 0.3s ease;
+        }
+
+        .resize-group input:focus {
+            border-color: #4facfe;
+            outline: none;
+        }
+
+        .resize-group button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .resize-group button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-section {
+            margin-bottom: 15px;
+        }
+
+        #authButton {
+            width: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        #authButton:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(238, 90, 111, 0.4);
+        }
+
+        .auth-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .auth-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .auth-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Contact Us Section */
+        .contact-section {
+            margin-top: 60px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .contact-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-section h2 {
+            font-size: 2.5em;
+            color: #495057;
+            margin-bottom: 20px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-section p {
+            font-size: 1.2em;
+            color: #6c757d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .contact-item {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .contact-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .contact-details h3 {
+            color: #495057;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .contact-details p {
+            color: #6c757d;
+            font-size: 1em;
+            margin-bottom: 0;
+        }
+
+        .contact-details a {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .contact-details a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .social-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-content p {
+            margin: 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .developer-name {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #eb4d4b, #6c5ce7, #a29bfe);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: gradientShift 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            display: inline-block;
+            padding: 0 10px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            25% {
+                background-position: 100% 50%;
+            }
+            50% {
+                background-position: 50% 100%;
+            }
+            75% {
+                background-position: 50% 0%;
+            }
+        }
+
+        .footer-subtitle {
+            margin-top: 15px !important;
+            font-size: 0.9em !important;
+            opacity: 0.8;
+            color: #bdc3c7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .editor-container {
+                flex-direction: column;
+            }
+
+            .controls-panel {
+                width: 100%;
+            }
+
+            .button-group button {
+                min-width: 100%;
+            }
+
+            .contact-section {
+                margin-top: 40px;
+                padding: 40px 15px;
+            }
+
+            .contact-section h2 {
+                font-size: 2em;
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .developer-name {
+                font-size: 1.2em;
+                letter-spacing: 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced Photo Editor</h1>
+            <p>Upload, edit, and save your photos with powerful editing tools</p>
+        </header>
+
+        <div class="upload-section">
+            <input type="file" id="imageUpload" accept="image/*" />
+            <label for="imageUpload" class="upload-btn">
+                <span>📁 Choose Photo</span>
+            </label>
+        </div>
+
+        <div class="editor-container" id="editorContainer" style="display: none;">
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Basic Edits</h3>
+                    <div class="button-group">
+                        <button onclick="rotateImage(90)">↻ Rotate Right</button>
+                        <button onclick="rotateImage(-90)">↺ Rotate Left</button>
+                        <button onclick="flipHorizontal()">↔ Flip H</button>
+                        <button onclick="flipVertical()">↕ Flip V</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Filters</h3>
+                    <div class="button-group">
+                        <button onclick="applyGrayscale()">⚫ Black & White</button>
+                        <button onclick="applySepia()">🟤 Sepia</button>
+                        <button onclick="applyInvert()">🔄 Invert</button>
+                        <button onclick="resetImage()">↩ Reset</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Adjustments</h3>
+                    <div class="slider-group">
+                        <label>Brightness:</label>
+                        <input type="range" id="brightness" min="-100" max="100" value="0" oninput="adjustBrightness(this.value)">
+
+                        <label>Contrast:</label>
+                        <input type="range" id="contrast" min="-100" max="100" value="0" oninput="adjustContrast(this.value)">
+
+                        <label>Saturation:</label>
+                        <input type="range" id="saturation" min="-100" max="100" value="0" oninput="adjustSaturation(this.value)">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Resize</h3>
+                    <div class="resize-group">
+                        <label>Width:</label>
+                        <input type="number" id="newWidth" placeholder="Width">
+                        <label>Height:</label>
+                        <input type="number" id="newHeight" placeholder="Height">
+                        <button onclick="resizeImage()">📐 Resize</button>
+                        <button onclick="resizeByPercentage(0.5)">50%</button>
+                        <button onclick="resizeByPercentage(2)">200%</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Crop</h3>
+                    <div class="button-group">
+                        <button onclick="enableCrop()">✂ Enable Crop</button>
+                        <button onclick="applyCrop()">✅ Apply Crop</button>
+                        <button onclick="cancelCrop()">❌ Cancel Crop</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Save Options</h3>
+                    <div class="auth-section">
+                        <button id="authButton" onclick="handleAuth()">🔐 Login to Google</button>
+                        <div id="authStatus" class="auth-status">Ready to authenticate</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button onclick="downloadImage()">💾 Download</button>
+                        <button onclick="saveToGoogleDrive()" id="driveBtn" disabled>🗂 Save to Drive</button>
+                        <button onclick="saveToGooglePhotos()" id="photosBtn" disabled>📷 Save to Photos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Us Section -->
+        <section class="contact-section">
+            <div class="contact-container">
+                <h2>Contact Us</h2>
+                <p>Have questions or feedback about our photo editor? We'd love to hear from you!</p>
+
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <a href="mailto:priyanshrajbhar499@gmail.com">priyanshrajbhar499@gmail.com</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <h3>Support</h3>
+                            <p>Get help with my photo editing projects</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">🚀</div>
+                        <div class="contact-details">
+                            <h3>Feature Requests</h3>
+                            <p>Suggest new features for future updates</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="social-links">
+                    <a href="https://github.com/priyansh-86" class="social-link" title="GitHub">
+                        <span>🔗 GitHub</span>
+                    </a>
+                    <a href="https://x.com/Priyansh_86" class="social-link" title="Twitter">
+                        <span>🐦 Twitter</span>
+                    </a>
+                    <a href="https://t.me/priyansh_dev" class="social-link" title="Telegram">
+                        <span>💼 Telegram</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Made with ❤️ by <span class="developer-name">PRIYANSH</span></p>
+            <p class="footer-subtitle">Advanced Photo Editor © 2025. All rights reserved.</p>
+        </div>
+    </footer>
+
+<script>
+        // Advanced Photo Editor JavaScript
+        let canvas, ctx;
+        let originalImageData = null;
+        let currentImageData = null;
+        let isAuthenticated = false;
+        let cropMode = false;
+        let cropStartX, cropStartY, cropEndX, cropEndY;
+        let isDragging = false;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d', { willReadFrequently: true });
+            
+            const imageUpload = document.getElementById('imageUpload');
+            imageUpload.addEventListener('change', handleImageUpload);
+            
+            setupCropHandlers();
+        });
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    document.getElementById('editorContainer').style.display = 'flex';
+                    document.getElementById('newWidth').value = img.width;
+                    document.getElementById('newHeight').value = img.height;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Image editing functions
+        function rotateImage(degrees) {
+            if (!currentImageData) return;
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCtx.putImageData(currentImageData, 0, 0);
+            
+            if (Math.abs(degrees) === 90) {
+                canvas.width = tempCanvas.height;
+                canvas.height = tempCanvas.width;
+            }
+            
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(degrees * Math.PI / 180);
+            ctx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2);
+            ctx.restore();
+            
+            updateCurrentImageData();
+        }
+
+        function flipHorizontal() {
+            if (!currentImageData) return;
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(canvas, -canvas.width, 0);
+            ctx.restore();
+            updateCurrentImageData();
+        }
+
+        function flipVertical() {
+            if (!currentImageData) return;
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.drawImage(canvas, 0, -canvas.height);
+            ctx.restore();
+            updateCurrentImageData();
+        }
+
+        function applyGrayscale() {
+            if (!currentImageData) return;
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = data[i + 1] = data[i + 2] = avg;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function applySepia() {
+            if (!currentImageData) return;
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function applyInvert() {
+            if (!currentImageData) return;
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = 255 - data[i];
+                data[i + 1] = 255 - data[i + 1];
+                data[i + 2] = 255 - data[i + 2];
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function adjustBrightness(value) {
+            if (!originalImageData) return;
+            
+            const imageData = new ImageData(
+                new Uint8ClampedArray(originalImageData.data),
+                originalImageData.width,
+                originalImageData.height
+            );
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] += parseInt(value);
+                data[i + 1] += parseInt(value);
+                data[i + 2] += parseInt(value);
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function adjustContrast(value) {
+            if (!originalImageData) return;
+            
+            const factor = (259 * (parseInt(value) + 255)) / (255 * (259 - parseInt(value)));
+            
+            const imageData = new ImageData(
+                new Uint8ClampedArray(originalImageData.data),
+                originalImageData.width,
+                originalImageData.height
+            );
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = factor * (data[i] - 128) + 128;
+                data[i + 1] = factor * (data[i + 1] - 128) + 128;
+                data[i + 2] = factor * (data[i + 2] - 128) + 128;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function adjustSaturation(value) {
+            if (!originalImageData) return;
+            
+            const saturation = parseInt(value) / 100;
+            
+            const imageData = new ImageData(
+                new Uint8ClampedArray(originalImageData.data),
+                originalImageData.width,
+                originalImageData.height
+            );
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                
+                data[i] = gray + saturation * (r - gray);
+                data[i + 1] = gray + saturation * (g - gray);
+                data[i + 2] = gray + saturation * (b - gray);
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            updateCurrentImageData();
+        }
+
+        function resizeImage() {
+            if (!currentImageData) return;
+            
+            const newWidth = parseInt(document.getElementById('newWidth').value);
+            const newHeight = parseInt(document.getElementById('newHeight').value);
+            
+            if (!newWidth || !newHeight) {
+                alert('Please enter valid width and height values');
+                return;
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCtx.putImageData(currentImageData, 0, 0);
+            
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            
+            ctx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
+            updateCurrentImageData();
+        }
+
+        function resizeByPercentage(percentage) {
+            if (!currentImageData) return;
+            
+            const newWidth = Math.floor(canvas.width * percentage);
+            const newHeight = Math.floor(canvas.height * percentage);
+            
+            document.getElementById('newWidth').value = newWidth;
+            document.getElementById('newHeight').value = newHeight;
+            
+            resizeImage();
+        }
+
+        function resetImage() {
+            if (!originalImageData) return;
+            
+            canvas.width = originalImageData.width;
+            canvas.height = originalImageData.height;
+            ctx.putImageData(originalImageData, 0, 0);
+            currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            document.getElementById('brightness').value = 0;
+            document.getElementById('contrast').value = 0;
+            document.getElementById('saturation').value = 0;
+            document.getElementById('newWidth').value = canvas.width;
+            document.getElementById('newHeight').value = canvas.height;
+        }
+
+        function updateCurrentImageData() {
+            currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        // Crop functionality
+        function setupCropHandlers() {
+            canvas.addEventListener('mousedown', startCrop);
+            canvas.addEventListener('mousemove', updateCrop);
+            canvas.addEventListener('mouseup', endCrop);
+        }
+
+        function enableCrop() {
+            cropMode = true;
+            canvas.style.cursor = 'crosshair';
+            alert('Click and drag to select area to crop');
+        }
+
+        function startCrop(e) {
+            if (!cropMode) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            cropStartX = (e.clientX - rect.left) * scaleX;
+            cropStartY = (e.clientY - rect.top) * scaleY;
+            isDragging = true;
+        }
+
+        function updateCrop(e) {
+            if (!cropMode || !isDragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            cropEndX = (e.clientX - rect.left) * scaleX;
+            cropEndY = (e.clientY - rect.top) * scaleY;
+            
+            ctx.putImageData(currentImageData, 0, 0);
+            
+            ctx.strokeStyle = '#007bff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(
+                cropStartX,
+                cropStartY,
+                cropEndX - cropStartX,
+                cropEndY - cropStartY
+            );
+            ctx.setLineDash([]);
+        }
+
+        function endCrop() {
+            isDragging = false;
+        }
+
+        function applyCrop() {
+            if (!cropMode || !cropStartX) return;
+            
+            const width = Math.abs(cropEndX - cropStartX);
+            const height = Math.abs(cropEndY - cropStartY);
+            const x = Math.min(cropStartX, cropEndX);
+            const y = Math.min(cropStartY, cropEndY);
+            
+            const croppedImageData = ctx.getImageData(x, y, width, height);
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.putImageData(croppedImageData, 0, 0);
+            
+            updateCurrentImageData();
+            cancelCrop();
+            
+            document.getElementById('newWidth').value = width;
+            document.getElementById('newHeight').value = height;
+        }
+
+        function cancelCrop() {
+            cropMode = false;
+            canvas.style.cursor = 'default';
+            ctx.putImageData(currentImageData, 0, 0);
+            cropStartX = cropStartY = cropEndX = cropEndY = null;
+        }
+
+        function downloadImage() {
+            if (!currentImageData) return;
+            
+            const link = document.createElement('a');
+            link.download = 'edited-photo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Google authentication functions (simplified)
+        function handleAuth() {
+            alert('Google authentication feature requires additional setup with API keys');
+        }
+
+        function saveToGoogleDrive() {
+            alert('Google Drive save feature requires authentication setup');
+        }
+
+        function saveToGooglePhotos() {
+            alert('Google Photos save feature requires authentication setup');
+        }
+</script>
+</body>
+</html>
