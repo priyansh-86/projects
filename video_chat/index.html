@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Video Call (Firebase)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        video { transform: scaleX(-1); object-fit: cover; }
+        #remoteVideo { transform: scaleX(1); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center font-sans">
+
+    <div id="welcomeScreen" class="text-center p-8">
+        <h1 class="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">P2P Call</h1>
+        <p class="text-lg text-gray-300 mb-8">Enter your name to continue</p>
+        <div class="flex flex-col gap-4 max-w-sm mx-auto">
+            <input id="nameInput" type="text" placeholder="Your Name" class="bg-gray-700 text-white text-center py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="20">
+            <button id="continueBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
+                Continue
+            </button>
+        </div>
+        <p id="loadingConfig" class="text-gray-400 mt-4">Loading config...</p>
+    </div>
+
+    <div id="homeScreen" class="hidden text-center p-8">
+        <h1 class="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">P2P Call</h1>
+        <p id="welcomeMessage" class="text-lg text-gray-300 mb-8">Welcome, Guest!</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="createRoomBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300">
+                Create Room
+            </button>
+            <div class="flex">
+                <input id="joinRoomInput" type="text" placeholder="Enter Room Code" class="bg-gray-700 text-white py-3 px-4 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="joinRoomBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-r-lg transition duration-300">
+                    Join
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="roomScreen" class="hidden w-full h-screen p-4 flex flex-col lg:flex-row gap-4">
+        
+        <div class="flex-1 flex flex-col gap-4 relative">
+            <div class="bg-gray-800 rounded-lg h-full w-full flex items-center justify-center overflow-hidden shadow-2xl">
+                <video id="remoteVideo" autoplay playsinline class="h-full w-full"></video>
+                <p id="remoteVideoPlaceholder" class="absolute text-gray-400">Waiting for other user...</p>
+            </div>
+            
+            <div class="absolute bottom-4 right-4 w-40 h-32 md:w-60 md:h-44 bg-gray-700 rounded-lg overflow-hidden shadow-lg border-2 border-blue-500">
+                <video id="localVideo" autoplay playsinline muted class="h-full w-full"></video>
+            </div>
+
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-70 p-3 rounded-full shadow-lg">
+                <button id="muteBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">🔇</button>
+                <button id="videoBtn" class="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center">📹</button>
+                <button id="switchCameraBtn" class="hidden w-12 h-12 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center">🔄</button>
+                <button id="hangupBtn" class="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center">📞</button>
+            </div>
+        </div>
+
+        <div class="lg:w-80 w-full lg:h-full h-1/2 bg-gray-800 rounded-lg p-4 flex flex-col shadow-xl">
+            <div class="mb-4">
+                <h3 class="font-bold text-lg mb-2">Room Code:</h3>
+                <div class="flex gap-2">
+                    <input id="roomCodeDisplay" type="text" readonly class="flex-1 bg-gray-700 text-white py-2 px-3 rounded-lg focus:outline-none">
+                    <button id="shareBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">Share</button>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-lg mb-2">Chat</h3>
+            <div id="chatMessages" class="flex-1 bg-gray-700 rounded-lg p-2 overflow-y-auto mb-2 space-y-2">
+                </div>
+            <div class="flex gap-2">
+                <input id="chatInput" type="text" placeholder="Type a message..." class="flex-1 bg-gray-700 text-white py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="sendChatBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">Send</D>
+            </div>
+        </div>
+    </div>
+
+    <div id="shareModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-2xl text-center w-11/12 max-w-sm">
+            <h2 class="text-2xl font-bold mb-4">Share Room</h2>
+            <p class="mb-2 text-gray-300">Share this URL, code, or QR:</p>
+            <input id="shareUrl" type="text" readonly class="w-full bg-gray-700 text-white py-2 px-3 rounded-lg mb-4 focus:outline-none">
+            <button id="copyUrlBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg mb-4">Copy URL</button>
+            <div id="qrcode" class="flex justify-center p-4 bg-white rounded-lg mb-4"></div>
+            <button id="closeModalBtn" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg">Close</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
