@@ -104,7 +104,7 @@ function initHome() {
     createRoomBtn.onclick = createRoom;
     joinRoomBtn.onclick = () => joinRoom(joinRoomInput.value);
     
-    // RE-ADDED: Simple button listeners (no auto-hide)
+    // Simple button listeners
     muteBtn.onclick = toggleAudio;
     videoBtn.onclick = toggleVideo;
     switchCameraBtn.onclick = switchCamera;
@@ -145,8 +145,6 @@ function showTooltip(message, type = 'success') {
         tooltip.classList.remove('tooltip-visible');
     }, 3000);
 }
-
-// REMOVED: Auto-hide control functions (toggleControls, showControls, hideControls, restartControlsTimer)
 
 // --- Core Functions ---
 
@@ -345,8 +343,8 @@ function setupDataChannelEvents(channel) {
     channel.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === 'chat') {
-            // *** BUG FIX: Use renamed variables ***
-            displayChatMessage(data.chatMessage, data.senderName);
+            // *** BUG FIX: Reverted to `message` and `sender` ***
+            displayChatMessage(data.message, data.sender);
         } else if (data.type === 'status') {
             handlePeerStatus(data.media, data.enabled);
         }
@@ -384,9 +382,9 @@ function sendChatMessage() {
 
     const data = {
         type: 'chat',
-        // *** BUG FIX: Use renamed variables ***
-        senderName: userName,
-        chatMessage: message
+        // *** BUG FIX: Reverted to `message` and `sender` ***
+        sender: userName,
+        message: message
     };
 
     if (dataChannel && dataChannel.readyState === 'open') {
@@ -419,8 +417,6 @@ function setupRoomUI() {
     chatInput.disabled = true;
     sendChatBtn.disabled = true;
     remoteVideoPlaceholder.classList.remove('hidden');
-    
-    // REMOVED: showControls();
 }
 
 function updateShareModal(id) {
