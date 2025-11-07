@@ -1,29 +1,100 @@
-// FINAL CODE (Scroll Fix + Emoji Fix)
+// FINAL CODE (Scroll Fix + Emoji Fix + All Features)
 
 // --- DOM Elements ---
 const welcomeScreen = document.getElementById('welcomeScreen');
 const nameInput = document.getElementById('nameInput');
-// ... (Saare DOM elements same hain) ...
+const continueBtn = document.getElementById('continueBtn');
+const loadingConfig = document.getElementById('loadingConfig');
+
+const homeScreen = document.getElementById('homeScreen');
+const welcomeMessage = document.getElementById('welcomeMessage');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const joinRoomInput = document.getElementById('joinRoomInput');
+const joinRoomBtn = document.getElementById('joinRoomBtn');
+
+const roomScreen = document.getElementById('roomScreen');
+const videoContainer = document.getElementById('videoContainer');
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
+const animationContainer = document.getElementById('animationContainer'); 
+const localVideoContainer = document.getElementById('localVideoContainer');
+
+const controlsContainer = document.getElementById('controlsContainer');
+const muteBtn = document.getElementById('muteBtn');
+const videoBtn = document.getElementById('videoBtn');
+const switchCameraBtn = document.getElementById('switchCameraBtn');
+const screenShareBtn = document.getElementById('screenShareBtn');
+const recordBtn = document.getElementById('recordBtn');
+const hangupBtn = document.getElementById('hangupBtn');
+
+const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+const shareBtn = document.getElementById('shareBtn');
+
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChatBtn');
+const fileInput = document.getElementById('fileInput');
 const attachFileBtn = document.getElementById('attachFileBtn');
+
 const shareModal = document.getElementById('shareModal');
 const shareUrl = document.getElementById('shareUrl');
 const copyUrlBtn = document.getElementById('copyUrlBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const qrcodeDiv = document.getElementById('qrcode');
 
-// Tooltip ab #roomScreen ke andar hai, par getElementById usey dhoondh lega
-const tooltip = document.getElementById('tooltip'); 
+const tooltip = document.getElementById('tooltip');
 const peerStatus = document.getElementById('peerStatus');
-// ... (Baaki DOM elements same hain) ...
+const peerVideoStatus = document.getElementById('peerVideoStatus');
+const peerAudioStatus = document.getElementById('peerAudioStatus');
+
+const callInfoContainer = document.getElementById('callInfoContainer');
 
 // --- Global Variables ---
-// ... (Saare global variables same hain) ...
-let mediaRecorder, recordedChunks = [], isRecording = false;
-const CHUNK_SIZE = 64000;
-let receiveBuffer = [], receivedFileSize = 0, fileInProgress = null;
+let currentStream;
+let remoteStream;
+let peerConnection;
+let dataChannel;
+let roomId;
+let userName = 'Guest';
+let facingMode = 'user';
+let db;
+let isRoomCreator = false;
+let isScreenSharing = false;
+let screenStream;
+let callTimerInterval;
+let callStartTime;
+let remoteUserName = 'Peer';
+let networkStatsInterval;
+let tooltipTimer;
+let shortPin;
+
+// Recording Variables
+let mediaRecorder;
+let recordedChunks = [];
+let isRecording = false;
+
+// File Sharing
+const CHUNK_SIZE = 64000; // 64KB chunks
+let receiveBuffer = [];
+let receivedFileSize = 0;
+let fileInProgress = null;
+
+// Speaking Indicator
 let audioContext, analyser, source, dataArray, speakingTimer;
-let unsubscribeRoom, unsubscribeOfferCandidates, unsubscribeAnswerCandidates;
-const servers = { iceServers: [ { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' } ] };
+
+// Listeners
+let unsubscribeRoom;
+let unsubscribeOfferCandidates;
+let unsubscribeAnswerCandidates;
+
+// Google ke free STUN servers
+const servers = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', fetchConfigAndInitialize);
@@ -132,9 +203,10 @@ function generatePin() {
 
 // --- Core Functions ---
 async function startMedia() {
-    if (currentStream) {
+    if (currentStream) { // Yeh hai line 135
         currentStream.getTracks().forEach(track => track.stop());
     }
+
     try {
         currentStream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: facingMode },
@@ -177,7 +249,7 @@ async function switchCamera() {
 }
 
 async function createRoom() {
-    await startMedia();
+    await startMedia(); // Yeh hai line 180
     setupRoomUI();
     isRoomCreator = true; 
     
@@ -409,7 +481,7 @@ function setupDataChannelEvents(channel) {
                     remoteVideo.classList.remove('speaking');
                 }
 
-            } else if (data.type === 'reaction') {
+            } else if (data.type === 'reaction') { // Emoji Fix: Sirf receive hone par show hoga
                 showFloatingEmoji(data.payload.emoji);
             
             } else if (data.type === 'file') {
@@ -444,7 +516,10 @@ function handlePeerStatus(media, enabled) {
 function sendChatMessage() {
     const message = chatInput.value;
     if (message.trim() === '') return;
-    sendEventMessage('chat', { text: message }); // Use sendEventMessage for chat
+    
+    // Chat ko bhi event ki tarah bhejo
+    sendEventMessage('chat', { text: message }); 
+    
     displayChatMessage(message, 'You');
     chatInput.value = '';
 }
@@ -479,7 +554,7 @@ function setupRoomUI() {
     homeScreen.classList.add('hidden');
     roomScreen.classList.remove('hidden');
     
-    // Chat/File buttons disabled rahenge jab tak data channel open na ho
+    // Buttons disabled rahenge jab tak data channel open na ho
     chatInput.disabled = true;
     sendChatBtn.disabled = true;
     fileInput.disabled = true;
@@ -513,9 +588,7 @@ function toggleAudio() {
     sendEventMessage('status', { media: 'audio', enabled: enabled });
 
     // Speaking indicator ko update karo
-    if (enabled) {
-        checkMicVolume();
-    } else {
+    if (!enabled) {
         localVideoContainer.classList.remove('speaking');
         sendEventMessage('event', { type: 'stopped_speaking' });
     }
@@ -806,18 +879,16 @@ function onFileSelected(e) {
 
         function sendNextChunk() {
             if (offset >= buffer.byteLength) {
+                // Done
                 sendEventMessage('file', { type: 'end', name: file.name });
                 fileInProgress = null;
                 console.log('File sending finished.');
                 return;
             }
             
-            if (dataChannel.bufferedAmount > dataChannel.bufferedAmountLowThreshold) {
-                // Wait for buffer to clear
-                dataChannel.onbufferedamountlow = () => {
-                    dataChannel.onbufferedamountlow = null; // Remove listener
-                    sendNextChunk();
-                }
+            // Check buffer
+            if (dataChannel.bufferedAmount > CHUNK_SIZE * 10) { // Buffer limit
+                setTimeout(sendNextChunk, 100);
                 return;
             }
             
@@ -828,18 +899,9 @@ function onFileSelected(e) {
             const percent = Math.floor((offset / buffer.byteLength) * 100);
             updateFileProgress(file.name, `Sending ${file.name} (${percent}%)`, 'You');
 
-            // Continue sending
-            if (offset < buffer.byteLength) {
-                // Use setTimeout to avoid blocking the main thread completely
-                setTimeout(sendNextChunk, 0); 
-            } else {
-                sendEventMessage('file', { type: 'end', name: file.name });
-                fileInProgress = null;
-                console.log('File sending finished.');
-            }
+            // Send next chunk
+            setTimeout(sendNextChunk, 0); 
         }
-        // Set a low threshold to manage buffer
-        dataChannel.bufferedAmountLowThreshold = CHUNK_SIZE * 5; // 5 chunks
         sendNextChunk();
     };
     fileReader.readAsArrayBuffer(file);
@@ -856,7 +918,6 @@ function handleFileChunk(chunk) {
 
 function handleFileEvent(payload, sender) {
     if (payload.type === 'start') {
-        // Check if a file is already being received
         if (fileInProgress) {
             console.warn('Another file transfer is in progress. Ignoring new file.');
             return;
@@ -884,7 +945,7 @@ function downloadReceivedFile() {
     a.href = url;
     a.download = fileInProgress.name;
     document.body.appendChild(a);
-    a.style.display = 'none';
+    a.style = 'display: none';
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
