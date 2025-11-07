@@ -25,15 +25,26 @@
         }
 
         /* Tooltip Style (POPUP FIX) */
+        /* Tooltip Style (POPUP FIX) */
         #tooltip {
+            position: absolute; /* 'fixed' se 'absolute' kiya */
+            bottom: 0; /* 'bottom-0' se liya */
+            left: 50%; /* 'left-1/2' se liya */
+            transform: translateX(-50%) translateY(100px); /* 'left-1/2' aur 'translate-x-1/2' ko combine kiya */
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            transform: translateY(100px); /* Hidden state */
             opacity: 0;
-            pointer-events: none; /* Taa ki click na ho */
-            z-index: 9999; /* Hamesha upar dikhega */
+            pointer-events: none;
+            z-index: 9999; /* Yeh hamesha video (z-20) se upar rahega */
+            
+            /* Tailwind classes ko CSS mein convert kiya */
+            padding: 0.75rem 1.25rem; /* p-3 px-5 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            color: white; /* text-white */
+            font-size: 0.875rem; /* text-sm */
         }
         .tooltip-visible {
-            transform: translateY(-20px); /* Visible state */
+            transform: translateX(-50%) translateY(-20px); /* Visible state */
             opacity: 1;
         }
 
@@ -121,7 +132,7 @@
     </div>
 
     <div id="roomScreen" class="hidden w-full h-screen p-0 lg:p-4 flex flex-col lg:flex-row gap-0 lg:gap-4 overflow-hidden">
-        
+        <div id="tooltip" class="fixed bottom-0 left-1/2 -translate-x-1/2 p-3 px-5 rounded-lg shadow-lg text-white text-sm"></div>
         <div class="flex-1 flex flex-col"> 
             <div id="videoContainer" class="bg-gray-800 w-full h-full flex items-center justify-center overflow-hidden shadow-2xl relative">
                 
