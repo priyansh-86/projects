@@ -1,4 +1,4 @@
-// updating code @ 10.14am
+// updating code @ 10.16am
 // --- DOM Elements ---
 const welcomeScreen = document.getElementById('welcomeScreen');
 const nameInput = document.getElementById('nameInput');
@@ -196,6 +196,7 @@ async function switchCamera() {
 async function createRoom() {
     await startMedia();
     setupRoomUI();
+    isRoomCreator = true; // Mark as room creator
 
     const roomRef = await db.collection('rooms').add({});
     roomId = roomRef.id;
@@ -260,8 +261,13 @@ async function joinRoom(id) {
     roomId = id;
     await startMedia();
     setupRoomUI();
-    roomCodeDisplay.value = roomId;
-    updateShareModal(roomId);
+    isRoomCreator = false; // Mark as joiner
+    
+    // Hide room code section for joiner
+    const roomCodeSection = document.getElementById('roomCodeSection');
+    if (roomCodeSection) {
+        roomCodeSection.style.display = 'none';
+    }
     
     console.log('Joining room:', roomId);
 
@@ -341,11 +347,17 @@ function setupDataChannelEvents(channel) {
     };
     
     channel.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'chat') {
-            displayChatMessage(data.message, data.sender);
-        } else if (data.type === 'status') {
-            handlePeerStatus(data.media, data.enabled);
+        try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'chat') {
+                // Display message with proper sender name
+                displayChatMessage(data.text, data.sender);
+            } else if (data.type === 'status') {
+                handlePeerStatus(data.media, data.enabled);
+            }
+        } catch (error) {
+            console.error('Error parsing message:', error);
         }
     };
 }
@@ -382,7 +394,7 @@ function sendChatMessage() {
     const data = {
         type: 'chat',
         sender: userName,
-        message: message
+        text: message  // Changed from 'message' to 'text'
     };
 
     if (dataChannel && dataChannel.readyState === 'open') {
