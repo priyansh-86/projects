@@ -54,7 +54,6 @@ let db;
 let unsubscribeRoom;
 let unsubscribeOfferCandidates;
 let unsubscribeAnswerCandidates;
-// REMOVED: controlsTimer
 
 // Google ke free STUN servers
 const servers = {
@@ -339,11 +338,9 @@ function setupDataChannelEvents(channel) {
         peerAudioStatus.classList.add('hidden');
     };
     
-    // UPDATED: Handle different message types
     channel.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === 'chat') {
-            // *** BUG FIX: Reverted to `message` and `sender` ***
             displayChatMessage(data.message, data.sender);
         } else if (data.type === 'status') {
             handlePeerStatus(data.media, data.enabled);
@@ -382,7 +379,6 @@ function sendChatMessage() {
 
     const data = {
         type: 'chat',
-        // *** BUG FIX: Reverted to `message` and `sender` ***
         sender: userName,
         message: message
     };
@@ -433,7 +429,7 @@ function updateShareModal(id) {
 
 function toggleAudio() {
     const audioTrack = currentStream.getAudioTracks()[0];
-    audioTrack.enabled = !audioTrack.enabled; // Toggle
+    audioTrack.enabled = !audioTrack.enabled;
     
     muteBtn.innerHTML = audioTrack.enabled ? '🔈' : '🔇';
     muteBtn.classList.toggle('bg-blue-600', audioTrack.enabled);
@@ -444,7 +440,7 @@ function toggleAudio() {
 
 function toggleVideo() {
     const videoTrack = currentStream.getVideoTracks()[0];
-    videoTrack.enabled = !videoTrack.enabled; // Toggle
+    videoTrack.enabled = !videoTrack.enabled;
     
     videoBtn.innerHTML = videoTrack.enabled ? '📹' : '🚫';
     videoBtn.classList.toggle('bg-blue-600', videoTrack.enabled);
