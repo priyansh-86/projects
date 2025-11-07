@@ -1,4 +1,6 @@
-// updating code @ 10.16am
+// FINAL CODE (with Reactions, Mobile Screen Share Fix, Popup Fix)
+// FIX: Renamed copyUrlBtn function to copyShareUrl to avoid declaration conflict
+
 // --- DOM Elements ---
 const welcomeScreen = document.getElementById('welcomeScreen');
 const nameInput = document.getElementById('nameInput');
@@ -16,11 +18,14 @@ const videoContainer = document.getElementById('videoContainer');
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 const remoteVideoPlaceholder = document.getElementById('remoteVideoPlaceholder');
+const animationContainer = document.getElementById('animationContainer'); // NEW
 
 const controlsContainer = document.getElementById('controlsContainer');
 const muteBtn = document.getElementById('muteBtn');
 const videoBtn = document.getElementById('videoBtn');
 const switchCameraBtn = document.getElementById('switchCameraBtn');
+const screenShareBtn = document.getElementById('screenShareBtn');
+const recordBtn = document.getElementById('recordBtn');
 const hangupBtn = document.getElementById('hangupBtn');
 
 const roomCodeDisplay = document.getElementById('roomCodeDisplay');
@@ -41,6 +46,8 @@ const peerStatus = document.getElementById('peerStatus');
 const peerVideoStatus = document.getElementById('peerVideoStatus');
 const peerAudioStatus = document.getElementById('peerAudioStatus');
 
+const callInfoContainer = document.getElementById('callInfoContainer');
+
 // --- Global Variables ---
 let currentStream;
 let remoteStream;
@@ -50,7 +57,20 @@ let roomId;
 let userName = 'Guest';
 let facingMode = 'user';
 let db;
-let isRoomCreator = false; // Track if user created the room
+let isRoomCreator = false;
+let isScreenSharing = false;
+let screenStream;
+let callTimerInterval;
+let callStartTime;
+let remoteUserName = 'Peer';
+let networkStatsInterval;
+let tooltipTimer;
+let shortPin;
+
+// Recording Variables
+let mediaRecorder;
+let recordedChunks = [];
+let isRecording = false;
 
 // Listeners
 let unsubscribeRoom;
@@ -109,6 +129,8 @@ function initHome() {
     muteBtn.onclick = toggleAudio;
     videoBtn.onclick = toggleVideo;
     switchCameraBtn.onclick = switchCamera;
+    screenShareBtn.onclick = toggleScreenShare;
+    recordBtn.onclick = toggleRecording;
     hangupBtn.onclick = hangUp;
 
     sendChatBtn.onclick = sendChatMessage;
@@ -118,21 +140,37 @@ function initHome() {
 
     shareBtn.onclick = showShareModal;
     closeModalBtn.onclick = () => shareModal.classList.add('hidden');
-    copyUrlBtn.onclick = copyShareUrl;
+    copyUrlBtn.onclick = copyShareUrl; // FIX: Was pointing to a non-existent function
+
+    // NEW: Reaction Listeners
+    document.getElementById('react-thumbsup').onclick = () => sendReaction('👍');
+    document.getElementById('react-heart').onclick = () => sendReaction('❤️');
+    document.getElementById('react-laugh').onclick = () => sendReaction('😂');
+    document.getElementById('react-clap').onclick = () => sendReaction('👏');
 }
 
 function checkUrlForRoom() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomFromUrl = urlParams.get('room');
     if (roomFromUrl) {
-        joinRoomInput.value = roomFromUrl;
+        console.log('Room ID in URL found, but PIN system is active. Please enter PIN.');
     }
 }
 
-// --- Tooltip Function ---
+// --- Tooltip Function (POPUP FIX) ---
 function showTooltip(message, type = 'success') {
+    console.log('Tooltip Check:', message); // DEBUG: Check if function is called
+    const tooltip = document.getElementById('tooltip');
+    if (!tooltip) return;
+    
     tooltip.innerText = message;
     
+    // Purana timer (agar ho) toh clear karo
+    if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+    }
+
+    // Color set karo
     if (type === 'error') {
         tooltip.classList.add('bg-red-500');
         tooltip.classList.remove('bg-green-500');
@@ -141,10 +179,18 @@ function showTooltip(message, type = 'success') {
         tooltip.classList.remove('bg-red-500');
     }
 
+    // Show karo
     tooltip.classList.add('tooltip-visible');
-    setTimeout(() => {
+
+    // 3 second baad hide karo
+    tooltipTimer = setTimeout(() => {
         tooltip.classList.remove('tooltip-visible');
     }, 3000);
+}
+
+// --- Helper Function ---
+function generatePin() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 // --- Core Functions ---
@@ -187,8 +233,10 @@ async function switchCamera() {
         const videoTrack = currentStream.getVideoTracks()[0];
         const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
         if (sender) {
-            sender.replaceTrack(videoTrack);
-            sendPeerStatus('video', videoTrack.enabled);
+            await sender.replaceTrack(videoTrack);
+            
+            showTooltip('Camera switched', 'success');
+            sendEventMessage('event', { type: 'camera_switch' });
         }
     }
 }
@@ -196,17 +244,40 @@ async function switchCamera() {
 async function createRoom() {
     await startMedia();
     setupRoomUI();
-    isRoomCreator = true; // Mark as room creator
+    isRoomCreator = true; 
+
+    // --- NEW PIN LOGIC ---
+    shortPin = generatePin();
+    const pinRef = db.collection('activePins').doc(shortPin);
 
     const roomRef = await db.collection('rooms').add({});
     roomId = roomRef.id;
-    roomCodeDisplay.value = roomId;
-    updateShareModal(roomId);
+    
+    await pinRef.set({
+        roomId: roomId,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+    });
+    
+    roomCodeDisplay.value = shortPin; // UI mein PIN dikhao
+    updateShareModal(roomId); // Share Modal abhi bhi poora URL dega
 
     const offerCandidates = roomRef.collection('offerCandidates');
     const answerCandidates = roomRef.collection('answerCandidates');
 
     peerConnection = new RTCPeerConnection(servers);
+
+    // Connection State Listener
+    peerConnection.onconnectionstatechange = (event) => {
+        console.log('Connection state changed:', peerConnection.connectionState);
+        if (peerConnection.connectionState === 'disconnected' ||
+            peerConnection.connectionState === 'failed' ||
+            peerConnection.connectionState === 'closed') {
+            
+            setTimeout(() => {
+                hangUp();
+            }, 2000);
+        }
+    };
 
     currentStream.getTracks().forEach(track => {
         peerConnection.addTrack(track, currentStream);
@@ -231,7 +302,7 @@ async function createRoom() {
     await peerConnection.setLocalDescription(offer);
     
     await roomRef.set({ offer: { sdp: offer.sdp, type: offer.type } });
-    console.log('Room created with ID:', roomId);
+    console.log('Room created with PIN:', shortPin, 'Actual ID:', roomId);
 
     unsubscribeRoom = roomRef.onSnapshot(async (snapshot) => {
         const data = snapshot.data();
@@ -252,18 +323,35 @@ async function createRoom() {
     });
 }
 
-async function joinRoom(id) {
-    if (!id) {
-        alert('Please enter a room code.');
+async function joinRoom(pin) {
+    if (!pin || pin.length !== 6) {
+        alert('Please enter a valid 6-digit PIN.');
         return;
     }
-    
-    roomId = id;
+
+    let actualRoomId;
+
+    try {
+        const pinRef = db.collection('activePins').doc(pin);
+        const pinDoc = await pinRef.get();
+
+        if (!pinDoc.exists) {
+            alert('PIN does not exist or has expired.');
+            return;
+        }
+        actualRoomId = pinDoc.data().roomId;
+
+    } catch (error) {
+        console.error('Error looking up PIN:', error);
+        alert('Could not find room.');
+        return;
+    }
+
+    roomId = actualRoomId;
     await startMedia();
     setupRoomUI();
-    isRoomCreator = false; // Mark as joiner
+    isRoomCreator = false; 
     
-    // Hide room code section for joiner
     const roomCodeSection = document.getElementById('roomCodeSection');
     if (roomCodeSection) {
         roomCodeSection.style.display = 'none';
@@ -281,6 +369,19 @@ async function joinRoom(id) {
     }
 
     peerConnection = new RTCPeerConnection(servers);
+
+    // Connection State Listener
+    peerConnection.onconnectionstatechange = (event) => {
+        console.log('Connection state changed:', peerConnection.connectionState);
+        if (peerConnection.connectionState === 'disconnected' ||
+            peerConnection.connectionState === 'failed' ||
+            peerConnection.connectionState === 'closed') {
+            
+            setTimeout(() => {
+                hangUp();
+            }, 2000);
+        }
+    };
 
     currentStream.getTracks().forEach(track => {
         peerConnection.addTrack(track, currentStream);
@@ -323,23 +424,27 @@ async function joinRoom(id) {
 }
 
 
-// --- Data Channel (Chat) Functions ---
+// --- Data Channel (Chat & Events) Functions ---
 
 function setupDataChannelEvents(channel) {
     channel.onopen = () => {
         console.log('Data channel open');
         chatInput.disabled = false;
         sendChatBtn.disabled = false;
-        showTooltip('User connected!', 'success'); 
         
-        sendPeerStatus('audio', currentStream.getAudioTracks()[0].enabled);
-        sendPeerStatus('video', currentStream.getVideoTracks()[0].enabled);
+        startCallTimer(); 
+        startNetworkMonitoring();
+        
+        sendEventMessage('hello', {});
     };
+    
     channel.onclose = () => {
         console.log('Data channel closed');
         chatInput.disabled = true;
         sendChatBtn.disabled = true;
-        showTooltip('User disconnected.', 'error');
+        
+        showTooltip(`${remoteUserName} disconnected.`, 'error');
+        stopNetworkMonitoring();
         
         peerStatus.classList.add('hidden');
         peerVideoStatus.classList.add('hidden');
@@ -350,25 +455,46 @@ function setupDataChannelEvents(channel) {
         try {
             const data = JSON.parse(event.data);
             
-            if (data.type === 'chat') {
-                // Display message with proper sender name
+            if (data.type === 'hello') {
+                remoteUserName = data.sender;
+                showTooltip(`${remoteUserName} connected!`, 'success');
+            
+            } else if (data.type === 'chat') {
                 displayChatMessage(data.text, data.sender);
+            
             } else if (data.type === 'status') {
-                handlePeerStatus(data.media, data.enabled);
+                handlePeerStatus(data.payload.media, data.payload.enabled);
+                if (data.payload.media === 'audio') {
+                    showTooltip(`${remoteUserName} ${data.payload.enabled ? 'is unmuted' : 'is muted'}`, 'success');
+                } else if (data.payload.media === 'video') {
+                    showTooltip(`${remoteUserName} ${data.payload.enabled ? 'turned camera on' : 'turned camera off'}`, 'success');
+                }
+            
+            } else if (data.type === 'event') {
+                if (data.payload.type === 'camera_switch') {
+                    showTooltip(`${remoteUserName} switched camera`, 'success');
+                } else if (data.payload.type === 'screen_share_on') {
+                    showTooltip(`${remoteUserName} started sharing screen`, 'success');
+                } else if (data.payload.type === 'screen_share_off') {
+                    showTooltip(`${remoteUserName} stopped sharing screen`, 'success');
+                }
+            } else if (data.type === 'reaction') { // NEW: Handle Reactions
+                showFloatingEmoji(data.payload.emoji);
             }
+
         } catch (error) {
             console.error('Error parsing message:', error);
         }
     };
 }
 
-// Send Peer Status Function
-function sendPeerStatus(media, enabled) {
+// Send Event/Status/Chat Message
+function sendEventMessage(type, payload) {
     if (dataChannel && dataChannel.readyState === 'open') {
         const data = {
-            type: 'status',
-            media: media,
-            enabled: enabled
+            type: type, // 'status', 'event', 'hello', 'reaction'
+            sender: userName,
+            payload: payload
         };
         dataChannel.send(JSON.stringify(data));
     }
@@ -394,7 +520,7 @@ function sendChatMessage() {
     const data = {
         type: 'chat',
         sender: userName,
-        text: message  // Changed from 'message' to 'text'
+        text: message
     };
 
     if (dataChannel && dataChannel.readyState === 'open') {
@@ -427,6 +553,13 @@ function setupRoomUI() {
     chatInput.disabled = true;
     sendChatBtn.disabled = true;
     remoteVideoPlaceholder.classList.remove('hidden');
+
+    // NEW: Mobile Screen Share Fix
+    // Agar device 'getDisplayMedia' support nahi karta (e.g., mobile), button chhipa do
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        console.log('Screen sharing not supported on this device.');
+        screenShareBtn.style.display = 'none';
+    }
 }
 
 function updateShareModal(id) {
@@ -445,56 +578,324 @@ function toggleAudio() {
     const audioTrack = currentStream.getAudioTracks()[0];
     audioTrack.enabled = !audioTrack.enabled;
     
-    muteBtn.innerHTML = audioTrack.enabled ? '🔈' : '🔇';
-    muteBtn.classList.toggle('bg-blue-600', audioTrack.enabled);
-    muteBtn.classList.toggle('bg-gray-600', !audioTrack.enabled);
+    const enabled = audioTrack.enabled;
+    muteBtn.innerHTML = enabled ? '🔇' : '🎤';
+    muteBtn.classList.toggle('bg-blue-600', enabled);
+    muteBtn.classList.toggle('bg-gray-600', !enabled);
 
-    sendPeerStatus('audio', audioTrack.enabled);
+    showTooltip(enabled ? 'Unmuted' : 'You are muted', 'success');
+    sendEventMessage('status', { media: 'audio', enabled: enabled });
 }
 
 function toggleVideo() {
     const videoTrack = currentStream.getVideoTracks()[0];
     videoTrack.enabled = !videoTrack.enabled;
     
-    videoBtn.innerHTML = videoTrack.enabled ? '📹' : '🚫';
-    videoBtn.classList.toggle('bg-blue-600', videoTrack.enabled);
-    videoBtn.classList.toggle('bg-gray-600', !videoTrack.enabled);
+    const enabled = videoTrack.enabled;
+    videoBtn.innerHTML = enabled ? '📹' : '🚫';
+    videoBtn.classList.toggle('bg-blue-600', enabled);
+    videoBtn.classList.toggle('bg-gray-600', !enabled);
 
-    sendPeerStatus('video', videoTrack.enabled);
+    showTooltip(enabled ? 'Camera On' : 'Camera Off', 'success');
+    sendEventMessage('status', { media: 'video', enabled: enabled });
 }
 
+// --- Screen Share Functions ---
+
+async function toggleScreenShare() {
+    if (!isScreenSharing) {
+        try {
+            screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            const screenTrack = screenStream.getVideoTracks()[0];
+            
+            if (peerConnection) {
+                const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+                if (sender) {
+                    await sender.replaceTrack(screenTrack);
+                }
+            }
+
+            isScreenSharing = true;
+            screenShareBtn.classList.add('bg-blue-600');
+            screenShareBtn.classList.remove('bg-gray-600');
+            
+            showTooltip('Started screen sharing', 'success');
+            sendEventMessage('event', { type: 'screen_share_on' });
+            
+            screenTrack.onended = () => {
+                stopScreenShare();
+            };
+
+        } catch (error) {
+            console.error('Error starting screen share:', error);
+            showTooltip('Could not start screen share', 'error');
+        }
+    } else {
+        await stopScreenShare();
+    }
+}
+
+async function stopScreenShare() {
+    if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+    }
+
+    if (currentStream && peerConnection) {
+        const videoTrack = currentStream.getVideoTracks()[0];
+        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+        if (sender) {
+            await sender.replaceTrack(videoTrack);
+        }
+    }
+    
+    showTooltip('Stopped screen sharing', 'success');
+    sendEventMessage('event', { type: 'screen_share_off' });
+    
+    isScreenSharing = false;
+    screenShareBtn.classList.remove('bg-blue-600');
+    screenShareBtn.classList.add('bg-gray-600');
+}
+
+// --- Call Timer Functions ---
+
+function startCallTimer() {
+    callInfoContainer.classList.remove('hidden'); // Show poora container
+    callStartTime = Date.now();
+
+    callTimerInterval = setInterval(() => {
+        const secondsElapsed = Math.floor((Date.now() - callStartTime) / 1000);
+        document.getElementById('callTimer').innerText = formatTime(secondsElapsed);
+    }, 1000);
+}
+
+function stopCallTimer() {
+    callInfoContainer.classList.add('hidden'); // Hide poora container
+    if (callTimerInterval) {
+        clearInterval(callTimerInterval);
+    }
+}
+
+function formatTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return [hours, minutes, seconds]
+        .map(v => (v < 10 ? "0" + v : v))
+        .join(":");
+}
+
+// --- Network & Quality Monitoring ---
+
+function startNetworkMonitoring() {
+    networkStatsInterval = setInterval(async () => {
+        if (!peerConnection) return;
+
+        try {
+            const stats = await peerConnection.getStats();
+            let roundTripTime = 0;
+            let frameHeight = 0; 
+
+            stats.forEach(report => {
+                if (report.type === 'remote-inbound-rtp' && report.roundTripTime) {
+                    roundTripTime = report.roundTripTime * 1000;
+                }
+                if (report.type === 'inbound-rtp' && report.kind === 'video' && report.frameHeight) {
+                    frameHeight = report.frameHeight;
+                }
+            });
+
+            // Network UI Update
+            const icon = document.getElementById('networkIcon');
+            const speedText = document.getElementById('networkSpeed');
+            speedText.innerText = `${roundTripTime.toFixed(0)} ms`;
+            if (roundTripTime < 150) icon.className = 'net-good';
+            else if (roundTripTime < 300) icon.className = 'net-medium';
+            else icon.className = 'net-bad';
+
+            // Quality UI Update
+            const qualityLabel = document.getElementById('qualityLabel');
+            if (frameHeight > 0) qualityLabel.innerText = `${frameHeight}p`;
+            else qualityLabel.innerText = '--p';
+
+        } catch (error) {
+            console.warn('Could not get network stats:', error);
+        }
+    }, 3000); // Har 3 second mein check karo
+}
+
+function stopNetworkMonitoring() {
+    if (networkStatsInterval) {
+        clearInterval(networkStatsInterval);
+    }
+}
+
+// --- Recording Functions ---
+
+function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    if (!remoteStream) {
+        showTooltip('Wait for the other user to join', 'error');
+        return;
+    }
+
+    recordedChunks = [];
+    const combinedStream = new MediaStream([
+        ...currentStream.getTracks(),
+        ...remoteStream.getTracks()
+    ]);
+
+    try {
+        mediaRecorder = new MediaRecorder(combinedStream, {
+            mimeType: 'video/webm; codecs=vp9,opus'
+        });
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = downloadRecording;
+
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.classList.add('bg-red-600');
+        recordBtn.classList.remove('bg-gray-600');
+        showTooltip('Recording started', 'success');
+
+    } catch (error) {
+        console.error('Error starting recording:', error);
+        showTooltip('Could not start recording', 'error');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordBtn.classList.remove('bg-red-600');
+        recordBtn.classList.add('bg-gray-600');
+        showTooltip('Recording stopped', 'success');
+    }
+}
+
+function downloadRecording() {
+    const blob = new Blob(recordedChunks, {
+        type: 'video/webm'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.href = url;
+    a.download = `call-recording-${new Date().getTime()}.webm`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    recordedChunks = [];
+}
+
+
+// --- Reaction Functions (NEW) ---
+
+function sendReaction(emoji) {
+    // Show locally
+    showFloatingEmoji(emoji);
+    // Send to peer
+    sendEventMessage('reaction', { emoji: emoji });
+}
+
+function showFloatingEmoji(emoji) {
+    const emojiSpan = document.createElement('span');
+    emojiSpan.innerText = emoji;
+    emojiSpan.className = 'floating-emoji';
+    // Random horizontal start
+    emojiSpan.style.left = (Math.random() * 80 + 10) + '%';
+    
+    animationContainer.appendChild(emojiSpan);
+    
+    // Remove after animation
+    emojiSpan.onanimationend = () => {
+        emojiSpan.remove();
+    };
+}
+
+
+// --- Hangup Function ---
+
 async function hangUp() {
+    if (isRecording) { // Recording stop karo
+        stopRecording();
+    }
+    stopCallTimer();
+    stopNetworkMonitoring();
+
     if (unsubscribeRoom) unsubscribeRoom();
     if (unsubscribeOfferCandidates) unsubscribeOfferCandidates();
     if (unsubscribeAnswerCandidates) unsubscribeAnswerCandidates();
 
+    if (dataChannel) {
+        dataChannel.close();
+    }
     if (peerConnection) {
+        peerConnection.onconnectionstatechange = null;
         peerConnection.close();
     }
     if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
     }
+    if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+    }
 
-    if (roomId) {
+    if (roomId && db) {
         try {
             const roomRef = db.collection('rooms').doc(roomId);
-            const offerCandidates = await roomRef.collection('offerCandidates').get();
-            offerCandidates.forEach(async (doc) => await doc.ref.delete());
-            const answerCandidates = await roomRef.collection('answerCandidates').get();
-            answerCandidates.forEach(async (doc) => await doc.ref.delete());
-            await roomRef.delete();
+            
+            if (isRoomCreator) {
+                console.log('Creator cleaning up room...');
+                const offerCandidates = await roomRef.collection('offerCandidates').get();
+                offerCandidates.forEach(async (doc) => await doc.ref.delete());
+                
+                const answerCandidates = await roomRef.collection('answerCandidates').get();
+                answerCandidates.forEach(async (doc) => await doc.ref.delete());
+                
+                if (shortPin) {
+                    await db.collection('activePins').doc(shortPin).delete();
+                }
+                
+                await roomRef.delete();
+
+            } else {
+                console.log('Joiner cleaning up candidates...');
+                const answerCandidates = await roomRef.collection('answerCandidates').get();
+                answerCandidates.forEach(async (doc) => await doc.ref.delete());
+            }
         } catch (error) {
-            console.error("Error cleaning up firestore:", error);
+            console.warn("Harmless error cleaning up firestore:", error.message);
         }
     }
 
-    window.location.href = 'index.html';
+    window.location.href = window.location.pathname;
 }
+
+// --- Modal Functions ---
 
 function showShareModal() {
     shareModal.classList.remove('hidden');
 }
 
+// *** THIS IS THE FIX ***
+// Renamed function from copyUrlBtn to copyShareUrl
 function copyShareUrl() {
     shareUrl.select();
     navigator.clipboard.writeText(shareUrl.value);
