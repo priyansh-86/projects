@@ -1,3 +1,4 @@
+// updating code @ 10.14am
 // --- DOM Elements ---
 const welcomeScreen = document.getElementById('welcomeScreen');
 const nameInput = document.getElementById('nameInput');
@@ -49,6 +50,7 @@ let roomId;
 let userName = 'Guest';
 let facingMode = 'user';
 let db;
+let isRoomCreator = false; // Track if user created the room
 
 // Listeners
 let unsubscribeRoom;
