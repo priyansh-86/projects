@@ -10,25 +10,31 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        /* NEW: Prevent scrolling on html and body */
+        /* NEW: Scroll Fix */
+        * {
+            box-sizing: border-box;
+        }
         html, body {
             overflow: hidden;
-            height: 100%; /* Ensure full height */
-            width: 100%; /* Ensure full width */
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
         }
+        /* End Scroll Fix */
 
         /* Mirror local video */
         video { transform: scaleX(-1); object-fit: cover; }
 
         /* Network Status Colors */
-        .net-good { color: #22c55e; } /* green-500 */
-        .net-medium { color: #eab308; } /* yellow-500 */
-        .net-bad { color: #ef4444; } /* red-500 */
+        .net-good { color: #22c55e; }
+        .net-medium { color: #eab308; }
+        .net-bad { color: #ef4444; }
         
         /* Don't mirror remote video + Screen Share Fix */
         #remoteVideo { 
             transform: scaleX(1);
-            object-fit: contain; /* Ensures screen share fits */
+            object-fit: contain;
         }
 
         /* Tooltip Style (POPUP FIX) */
@@ -42,12 +48,12 @@
             pointer-events: none;
             z-index: 9999; /* Hamesha sabse upar */
             
-            padding: 0.75rem 1.25rem; /* p-3 px-5 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-            color: white; /* text-white */
-            font-size: 0.875rem; /* text-sm */
-            white-space: nowrap; /* Tooltip content ek line mein rahe */
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: white;
+            font-size: 0.875rem;
+            white-space: nowrap;
         }
         .tooltip-visible {
             transform: translateX(-50%) translateY(-20px); /* Visible state */
@@ -65,7 +71,6 @@
             bottom: -50px;
             font-size: 2.5rem;
             animation: floatUp 4s ease-out;
-            transform-origin: center bottom; /* Animation should originate from bottom */
         }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -75,35 +80,25 @@
         /* --- Speaking Indicator --- */
         #localVideoContainer, #remoteVideo {
             transition: border 0.2s ease-out, box-shadow 0.2s ease-out;
-            box-sizing: border-box; /* Border doesn't add to element's total width/height */
         }
         .speaking {
-            border: 3px solid #34d399 !important; /* emerald-400 */
+            border: 3px solid #34d399 !important;
             box-shadow: 0 0 15px #34d399;
         }
-        /* Override default border for local video */
         #localVideoContainer.speaking {
-            border-color: #34d399 !important; /* emerald-400 */
+            border-color: #34d399 !important;
         }
 
-        /* NEW: Adjust #roomScreen for full height/width */
+        /* NEW: Scroll Fix for #roomScreen */
         #roomScreen {
-            height: 100vh; /* Make sure it takes full viewport height */
-            width: 100vw;  /* Make sure it takes full viewport width */
-            padding: 0; /* Remove default padding, will re-add as needed */
+            height: 100%; /* Use 100% instead of 100vh */
+            width: 100%;
         }
-        /* Re-add padding for larger screens */
-        @media (min-width: 1024px) { /* lg breakpoint */
-            #roomScreen {
-                padding: 1rem; /* p-4 equivalent */
-            }
-        }
-
+        
         /* Mobile Video Screen Fix */
         @media (max-width: 1023px) {
             #roomScreen {
                 flex-direction: column;
-                /* height: 100vh; */ /* Already set above */
                 overflow: hidden;
             }
             #videoContainer { height: 60vh; min-height: 60vh; }
@@ -147,7 +142,7 @@
 
     <div id="roomScreen" class="hidden w-full h-screen p-0 lg:p-4 flex flex-col lg:flex-row gap-0 lg:gap-4 overflow-hidden">
         
-        <div id="tooltip" class="absolute bottom-0 left-1/2 -translate-x-1/2 p-3 px-5 rounded-lg shadow-lg text-white text-sm">
+        <div id="tooltip" class="fixed bottom-0 left-1/2 -translate-x-1/2 p-3 px-5 rounded-lg shadow-lg text-white text-sm">
         </div>
 
         <div class="flex-1 flex flex-col"> 
@@ -216,9 +211,9 @@
             </div>
             <div class="flex gap-2">
                 <input type="file" id="fileInput" class="hidden">
-                <button id="attachFileBtn" class="bg-gray-600 hover:bg-gray-700 px-3 sm:px-4 py-2 rounded-lg text-sm">📎</button>
-                <input id="chatInput" type="text" placeholder="Type a message..." class="flex-1 bg-gray-700 text-white py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                <button id="sendChatBtn" class="bg-blue-600 hover:bg-blue-700 px-3 sm:px-4 py-2 rounded-lg text-sm">Send</button>
+                <button id="attachFileBtn" class="bg-gray-600 hover:bg-gray-700 px-3 sm:px-4 py-2 rounded-lg text-sm" disabled>📎</button>
+                <input id="chatInput" type="text" placeholder="Type a message..." class="flex-1 bg-gray-700 text-white py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" disabled>
+                <button id="sendChatBtn" class="bg-blue-600 hover:bg-blue-700 px-3 sm:px-4 py-2 rounded-lg text-sm" disabled>Send</button>
             </div>
         </div>
     </div>
