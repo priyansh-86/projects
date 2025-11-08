@@ -94,37 +94,40 @@ export default function App() {
 
   // --- Vercel Blob Upload process ---
   const handleUpload = async () => {
-    if (!file) {
-      setErrorMessage("Please select a file first.");
-      return;
+  if (!file) {
+    setErrorMessage("Please select a file first.");
+    return;
+  }
+  
+  setUploadState('uploading');
+  setErrorMessage('');
+
+  try {
+    // FormData use karo
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData, // FormData bhej rahe hain
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Upload failed');
     }
+
+    const blobData = await response.json();
     
-    setUploadState('uploading');
-    setErrorMessage('');
+    setShareLink(blobData.url);
+    setUploadState('completed');
 
-    try {
-      // Hum apne backend API route ko file bhej rahe hain
-      // Yeh 'api/upload' Vercel par chalega
-      const response = await fetch(`/api/upload?filename=${file.name}`, {
-        method: 'POST',
-        body: file,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const blobData = await response.json();
-      
-      setShareLink(blobData.url); // Vercel se mila real URL
-      setUploadState('completed');
-
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setErrorMessage(`Upload failed: ${error.message}`);
-      setUploadState('error');
-    }
-  };
+  } catch (error) {
+    console.error("Upload failed:", error);
+    setErrorMessage(`Upload failed: ${error.message}`);
+    setUploadState('error');
+  }
+};
 
   // Link ko clipboard par copy karta hai
   const copyToClipboard = () => {
