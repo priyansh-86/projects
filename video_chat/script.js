@@ -1,4 +1,5 @@
 // FINAL CODE (ACKNOWLEDGMENT FILE TRANSFER + LOGIC FIX + UI FIX + DUPLICATE DECLARATION FIX)
+// ✅ VERCEL MIGRATION FIX
 
 // --- DOM Elements ---
 const welcomeScreen = document.getElementById('welcomeScreen');
@@ -114,9 +115,11 @@ document.addEventListener('DOMContentLoaded', fetchConfigAndInitialize);
 
 async function fetchConfigAndInitialize() {
     try {
-        const response = await fetch('/.netlify/functions/config');
+        // ✅ CHANGED: Netlify path se Vercel path
+        const response = await fetch('/api/config');
         if (!response.ok) {
-            throw new Error('Failed to fetch config. Make sure Netlify env vars are set.');
+            // ✅ CHANGED: Error message Vercel ke liye
+            throw new Error('Failed to fetch config. Make sure Vercel env vars are set.');
         }
         const firebaseConfig = await response.json();
         
@@ -656,7 +659,7 @@ function toggleVideo() {
     videoTrack.enabled = !videoTrack.enabled;
     
     const enabled = videoTrack.enabled;
-    videoBtn.innerHTML = enabled ? '🔹' : '🚫';
+    videoBtn.innerHTML = enabled ? '📹' : '🚫';
     videoBtn.classList.toggle('bg-blue-600', enabled);
     videoBtn.classList.toggle('bg-gray-600', !enabled);
 
