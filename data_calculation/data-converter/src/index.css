@@ -1,0 +1,32 @@
+/* Pehle se @tailwind directives honi chahiye */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* YEH NAYA CODE ADD KAREIN */
+
+/* Custom Scrollbar for react-select */
+.custom-select__menu-list {
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #4B5563 #1F2937; /* thumb track */
+}
+
+/* For Chrome, Safari, and other Webkit browsers */
+.custom-select__menu-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-select__menu-list::-webkit-scrollbar-track {
+  background: #1F2937; /* bg-gray-800 */
+  border-radius: 8px;
+}
+
+.custom-select__menu-list::-webkit-scrollbar-thumb {
+  background: #4B5563; /* bg-gray-600 */
+  border-radius: 8px;
+}
+
+.custom-select__menu-list::-webkit-scrollbar-thumb:hover {
+  background: #6B7280; /* bg-gray-500 */
+}
