@@ -1,17 +1,33 @@
-// FILE: src/App.jsx
+// Quick Share - Client-Side ZIP Creation (MOST RELIABLE)
 import React, { useState, useRef, useCallback } from 'react';
 import QRCode from 'react-qr-code';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
-// --- Icon Components (Inline SVGs) ---
+// --- Icon Components ---
 const UploadIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
   </svg>
 );
 
+const FilesIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1v12.8c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h9.8c.4 0 .8-.2 1.1-.5.3-.3.5-.7.5-1.1V6.5L15.5 2z"></path>
+    <path d="M3 7.6v12.8c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h9.8"></path>
+    <path d="M15 2v5h5"></path>
+  </svg>
+);
+
 const FileIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline>
+  </svg>
+);
+
+const DownloadIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
   </svg>
 );
 
@@ -35,27 +51,17 @@ const SpinnerIcon = ({ className }) => (
 
 const QrCodeIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="5" height="5" x="3" y="3" rx="1"></rect>
-    <rect width="5" height="5" x="16" y="3" rx="1"></rect>
-    <rect width="5" height="5" x="3" y="16" rx="1"></rect>
-    <path d="M21 16h-1a2 2 0 0 0-2 2v1"></path>
-    <path d="M21 21v-1a2 2 0 0 0-2-2h-1"></path>
-    <path d="M8 3H7a2 2 0 0 0-2 2v1"></path>
-    <path d="M3 8V7a2 2 0 0 1 2-2h1"></path>
-    <path d="M8 16H7a2 2 0 0 1-2-2v-1"></path>
-    <path d="M3 16v1a2 2 0 0 0 2 2h1"></path>
-    <path d="M16 8h1a2 2 0 0 1 2 2v1"></path>
-    <path d="M16 3v1a2 2 0 0 0 2 2h1"></path>
-    <path d="M12 8h.01"></path>
-    <path d="M12 12h.01"></path>
-    <path d="M12 16h.01"></path>
-    <path d="M16 12h.01"></path>
-    <path d="M16 16h.01"></path>
-    <path d="M8 12h.01"></path>
+    <rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-1a2 2 0 0 0-2 2v1"></path><path d="M21 21v-1a2 2 0 0 0-2-2h-1"></path><path d="M8 3H7a2 2 0 0 0-2 2v1"></path><path d="M3 8V7a2 2 0 0 1 2-2h1"></path><path d="M8 16H7a2 2 0 0 1-2-2v-1"></path><path d="M3 16v1a2 2 0 0 0 2 2h1"></path><path d="M16 8h1a2 2 0 0 1 2 2v1"></path><path d="M16 3v1a2 2 0 0 0 2 2h1"></path><path d="M12 8h.01"></path><path d="M12 12h.01"></path><path d="M12 16h.01"></path><path d="M16 12h.01"></path><path d="M16 16h.01"></path><path d="M8 12h.01"></path>
   </svg>
 );
 
-// --- Helper Function ---
+const ShareIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+  </svg>
+);
+
+// --- Helper Functions ---
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -64,25 +70,38 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+function getTotalSize(files) {
+  const total = files.reduce((acc, file) => acc + file.size, 0);
+  return formatFileSize(total);
+}
+
+function generateShareId() {
+  return 'share_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+}
+
 // --- Main App Component ---
 export default function App() {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [uploadState, setUploadState] = useState('idle');
   const [shareLink, setShareLink] = useState('');
+  const [shareId, setShareId] = useState('');
   const [isCopying, setIsCopying] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
 
   const fileInputRef = useRef(null);
 
-  const handleFileSelect = (selectedFile) => {
-    if (!selectedFile) return;
-    setFile(selectedFile);
-    setUploadState('idle'); 
+  const handleFileSelect = (selectedFiles) => {
+    if (!selectedFiles || selectedFiles.length === 0) return;
+    setFiles(Array.from(selectedFiles));
+    setUploadState('idle');
     setShareLink('');
-    setErrorMessage(''); 
+    setShareId('');
+    setErrorMessage('');
     setShowQR(false);
+    setUploadProgress('');
   };
 
   const handleDragOver = useCallback((e) => {
@@ -101,9 +120,9 @@ export default function App() {
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      handleFileSelect(files[0]);
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+      handleFileSelect(droppedFiles);
     }
   }, []);
 
@@ -112,38 +131,82 @@ export default function App() {
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setErrorMessage("Please select a file first.");
+    if (files.length === 0) {
+      setErrorMessage("Please select files first.");
       return;
     }
-    
+
     setUploadState('uploading');
     setErrorMessage('');
     setShowQR(false);
 
     try {
+      const newShareId = generateShareId();
+      
+      // Create ZIP file using JSZip
+      setUploadProgress('Creating ZIP file...');
+      const zip = new JSZip();
+      
+      // Add all files to ZIP
+      for (const file of files) {
+        const arrayBuffer = await file.arrayBuffer();
+        zip.file(file.name, arrayBuffer);
+      }
+      
+      // Generate ZIP blob
+      setUploadProgress('Compressing files...');
+      const zipBlob = await zip.generateAsync({ 
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 9 }
+      });
+
+      // Upload ZIP to Vercel Blob
+      setUploadProgress('Uploading to cloud...');
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', zipBlob, `${newShareId}.zip`);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData, 
+        body: formData,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        throw new Error('Upload failed');
       }
 
       const blobData = await response.json();
       
-      setShareLink(blobData.url);
+      if (!blobData.url) {
+        throw new Error('No URL received from server');
+      }
+
+      // Store metadata in persistent storage
+      await window.storage.set(
+        newShareId,
+        JSON.stringify({
+          zipUrl: blobData.url,
+          files: files.map(f => ({ name: f.name, size: f.size })),
+          uploadedAt: new Date().toISOString(),
+          totalFiles: files.length
+        }),
+        true // shared storage
+      );
+
+      // Generate share link
+      const baseUrl = window.location.origin + window.location.pathname;
+      const link = `${baseUrl}?share=${newShareId}`;
+      
+      setShareLink(link);
+      setShareId(newShareId);
       setUploadState('completed');
+      setUploadProgress('');
 
     } catch (error) {
       console.error("Upload failed:", error);
       setErrorMessage(`Upload failed: ${error.message}`);
       setUploadState('error');
+      setUploadProgress('');
     }
   };
 
@@ -151,33 +214,35 @@ export default function App() {
     if (!shareLink) return;
     const textArea = document.createElement('textarea');
     textArea.value = shareLink;
-    textArea.style.position = 'fixed'; 
+    textArea.style.position = 'fixed';
     textArea.style.opacity = '0';
     document.body.appendChild(textArea);
     textArea.select();
     try {
       document.execCommand('copy');
       setIsCopying(true);
-      setTimeout(() => setIsCopying(false), 2000); 
+      setTimeout(() => setIsCopying(false), 2000);
     } catch (err) {
       console.error('Failed to copy link: ', err);
     }
     document.body.removeChild(textArea);
   };
-  
+
   const resetApp = () => {
-    setFile(null);
+    setFiles([]);
     setUploadState('idle');
     setShareLink('');
+    setShareId('');
     setErrorMessage('');
     setShowQR(false);
+    setUploadProgress('');
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-inter p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans p-4">
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-100 via-transparent to-purple-100 -z-10"></div>
-
       <div className="w-full max-w-md bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 md:p-8 transform transition-all">
+        
         <div className="flex justify-center mb-4">
           <div className="p-2 bg-blue-600 rounded-full shadow-lg">
             <UploadIcon className="w-6 h-6 text-white" />
@@ -187,8 +252,8 @@ export default function App() {
           Quick Share
         </h1>
 
-        {/* --- 1. File Upload / Dropzone --- */}
-        {!file && uploadState !== 'completed' && (
+        {/* File Upload / Dropzone */}
+        {files.length === 0 && uploadState !== 'completed' && (
           <div
             className={`relative flex flex-col items-center justify-center w-full h-52 border-2 border-dashed rounded-lg cursor-pointer
               ${dragOver ? 'border-blue-500 bg-blue-50/50' : 'border-gray-300 bg-gray-50/50'}
@@ -198,104 +263,126 @@ export default function App() {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <input type="file" ref={fileInputRef} onChange={(e) => handleFileSelect(e.target.files[0])} className="hidden" />
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={(e) => handleFileSelect(e.target.files)} 
+              className="hidden" 
+              multiple 
+            />
             <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-              <UploadIcon className="w-12 h-12 mb-4 text-gray-400" />
+              <FilesIcon className="w-12 h-12 mb-4 text-gray-400" />
               <p className="mb-2 text-md text-gray-600">
-                <span className="font-semibold">Drag & drop your file</span>
+                <span className="font-semibold">Drag & drop your files</span>
               </p>
               <p className="text-xs text-gray-500">or click to browse</p>
             </div>
           </div>
         )}
 
-        {/* --- 2. File Details & Upload Button --- */}
-        {file && uploadState === 'idle' && (
+        {/* File Details & Upload Button */}
+        {files.length > 0 && uploadState === 'idle' && (
           <div className="text-center animate-fade-in">
-            <div className="flex items-center w-full bg-gray-50 p-4 rounded-lg border border-gray-200 mb-5">
-              <FileIcon className="w-8 h-8 text-blue-500 mr-4 shrink-0" />
-              <div className="text-left overflow-hidden">
-                <p className="text-sm font-medium text-gray-800 truncate" title={file.name}>
-                  {file.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {formatFileSize(file.size)}
-                </p>
-              </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-3">
+              {files.length} {files.length > 1 ? 'Files' : 'File'} Selected
+            </h3>
+            
+            <div className="w-full bg-gray-50 p-3 rounded-lg border border-gray-200 mb-5 max-h-40 overflow-y-auto">
+              <ul className="divide-y divide-gray-200">
+                {files.map((file, index) => (
+                  <li key={`${file.name}-${index}`} className="flex items-center justify-between py-2">
+                    <div className="flex items-center min-w-0">
+                      <FileIcon className="w-5 h-5 text-blue-500 mr-3 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate" title={file.name}>
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatFileSize(file.size)}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
+            
+            <p className="text-sm text-gray-600 mb-5">
+              Total Size: <span className="font-medium">{getTotalSize(files)}</span>
+            </p>
+            
             <button
               onClick={handleUpload}
               className="w-full px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all transform hover:scale-105"
             >
-              Start Upload
+              Create Share Link
             </button>
           </div>
         )}
 
-        {/* --- 3. Uploading Progress --- */}
+        {/* Uploading Progress */}
         {uploadState === 'uploading' && (
           <div className="w-full text-center h-52 flex flex-col justify-center items-center animate-fade-in">
             <SpinnerIcon className="w-12 h-12 text-blue-600" />
-            <p className="text-gray-600 mt-4 text-lg">Uploading...</p>
-            <p className="text-sm text-gray-500">Please wait, this may take a moment.</p>
+            <p className="text-gray-600 mt-4 text-lg font-medium">Processing...</p>
+            {uploadProgress && (
+              <p className="text-sm text-gray-500 mt-2">{uploadProgress}</p>
+            )}
           </div>
         )}
         
-        {/* --- 4. Upload Complete & Share Link --- */}
+        {/* Upload Complete & Share Link */}
         {uploadState === 'completed' && shareLink && (
           <div className="text-center transition-all animate-fade-in">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 shadow-inner">
               <CheckIcon className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Upload Complete!
+              Share Link Ready!
             </h2>
             <p className="text-sm text-gray-500 mb-5">
-              Your file is ready to share.
+              {files.length} {files.length > 1 ? 'files packaged' : 'file'} and ready to share
             </p>
 
-            {/* --- QR CODE SECTION --- */}
+            {/* Single QR Code Section */}
             {showQR && (
               <div className="p-4 bg-white rounded-lg border border-gray-200 mb-4 shadow-sm animate-fade-in">
-                <QRCode
-                  value={shareLink}
-                  size={200}
-                  level="M"
-                  className="mx-auto"
-                />
-                <p className="text-xs text-gray-500 mt-2">Scan to download</p>
+                <QRCode value={shareLink} size={160} level="M" className="mx-auto" />
+                <p className="text-xs text-gray-500 mt-3">Scan to access files</p>
               </div>
             )}
             
-            <div className="flex w-full mb-4">
-              <input
-                type="text"
-                value={shareLink}
-                readOnly
-                className="flex-grow p-3 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button
-                onClick={copyToClipboard}
-                title="Copy Link"
-                className={`w-14 p-3 text-white transition-colors flex items-center justify-center
-                  ${isCopying ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-600 hover:bg-blue-700'}
-                  focus:outline-none focus:ring-4 focus:ring-blue-300`}
-              >
-                {isCopying ? (
-                  <CheckIcon className="w-5 h-5" />
-                ) : (
-                  <CopyIcon className="w-5 h-5" />
-                )}
-              </button>
-              {/* QR CODE TOGGLE BUTTON */}
+            {/* Single Link Section */}
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 mb-4">
+              <div className="flex items-center justify-center mb-3">
+                <ShareIcon className="w-5 h-5 text-blue-600 mr-2" />
+                <p className="text-sm font-semibold text-gray-700">Share Link</p>
+              </div>
+              
+              <div className="flex w-full mb-3">
+                <input
+                  type="text"
+                  value={shareLink}
+                  readOnly
+                  className="flex-grow p-2.5 text-xs text-gray-700 bg-white border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  title="Copy Link"
+                  className={`w-12 p-2 text-white transition-colors flex items-center justify-center
+                    ${isCopying ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-600 hover:bg-blue-700'}
+                    focus:outline-none focus:ring-4 focus:ring-blue-300 rounded-r-lg`}
+                >
+                  {isCopying ? <CheckIcon className="w-5 h-5" /> : <CopyIcon className="w-5 h-5" />}
+                </button>
+              </div>
+              
               <button
                 onClick={() => setShowQR(!showQR)}
-                title={showQR ? "Hide QR Code" : "Show QR Code"}
-                className={`w-14 p-3 text-white rounded-r-lg transition-colors flex items-center justify-center ml-1
-                  ${showQR ? 'bg-gray-700 hover:bg-gray-800' : 'bg-gray-500 hover:bg-gray-600'}
-                  focus:outline-none focus:ring-4 focus:ring-gray-300`}
+                className="w-full px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all flex items-center justify-center"
               >
-                <QrCodeIcon className="w-5 h-5" />
+                <QrCodeIcon className="w-4 h-4 mr-2" />
+                {showQR ? 'Hide QR Code' : 'Show QR Code'}
               </button>
             </div>
             
@@ -303,19 +390,20 @@ export default function App() {
               onClick={resetApp}
               className="w-full px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all"
             >
-              Transfer Another File
+              Share More Files
             </button>
           </div>
         )}
 
-        {/* --- 5. Error State --- */}
+        {/* Error State */}
         {errorMessage && (
-          <div className="mt-4 text-center p-3 bg-red-100 text-red-700 rounded-lg text-sm animate-fade-in">
-            <p>{errorMessage}</p>
+          <div className="mt-4 text-center p-4 bg-red-100 text-red-700 rounded-lg text-sm animate-fade-in">
+            <p className="font-medium mb-2">⚠️ Error</p>
+            <p className="text-xs">{errorMessage}</p>
             {uploadState === 'error' && (
-               <button
+              <button
                 onClick={resetApp}
-                className="mt-2 px-4 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                className="mt-3 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
               >
                 Try Again
               </button>
