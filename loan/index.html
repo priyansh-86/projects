@@ -45,13 +45,13 @@
         body.dark-mode {
             --bg-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --text-color: #ecf0f1;
-            --header-bg: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* More vibrant dark gradient */
+            --header-bg: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             --header-text: white;
             --card-bg: #3b4f63;
             --input-border: #5a6f82;
             --input-focus-shadow: rgba(100, 149, 237, 0.3);
             --slider-bg: #5a6f82;
-            --slider-thumb: #6495ed; /* Cornflower blue */
+            --slider-thumb: #6495ed;
             --table-header-bg: #6495ed;
             --table-header-text: white;
             --table-row-even: #4a5f73;
@@ -62,9 +62,9 @@
             --toggle-hover-bg: #5a6f73;
             --savings-highlight-bg: #6495ed;
             --savings-highlight-shadow: rgba(100, 149, 237, 0.3);
-            --primary: #6495ed; /* Adjust primary for dark mode */
-            --secondary: #4682b4; /* Steel blue */
-            --accent: #8a2be2; /* Blue violet */
+            --primary: #6495ed;
+            --secondary: #4682b4;
+            --accent: #8a2be2;
             color: var(--text-color);
         }
         
@@ -185,18 +185,18 @@
             flex: 1;
             justify-content: center;
             border-bottom: 3px solid transparent;
-            color: var(--dark); /* Default color for inactive tabs */
+            color: var(--dark);
         }
         
         .tab-btn.active {
             background: var(--card-bg);
-            color: var(--primary); /* Visible color for active tab */
+            color: var(--primary);
             border-bottom: 3px solid var(--primary);
         }
         
         .tab-btn:hover {
             background: var(--toggle-hover-bg);
-            color: var(--primary); /* Visible color on hover */
+            color: var(--primary);
         }
         
         .tab-content {
@@ -483,50 +483,6 @@
             align-items: center;
         }
         
-        .pie-chart {
-            width: 300px;
-            height: 300px;
-            position: relative;
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .pie-segment {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%);
-            transform: rotate(0deg);
-            transition: transform 1s ease;
-        }
-        
-        .principal-segment {
-            background: var(--primary);
-        }
-        
-        .interest-segment {
-            background: var(--accent);
-        }
-        
-        .chart-center {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background: var(--card-bg);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-            transition: background 0.5s ease;
-        }
-        
         .chart-legend {
             display: flex;
             justify-content: center;
@@ -593,12 +549,12 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease;
-            padding-top: 0; /* Start with no padding */
+            padding-top: 0;
         }
         
         .option-content.active {
-            max-height: 1000px; /* Sufficiently large value */
-            padding-top: 20px; /* Add padding when active */
+            max-height: 1000px;
+            padding-top: 20px;
         }
         
         .scenario-box {
@@ -647,11 +603,6 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             transition: background 0.5s ease, color 0.5s ease;
-        }
-        
-        .highlight {
-            color: var(--primary);
-            font-weight: 700;
         }
         
         .tax-info {
@@ -722,7 +673,7 @@
         }
 
         .heatmap-cell {
-            width: 40px; /* Adjust cell size as needed */
+            width: 40px;
             height: 40px;
             display: flex;
             align-items: center;
@@ -765,7 +716,7 @@
             padding: 5px 0;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Position the tooltip above the text */
+            bottom: 125%;
             left: 50%;
             margin-left: -100px;
             opacity: 0;
@@ -823,58 +774,6 @@
             border-left: 5px solid var(--primary);
             transition: background 0.5s ease;
         }
-
-        .scenario-column h4 {
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .scenario-column p {
-            margin-bottom: 8px;
-            color: var(--text-color);
-        }
-
-        .scenario-column .value {
-            font-weight: bold;
-            color: var(--dark);
-        }
-
-        .collapsible-header {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 15px;
-            background: var(--toggle-bg);
-            border-radius: var(--border-radius);
-            margin-bottom: 10px;
-            transition: var(--transition), background 0.5s ease;
-        }
-
-        .collapsible-header:hover {
-            background: var(--toggle-hover-bg);
-        }
-
-        .collapsible-header i {
-            margin-right: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out;
-            padding: 0 15px;
-        }
-
-        .collapsible-content.active {
-            max-height: 1000px; /* Sufficiently large value */
-            padding-bottom: 15px;
-        }
-
-        .collapsible-header.active i {
-            transform: rotate(90deg);
-        }
-
     </style>
 </head>
 <body>
@@ -920,10 +819,6 @@
                     <div class="form-group">
                         <label for="loanAmount">
                             <i class="fas fa-indian-rupee-sign input-icon"></i> Loan Amount (₹)
-                            <span class="tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="tooltiptext">The total amount of money you wish to borrow.</span>
-                            </span>
                         </label>
                         <input type="number" id="loanAmount" min="1000" max="100000000" step="1000" value="1000000">
                         <div class="slider-container">
@@ -938,10 +833,6 @@
                     <div class="form-group">
                         <label for="interestRate">
                             <i class="fas fa-percent input-icon"></i> Interest Rate (% per annum)
-                            <span class="tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="tooltiptext">The annual percentage rate charged on the loan.</span>
-                            </span>
                         </label>
                         <input type="number" id="interestRate" min="1" max="30" step="0.1" value="8.5">
                         <div class="slider-container">
@@ -956,10 +847,6 @@
                     <div class="form-group">
                         <label for="loanTenure">
                             <i class="fas fa-calendar-alt input-icon"></i> Loan Tenure
-                            <span class="tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="tooltiptext">The period over which you will repay the loan.</span>
-                            </span>
                         </label>
                         <div style="display: flex; gap: 10px;">
                             <input type="number" id="loanTenure" min="1" step="1" value="20" style="flex: 2;">
@@ -979,10 +866,6 @@
                     <div class="form-group">
                         <label for="compoundingFrequency">
                             <i class="fas fa-history input-icon"></i> Compounding Frequency
-                            <span class="tooltip">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="tooltiptext">How often the interest is calculated and added to the principal.</span>
-                            </span>
                         </label>
                         <select id="compoundingFrequency">
                             <option value="monthly">Monthly</option>
@@ -1049,8 +932,6 @@
                 <h2 class="section-title">
                     <i class="fas fa-table"></i> Amortization Schedule
                 </h2>
-                <p>See how your loan balance decreases with each payment</p>
-                
                 <div id="scheduleTableContainer">
                     <table id="scheduleTable">
                         <thead>
@@ -1079,7 +960,6 @@
                 <h2 class="section-title">
                     <i class="fas fa-th-large"></i> Amortization Heatmap (Interest Paid)
                 </h2>
-                <p>Visual representation of interest paid over the loan tenure.</p>
                 <div id="interestHeatmap" class="heatmap-grid"></div>
             </div>
         </div>
@@ -1183,7 +1063,6 @@
             <h2 class="section-title">
                 <i class="fas fa-chart-line"></i> What-If Scenarios
             </h2>
-            <p>See how changes to your loan can save you money</p>
             
             <div class="scenario-box">
                 <div class="scenario-title">
@@ -1196,8 +1075,7 @@
                 <button id="calculateEmiScenario">
                     <i class="fas fa-calculator"></i> Calculate Impact
                 </button>
-                <div class="savings-highlight" id="emiSavings">
-                    </div>
+                <div class="savings-highlight" id="emiSavings"></div>
             </div>
             
             <div class="scenario-box">
@@ -1211,8 +1089,7 @@
                 <button id="calculatePrepaymentScenario">
                     <i class="fas fa-calculator"></i> Calculate Impact
                 </button>
-                <div class="savings-highlight" id="prepaymentSavings">
-                    </div>
+                <div class="savings-highlight" id="prepaymentSavings"></div>
             </div>
 
             <div class="scenario-box">
@@ -1226,8 +1103,7 @@
                 <button id="calculateEarlyClosure">
                     <i class="fas fa-calculator"></i> Analyze Early Closure
                 </button>
-                <div class="savings-highlight" id="earlyClosureResult">
-                    </div>
+                <div class="savings-highlight" id="earlyClosureResult"></div>
             </div>
             
             <div class="scenario-box">
@@ -1241,8 +1117,7 @@
                 <button id="calculateInflationScenario">
                     <i class="fas fa-calculator"></i> Calculate Real Cost
                 </button>
-                <div class="savings-highlight" id="inflationImpact">
-                    </div>
+                <div class="savings-highlight" id="inflationImpact"></div>
             </div>
 
             <div class="scenario-box">
@@ -1264,10 +1139,7 @@
                 <button id="calculateRefinanceScenario">
                     <i class="fas fa-calculator"></i> Analyze Refinance
                 </button>
-                <div class="savings-highlight" id="refinanceSavings">
-                    </div>
-                <div class="scenario-comparison" id="refinanceComparison">
-                    </div>
+                <div class="savings-highlight" id="refinanceSavings"></div>
             </div>
 
             <div class="scenario-box">
@@ -1285,10 +1157,7 @@
                 <button id="calculateRateChangeScenario">
                     <i class="fas fa-calculator"></i> Analyze Rate Change
                 </button>
-                <div class="savings-highlight" id="rateChangeImpact">
-                    </div>
-                <div class="scenario-comparison" id="rateChangeComparison">
-                    </div>
+                <div class="savings-highlight" id="rateChangeImpact"></div>
             </div>
         </div>
 
@@ -1296,7 +1165,7 @@
             <h2 class="section-title">
                 <i class="fas fa-layer-group"></i> Loan Portfolio Management
             </h2>
-            <p>Add multiple loans to see your total monthly EMI burden and visualize your outflow.</p>
+            <p>Add multiple loans to see your total monthly EMI burden.</p>
 
             <div class="section-card">
                 <h3 class="section-title">Your Loans</h3>
@@ -1393,7 +1262,7 @@
                         <label for="affordabilityTenure">
                             <i class="fas fa-calendar-alt input-icon"></i> Desired Loan Tenure
                         </label>
-                         <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 10px;">
                             <input type="number" id="affordabilityTenure" value="20" min="1" style="flex: 2;">
                             <select id="affordabilityTenureType" style="flex: 1; padding: 15px; border: 2px solid var(--input-border); border-radius: var(--border-radius); font-size: 16px; background: var(--card-bg); color: var(--text-color);">
                                 <option value="years" selected>Years</option>
@@ -1447,8 +1316,7 @@
                     <div class="result-title">Your Debt-to-Income (DTI) Ratio</div>
                     <div class="result-value" id="dtiRatio">0%</div>
                 </div>
-                <div class="savings-highlight" id="dtiRiskAssessment" style="background: var(--info);">
-                    </div>
+                <div class="savings-highlight" id="dtiRiskAssessment" style="background: var(--info);"></div>
             </div>
         </div>
         
@@ -1487,19 +1355,7 @@
                             </tr>
                         </thead>
                         <tbody id="variableRateBody">
-                            <tr>
-                                <td><input type="number" value="1" min="1"></td>
-                                <td><input type="number" value="3" min="1"></td>
-                                <td><input type="number" value="7.5" step="0.1"></td>
-                                <td><button class="remove-row"><i class="fas fa-trash"></i></button></td>
-                            </tr>
-                            <tr>
-                                <td><input type="number" value="4" min="1"></td>
-                                <td><input type="number" value="6" min="1"></td>
-                                <td><input type="number" value="8.2" step="0.1"></td>
-                                <td><button class="remove-row"><i class="fas fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
+                            </tbody>
                     </table>
                     <button class="add-rate-row"><i class="fas fa-plus"></i> Add Rate Period</button>
                 </div>
@@ -1521,20 +1377,7 @@
                             </tr>
                         </thead>
                         <tbody id="prepaymentBody">
-                            <tr>
-                                <td><input type="number" value="12" min="1"></td>
-                                <td>
-                                    <select>
-                                        <option value="monthly">Monthly</option>
-                                        <option value="quarterly">Quarterly</option>
-                                        <option value="half-yearly">Half-Yearly</option>
-                                        <option value="yearly">Yearly</option>
-                                    </select>
-                                </td>
-                                <td><input type="number" value="50000" min="0" step="1000"></td>
-                                <td><button class="remove-row"><i class="fas fa-trash"></i></button></td>
-                            </tr>
-                        </tbody>
+                            </tbody>
                     </table>
                     <button class="add-prepayment-row"><i class="fas fa-plus"></i> Add Prepayment</button>
                 </div>
@@ -1544,11 +1387,10 @@
         <footer>
             <p>Disclaimer: This calculator provides approximate values for reference purposes only. Actual loan terms may vary depending on the lender's policies.</p>
             <p>
-<button id="saveToGoogleSheetsBtn" style="margin-top: 20px; background: #4285F4; font-size: 16px;">
-    <i class="fas fa-file-excel"></i> Save to Google Sheets
-</button>
-<div id="googleSheetsStatus" style="margin-top: 15px; font-weight: 600; padding: 10px; border-radius: 8px; text-align: center;"></div>
-
+                <button id="saveToGoogleSheetsBtn" style="margin-top: 20px; background: #4285F4; font-size: 16px;">
+                    <i class="fas fa-file-excel"></i> Save to Google Sheets
+                </button>
+                <div id="googleSheetsStatus" style="margin-top: 15px; font-weight: 600; padding: 10px; border-radius: 8px; text-align: center;"></div>
                 <span class="tooltip">
                     <i class="fas fa-info-circle"></i> API Mode
                     <span class="tooltiptext">This calculator's logic can be exposed as an API for integration into other fintech applications. (Requires backend development)</span>
@@ -1560,14 +1402,13 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
-<script>
-// Configuration variables (will be loaded from API)
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script>
+// Configuration variables
 let CLIENT_ID = '';
 let API_KEY = '';
 
-// Function to load configuration from server
 async function loadConfig() {
     try {
         const response = await fetch('/api/config');
@@ -1577,8 +1418,6 @@ async function loadConfig() {
         console.log('Configuration loaded from server successfully');
     } catch (error) {
         console.error('Failed to load configuration:', error);
-        alert('Failed to load API configuration. Please check your deployment setup.');
-        throw new Error('Configuration loading failed');
     }
 }
 
@@ -1591,13 +1430,10 @@ let gapiInited = false;
 let gisInited = false;
 let isAuthenticated = false;
 
-// Initialize Google APIs
 function initializeGoogleAPIs() {
     return new Promise(async (resolve, reject) => {
-        // Load configuration first
         await loadConfig();
         
-        // Load gapi client
         gapi.load('client', function() {
             gapi.client.init({
                 apiKey: API_KEY,
@@ -1606,18 +1442,15 @@ function initializeGoogleAPIs() {
                 gapiInited = true;
                 console.log('Google API client initialized successfully!');
                 
-                // Initialize GIS
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
                     callback: (tokenResponse) => {
                         if (tokenResponse && tokenResponse.access_token) {
-                            console.log('Authentication successful!');
                             isAuthenticated = true;
                             updateGoogleSheetsStatus('Authenticated successfully!', 'success');
                             resolve(true);
                         } else {
-                            console.log('Authentication failed or was canceled.');
                             updateGoogleSheetsStatus('Authentication failed or was canceled.', 'error');
                             reject(new Error('Authentication failed'));
                         }
@@ -1625,14 +1458,10 @@ function initializeGoogleAPIs() {
                 });
                 
                 gisInited = true;
-                console.log('Google Identity Services initialized.');
-                
                 if (!isAuthenticated) {
-                    // Auto-request authentication
                     tokenClient.requestAccessToken();
                 }
             }).catch(function(error) {
-                console.error("Error initializing gapi.client:", error);
                 updateGoogleSheetsStatus(`Error initializing Google API: ${error.message}`, 'error');
                 reject(error);
             });
@@ -1640,10 +1469,6 @@ function initializeGoogleAPIs() {
     });
 }
 
-// [REST OF YOUR EXISTING CODE REMAINS THE SAME...]
-
-
-// Update Google Sheets status
 function updateGoogleSheetsStatus(message, type) {
     const statusElement = document.getElementById('googleSheetsStatus');
     if (statusElement) {
@@ -1664,7 +1489,6 @@ function updateGoogleSheetsStatus(message, type) {
     }
 }
 
-// Save loan details to Google Sheets
 async function saveToGoogleSheets() {
     if (!isAuthenticated) {
         updateGoogleSheetsStatus('Initializing Google APIs...', 'loading');
@@ -1679,7 +1503,6 @@ async function saveToGoogleSheets() {
     updateGoogleSheetsStatus('Saving to Google Sheets...', 'loading');
 
     try {
-        // Create a new spreadsheet
         const spreadsheetResponse = await gapi.client.sheets.spreadsheets.create({
             properties: {
                 title: `Loan Calculator Results - ${new Date().toLocaleDateString()}`
@@ -1687,11 +1510,8 @@ async function saveToGoogleSheets() {
         });
 
         const spreadsheetId = spreadsheetResponse.result.spreadsheetId;
-        
-        // Get current loan data
         const loanData = getCurrentLoanData();
         
-        // Prepare data for sheets
         const values = [
             ['Loan Calculator Results', '', '', '', '', ''],
             ['Generated on :', new Date().toLocaleString(), '', '', '', ''],
@@ -1699,7 +1519,7 @@ async function saveToGoogleSheets() {
             ['Basic Loan Details', '', '', '', '', ''],
             ['Loan Amount (₹) :', loanData.loanAmount, '', '', '', ''],
             ['Interest Rate (%) :', loanData.interestRate, '', '', '', ''],
-            ['Loan Tenure (Years) :', loanData.loanTenure, '', '', '', ''],
+            ['Loan Tenure :', loanData.loanTenure, '', '', '', ''],
             ['Compounding Frequency :', loanData.compoundingFrequency, '', '', '', ''],
             ['', '', '', '', '', ''],
             ['Calculated Results', '', '', '', '', ''],
@@ -1713,7 +1533,6 @@ async function saveToGoogleSheets() {
             ['Payment No.', 'EMI Amount', 'Principal', 'Interest', 'Total Interest', 'Balance'],
         ];
 
-        // Add schedule data (first 50 payments to avoid too much data)
         if (loanData.schedule && loanData.schedule.length > 0) {
             loanData.schedule.forEach(payment => {
                 values.push([
@@ -1727,104 +1546,202 @@ async function saveToGoogleSheets() {
             });
         }
 
-        // Write data to spreadsheet
         await gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: spreadsheetId,
             range: 'A1',
             valueInputOption: 'USER_ENTERED',
-            resource: {
-                values: values
-            }
-        });
-
-        // Format the spreadsheet
-        await gapi.client.sheets.spreadsheets.batchUpdate({
-            spreadsheetId: spreadsheetId,
-            resource: {
-                requests: [
-                    {
-                        repeatCell: {
-                            range: {
-                                sheetId: 0,
-                                startRowIndex: 0,
-                                endRowIndex: 1
-                            },
-                            cell: {
-                                userEnteredFormat: {
-                                    textFormat: {
-                                        bold: true,
-                                        fontSize: 16
-                                    },
-                                    backgroundColor: {
-                                        red: 0.2627,
-                                        green: 0.6,
-                                        blue: 0.9333
-                                    }
-                                }
-                            },
-                            fields: "userEnteredFormat(textFormat,backgroundColor)"
-                        }
-                    },
-                    {
-                        repeatCell: {
-                            range: {
-                                sheetId: 0,
-                                startRowIndex: 17,
-                                endRowIndex: 18
-                            },
-                            cell: {
-                                userEnteredFormat: {
-                                    textFormat: {
-                                        bold: true
-                                    },
-                                    backgroundColor: {
-                                        red: 0.9,
-                                        green: 0.9,
-                                        blue: 0.9
-                                    }
-                                }
-                            },
-                            fields: "userEnteredFormat(textFormat,backgroundColor)"
-                        }
-                    }
-                ]
-            }
+            resource: { values: values }
         });
 
         updateGoogleSheetsStatus(`Successfully saved! <a href="https://docs.google.com/spreadsheets/d/${spreadsheetId}" target="_blank" style="color: white; text-decoration: underline;">Open Spreadsheet</a>`, 'success');
 
     } catch (error) {
-        console.error('Error saving to Google Sheets:', error);
         updateGoogleSheetsStatus(`Error saving to Google Sheets: ${error.message}`, 'error');
     }
 }
 
-// === NEW HELPER FUNCTION ===
-// Gets tenure from Basic Calculator tab and returns it in YEARS
+// === CORE HELPERS ===
 function getPrimaryLoanTenureInYears() {
     const tenureValue = parseFloat(document.getElementById('loanTenure').value) || 0;
     const tenureType = document.getElementById('loanTenureType').value;
-    
-    if (tenureType === 'months') {
-        return tenureValue / 12;
-    }
-    return tenureValue; // Default is years
+    return tenureType === 'months' ? tenureValue / 12 : tenureValue;
 }
 
-// Get current loan data
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// === ADVANCED INPUTS & LOGIC ===
+function getAdvancedInputs() {
+    const balloonPayment = parseFloat(document.getElementById('balloonPayment').value) || 0;
+    
+    const rateRows = document.querySelectorAll('#variableRateBody tr');
+    const variableRates = [];
+    rateRows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs.length >= 3) {
+            const fromYear = parseFloat(inputs[0].value);
+            const toYear = parseFloat(inputs[1].value);
+            const rate = parseFloat(inputs[2].value);
+            
+            // Only add if values are valid numbers
+            if (!isNaN(fromYear) && !isNaN(toYear) && !isNaN(rate)) {
+                variableRates.push({ fromYear, toYear, rate });
+            }
+        }
+    });
+
+    const prepayRows = document.querySelectorAll('#prepaymentBody tr');
+    const prepayments = [];
+    prepayRows.forEach(row => {
+        const inputs = row.querySelectorAll('input, select');
+        if (inputs.length >= 3) {
+            const startMonth = parseFloat(inputs[0].value);
+            const frequency = inputs[1].value;
+            const amount = parseFloat(inputs[2].value);
+            
+            // Only add if values are valid numbers
+            if (!isNaN(startMonth) && !isNaN(amount)) {
+                prepayments.push({ startMonth, frequency, amount });
+            }
+        }
+    });
+
+    return { balloonPayment, variableRates, prepayments };
+}
+
+function calculateEMI(principal, annualRate, years, compoundingFreq) {
+    const advanced = getAdvancedInputs();
+    const monthlyRate = annualRate / 100 / 12;
+    const numberOfPayments = Math.round(years * 12);
+    
+    let adjustedPrincipal = principal;
+    if (advanced.balloonPayment > 0) {
+        const pvBalloon = advanced.balloonPayment / Math.pow(1 + monthlyRate, numberOfPayments);
+        adjustedPrincipal = principal - pvBalloon;
+    }
+
+    let emi;
+    if (monthlyRate === 0) {
+        emi = adjustedPrincipal / numberOfPayments;
+    } else {
+        emi = adjustedPrincipal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    }
+    
+    const totalEmiPayment = emi * numberOfPayments;
+    const totalPayment = totalEmiPayment + advanced.balloonPayment;
+    const totalInterest = totalPayment - principal;
+    
+    if (isNaN(emi) || !isFinite(emi)) emi = 0;
+
+    const interestPercent = totalPayment > 0 ? (totalInterest / totalPayment) * 100 : 0;
+    
+    return {
+        emi: Math.round(emi),
+        totalInterest: Math.round(totalInterest),
+        totalPayment: Math.round(totalPayment),
+        interestPercent: Math.round(interestPercent * 100) / 100,
+        numberOfPayments: numberOfPayments
+    };
+}
+
+function generateAmortizationSchedule(principal, initialAnnualRate, years, compoundingFreq) {
+    const advanced = getAdvancedInputs();
+    const initialCalculation = calculateEMI(principal, initialAnnualRate, years, compoundingFreq);
+    
+    let balance = principal;
+    let totalInterestPaid = 0;
+    const schedule = [];
+    
+    let currentEmi = initialCalculation.emi;
+    let currentRate = initialAnnualRate;
+    const totalMonths = initialCalculation.numberOfPayments;
+
+    for (let month = 1; month <= totalMonths; month++) {
+        let activeRate = initialAnnualRate;
+        const currentYear = Math.ceil(month / 12);
+        
+        const rateOverride = advanced.variableRates.find(r => currentYear >= r.fromYear && currentYear <= r.toYear);
+        if (rateOverride) activeRate = rateOverride.rate;
+
+        if (activeRate !== currentRate) {
+            currentRate = activeRate;
+            const remainingMonths = totalMonths - (month - 1);
+            const monthlyRateNew = currentRate / 100 / 12;
+            
+            let adjBal = balance;
+            if (advanced.balloonPayment > 0) {
+                const pvBalloon = advanced.balloonPayment / Math.pow(1 + monthlyRateNew, remainingMonths);
+                adjBal = balance - pvBalloon;
+            }
+            
+            currentEmi = adjBal * (monthlyRateNew * Math.pow(1 + monthlyRateNew, remainingMonths)) / (Math.pow(1 + monthlyRateNew, remainingMonths) - 1);
+        }
+
+        const monthlyRate = currentRate / 100 / 12;
+        const interestPayment = Math.round(balance * monthlyRate);
+        let principalPayment = Math.round(currentEmi - interestPayment);
+        
+        let extraPayment = 0;
+        advanced.prepayments.forEach(pre => {
+            if (month >= pre.startMonth) {
+                let isDue = false;
+                const monthFromStart = month - pre.startMonth;
+                if (pre.frequency === 'monthly') isDue = true;
+                if (pre.frequency === 'quarterly' && monthFromStart % 3 === 0) isDue = true;
+                if (pre.frequency === 'half-yearly' && monthFromStart % 6 === 0) isDue = true;
+                if (pre.frequency === 'yearly' && monthFromStart % 12 === 0) isDue = true;
+                
+                if (isDue) extraPayment += pre.amount;
+            }
+        });
+
+        if (balance - principalPayment - extraPayment < 0) {
+            extraPayment = balance - principalPayment;
+            if (extraPayment < 0) {
+                principalPayment = balance;
+                extraPayment = 0;
+            }
+        }
+
+        balance = Math.round(balance - principalPayment - extraPayment);
+        totalInterestPaid += interestPayment;
+        if (balance <= 0) balance = 0;
+
+        schedule.push({
+            paymentNumber: month,
+            emiAmount: Math.round(currentEmi),
+            principal: principalPayment + extraPayment,
+            interest: interestPayment,
+            totalInterest: totalInterestPaid,
+            balance: balance
+        });
+
+        if (balance === 0) break;
+    }
+    
+    return schedule;
+}
+
 function getCurrentLoanData() {
     const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
     const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
+    const loanTenure = getPrimaryLoanTenureInYears();
+    const tenureType = document.getElementById('loanTenureType').value;
+    const tenureValue = document.getElementById('loanTenure').value;
     const compoundingFrequency = document.getElementById('compoundingFrequency').value;
     
-    // Calculate EMI and other values
     const calculation = calculateEMI(loanAmount, interestRate, loanTenure, compoundingFrequency);
     
     return {
         loanAmount: formatCurrency(loanAmount),
         interestRate: interestRate + '%',
-        loanTenure: loanTenure + ' years', // This will now show fractions like 1.5 years
+        loanTenure: `${tenureValue} ${tenureType.charAt(0).toUpperCase() + tenureType.slice(1)}`,
         compoundingFrequency: compoundingFrequency,
         monthlyEmi: formatCurrency(calculation.emi),
         totalInterest: formatCurrency(calculation.totalInterest),
@@ -1835,88 +1752,8 @@ function getCurrentLoanData() {
     };
 }
 
-// Global variables for calculations
-let currentEmiData = {
-    emi: 0,
-    totalInterest: 0,
-    totalPayment: 0,
-    interestPercent: 0,
-    numberOfPayments: 0
-};
+let currentEmiData = { emi: 0, totalInterest: 0, totalPayment: 0, interestPercent: 0, numberOfPayments: 0 };
 
-// Utility function to format currency
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-}
-
-// Calculate EMI based on compounding frequency
-function calculateEMI(principal, annualRate, years, compoundingFreq) {
-    const monthlyRate = annualRate / 100 / 12;
-    const numberOfPayments = years * 12;
-    
-    let emi;
-    if (monthlyRate === 0) {
-        emi = principal / numberOfPayments;
-    } else {
-        emi = principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    }
-    
-    const totalPayment = emi * numberOfPayments;
-    const totalInterest = totalPayment - principal;
-    // Pehle tha: (totalInterest / principal) * 100
-    // Ab hai: (totalInterest / totalPayment) * 100
-    const interestPercent = (totalInterest / totalPayment) * 100;
-    
-    return {
-        emi: Math.round(emi),
-        totalInterest: Math.round(totalInterest),
-        totalPayment: Math.round(totalPayment),
-        interestPercent: Math.round(interestPercent * 100) / 100,
-        numberOfPayments: Math.round(numberOfPayments) // Round this in case of month conversion
-    };
-}
-
-// Generate amortization schedule
-function generateAmortizationSchedule(principal, annualRate, years, compoundingFreq) {
-    const calculation = calculateEMI(principal, annualRate, years, compoundingFreq);
-    const monthlyRate = annualRate / 100 / 12;
-    const emi = calculation.emi;
-    
-    let balance = principal;
-    let totalInterestPaid = 0;
-    const schedule = [];
-    
-    for (let i = 1; i <= calculation.numberOfPayments; i++) {
-        const interestPayment = Math.round(balance * monthlyRate);
-        const principalPayment = Math.round(emi - interestPayment);
-        balance = Math.round(balance - principalPayment);
-        totalInterestPaid += interestPayment;
-        
-        // Adjust last payment if needed
-        if (i === calculation.numberOfPayments && balance !== 0) {
-            const lastPrincipalPayment = principalPayment + balance;
-            balance = 0;
-        }
-        
-        schedule.push({
-            paymentNumber: i,
-            emiAmount: emi,
-            principal: principalPayment,
-            interest: interestPayment,
-            totalInterest: totalInterestPaid,
-            balance: Math.max(0, balance)
-        });
-    }
-    
-    return schedule;
-}
-
-// Update UI with calculated values
 function updateLoanResults(calculation) {
     document.getElementById('emiValue').textContent = formatCurrency(calculation.emi);
     document.getElementById('totalInterest').textContent = formatCurrency(calculation.totalInterest);
@@ -1924,29 +1761,22 @@ function updateLoanResults(calculation) {
     document.getElementById('interestPercent').textContent = calculation.interestPercent + '%';
     document.getElementById('numberOfEmis').textContent = calculation.numberOfPayments;
     
-    // Update progress bar
     const progressBar = document.getElementById('loanProgressBar');
     if (progressBar) {
         progressBar.style.width = '0%';
         progressBar.textContent = '0% Repaid';
     }
-    
-    // Store current data globally
     currentEmiData = calculation;
 }
 
-// Generate and display amortization schedule
 function generateScheduleTable(principal, annualRate, years, compoundingFreq) {
     const schedule = generateAmortizationSchedule(principal, annualRate, years, compoundingFreq);
     const tbody = document.getElementById('scheduleBody');
-    
     if (!tbody) return;
-    
     tbody.innerHTML = '';
     
-    // Display first 12 months, then yearly summary
     schedule.forEach((payment, index) => {
-        if (index < 12 || (payment.paymentNumber % 12 === 0)) {
+        if (index < 12 || (payment.paymentNumber % 12 === 0) || index === schedule.length - 1) {
             const row = tbody.insertRow();
             row.innerHTML = `
                 <td>${payment.paymentNumber}</td>
@@ -1960,15 +1790,10 @@ function generateScheduleTable(principal, annualRate, years, compoundingFreq) {
     });
 }
 
-// Create payment breakdown chart
 function createPaymentChart(principal, totalInterest) {
     const ctx = document.getElementById('paymentBreakdownChart');
     if (!ctx) return;
-    
-    // Destroy existing chart if it exists
-    if (window.paymentChart) {
-        window.paymentChart.destroy();
-    }
+    if (window.paymentChart) window.paymentChart.destroy();
     
     window.paymentChart = new Chart(ctx, {
         type: 'doughnut',
@@ -1983,36 +1808,25 @@ function createPaymentChart(principal, totalInterest) {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
+            plugins: { legend: { display: false } }
         }
     });
 }
 
-// Create interest heatmap
 function createInterestHeatmap(principal, annualRate, years) {
     const heatmapContainer = document.getElementById('interestHeatmap');
     if (!heatmapContainer) return;
     
-    const monthsPerYear = 12;
-    const totalMonths = Math.round(years * monthsPerYear); // Round to nearest month
     const schedule = generateAmortizationSchedule(principal, annualRate, years, 'monthly');
-    
-    // Create grid layout
-    const cellsPerRow = 12; // 12 months per row
+    const totalMonths = schedule.length > 0 ? schedule.length : Math.round(years * 12);
+    const cellsPerRow = 12;
     const rows = Math.ceil(totalMonths / cellsPerRow);
     
     heatmapContainer.style.gridTemplateColumns = `60px repeat(${cellsPerRow}, 1fr)`;
     heatmapContainer.innerHTML = '';
     
-    // Add header row
     const headerRow = ['Year'];
-    for (let month = 1; month <= 12; month++) {
-        headerRow.push(month.toString());
-    }
+    for (let month = 1; month <= 12; month++) headerRow.push(month.toString());
     
     headerRow.forEach(header => {
         const cell = document.createElement('div');
@@ -2021,18 +1835,14 @@ function createInterestHeatmap(principal, annualRate, years) {
         heatmapContainer.appendChild(cell);
     });
     
-    // Find max interest for color scaling
-    const maxInterest = Math.max(...schedule.map(s => s.interest));
+    const maxInterest = schedule.length > 0 ? Math.max(...schedule.map(s => s.interest)) : 1;
     
-    // Add data rows
-    for (let year = 1; year <= rows; year++) { // Use 'rows' instead of 'years'
-        // Year label
+    for (let year = 1; year <= rows; year++) {
         const yearLabel = document.createElement('div');
         yearLabel.className = 'heatmap-cell heatmap-row-label';
         yearLabel.textContent = year.toString();
         heatmapContainer.appendChild(yearLabel);
         
-        // Monthly cells
         for (let month = 1; month <= 12; month++) {
             const scheduleIndex = (year - 1) * 12 + (month - 1);
             const cell = document.createElement('div');
@@ -2046,112 +1856,51 @@ function createInterestHeatmap(principal, annualRate, years) {
                 
                 cell.style.backgroundColor = `rgb(${red}, 100, ${blue})`;
                 cell.textContent = formatCurrency(payment.interest).replace('₹', '').replace(',', 'k');
-                cell.title = `Year ${year}, Month ${month}: ${formatCurrency(payment.interest)} interest`;
+                cell.title = `Month ${scheduleIndex + 1}: ${formatCurrency(payment.interest)} interest`;
             } else {
                 cell.style.backgroundColor = '#f0f0f0';
                 cell.textContent = '-';
             }
-            
             heatmapContainer.appendChild(cell);
         }
     }
 }
 
-// Export functions
+// Export Functions
 function exportToTXT() {
     const data = getCurrentLoanData();
-    let content = `Loan Calculator Results\n`;
-    content += `Generated on: ${new Date().toLocaleString()}\n\n`;
-    content += `Basic Loan Details:\n`;
-    content += `Loan Amount: ${data.loanAmount}\n`;
-    content += `Interest Rate: ${data.interestRate}\n`;
-    content += `Loan Tenure: ${data.loanTenure}\n`;
-    content += `Compounding Frequency: ${data.compoundingFrequency}\n\n`;
-    content += `Calculated Results:\n`;
-    content += `Monthly EMI: ${data.monthlyEmi}\n`;
-    content += `Total Interest: ${data.totalInterest}\n`;
-    content += `Total Payment: ${data.totalPayment}\n`;
-    content += `Interest Percentage: ${data.interestPercent}\n`;
-    content += `Number of EMIs: ${data.numberOfEmis}\n\n`;
-    
+    let content = `Loan Calculator Results\nGenerated on: ${new Date().toLocaleString()}\n\nBasic Loan Details:\nLoan Amount: ${data.loanAmount}\nInterest Rate: ${data.interestRate}\nLoan Tenure: ${data.loanTenure}\n\nCalculated Results:\nMonthly EMI: ${data.monthlyEmi}\nTotal Interest: ${data.totalInterest}\nTotal Payment: ${data.totalPayment}\n\n`;
     downloadFile(content, 'loan_calculator_results.txt', 'text/plain');
 }
 
 function exportToCSV() {
     const data = getCurrentLoanData();
-    let content = `Loan Calculator Results\n`;
-    content += `Generated on,${new Date().toLocaleString()}\n\n`;
-    content += `Loan Amount,${data.loanAmount}\n`;
-    content += `Interest Rate,${data.interestRate}\n`;
-    content += `Loan Tenure,${data.loanTenure}\n`;
-    content += `Monthly EMI,${data.monthlyEmi}\n`;
-    content += `Total Interest,${data.totalInterest}\n`;
-    content += `Total Payment,${data.totalPayment}\n\n`;
-    content += `Payment No.,EMI Amount,Principal,Interest,Total Interest,Balance\n`;
-    
+    let content = `Loan Calculator Results\nGenerated on,${new Date().toLocaleString()}\n\nLoan Amount,${data.loanAmount}\nInterest Rate,${data.interestRate}\nLoan Tenure,${data.loanTenure}\nMonthly EMI,${data.monthlyEmi}\nTotal Interest,${data.totalInterest}\nTotal Payment,${data.totalPayment}\n\nPayment No.,EMI Amount,Principal,Interest,Total Interest,Balance\n`;
     if (data.schedule) {
         data.schedule.forEach(payment => {
             content += `${payment.paymentNumber},${payment.emiAmount},${payment.principal},${payment.interest},${payment.totalInterest},${payment.balance}\n`;
         });
     }
-    
     downloadFile(content, 'loan_calculator_results.csv', 'text/csv');
 }
 
 function exportToMD() {
     const data = getCurrentLoanData();
-    let content = `# Loan Calculator Results\n\n`;
-    content += `**Generated on:** ${new Date().toLocaleString()}\n\n`;
-    content += `## Basic Loan Details\n\n`;
-    content += `- **Loan Amount:** ${data.loanAmount}\n`;
-    content += `- **Interest Rate:** ${data.interestRate}\n`;
-    content += `- **Loan Tenure:** ${data.loanTenure}\n`;
-    content += `- **Compounding Frequency:** ${data.compoundingFrequency}\n\n`;
-    content += `## Calculated Results\n\n`;
-    content += `- **Monthly EMI:** ${data.monthlyEmi}\n`;
-    content += `- **Total Interest:** ${data.totalInterest}\n`;
-    content += `- **Total Payment:** ${data.totalPayment}\n`;
-    content += `- **Interest Percentage:** ${data.interestPercent}\n`;
-    content += `- **Number of EMIs:** ${data.numberOfEmis}\n\n`;
-    
+    let content = `# Loan Calculator Results\n\n**Generated on:** ${new Date().toLocaleString()}\n\n## Loan Details\n- **Amount:** ${data.loanAmount}\n- **Interest:** ${data.interestRate}\n- **Tenure:** ${data.loanTenure}\n\n## Results\n- **EMI:** ${data.monthlyEmi}\n- **Total Interest:** ${data.totalInterest}\n`;
     downloadFile(content, 'loan_calculator_results.md', 'text/markdown');
 }
 
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
     const data = getCurrentLoanData();
-    
-    // Title
-    doc.setFontSize(20);
-    doc.text('Loan Calculator Results', 105, 20, { align: 'center' });
-    
-    // Date
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 40);
-    
-    // Loan details
-    doc.setFontSize(16);
-    doc.text('Basic Loan Details', 20, 60);
-    
-    doc.setFontSize(12);
-    doc.text(`Loan Amount: ${data.loanAmount}`, 20, 75);
-    doc.text(`Interest Rate: ${data.interestRate}`, 20, 85);
-    doc.text(`Loan Tenure: ${data.loanTenure}`, 20, 95);
-    doc.text(`Compounding Frequency: ${data.compoundingFrequency}`, 20, 105);
-    
-    // Results
-    doc.setFontSize(16);
-    doc.text('Calculated Results', 20, 125);
-    
-    doc.setFontSize(12);
-    doc.text(`Monthly EMI: ${data.monthlyEmi}`, 20, 140);
-    doc.text(`Total Interest: ${data.totalInterest}`, 20, 150);
-    doc.text(`Total Payment: ${data.totalPayment}`, 20, 160);
-    doc.text(`Interest Percentage: ${data.interestPercent}`, 20, 170);
-    doc.text(`Number of EMIs: ${data.numberOfEmis}`, 20, 180);
-    
+    doc.setFontSize(20); doc.text('Loan Calculator Results', 105, 20, { align: 'center' });
+    doc.setFontSize(12); doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 40);
+    doc.text(`Loan Amount: ${data.loanAmount}`, 20, 60);
+    doc.text(`Interest Rate: ${data.interestRate}`, 20, 70);
+    doc.text(`Loan Tenure: ${data.loanTenure}`, 20, 80);
+    doc.text(`Monthly EMI: ${data.monthlyEmi}`, 20, 100);
+    doc.text(`Total Payment: ${data.totalPayment}`, 20, 110);
     doc.save('loan_calculator_results.pdf');
 }
 
@@ -2159,109 +1908,64 @@ function downloadFile(content, filename, type) {
     const blob = new Blob([content], { type: type });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
+    a.href = url; a.download = filename; a.click();
     window.URL.revokeObjectURL(url);
 }
 
-// Tab functionality
+// Tab & Slider Logic
 function initializeTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
-    
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetTab = button.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and contents
             tabButtons.forEach(btn => btn.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
             button.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
         });
     });
 }
 
-// Dark mode toggle
 function initializeDarkMode() {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
-    
-    // Check for saved dark mode preference - but don't rely on localStorage in Claude environment
-    if (body.classList.contains('dark-mode')) {
-        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-    
     darkModeToggle.addEventListener('click', () => {
         body.classList.toggle('dark-mode');
-        
-        if (body.classList.contains('dark-mode')) {
-            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        } else {
-            darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-        }
+        darkModeToggle.innerHTML = body.classList.contains('dark-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
 }
 
-// === MODIFIED SLIDER FUNCTION ===
-// Initialize sliders
 function initializeSliders() {
     const loanAmountSlider = document.getElementById('loanAmountSlider');
     const loanAmountInput = document.getElementById('loanAmount');
     const interestRateSlider = document.getElementById('interestRateSlider');
     const interestRateInput = document.getElementById('interestRate');
-    
-    // Tenure elements
     const loanTenureSlider = document.getElementById('loanTenureSlider');
     const loanTenureInput = document.getElementById('loanTenure');
     const loanTenureType = document.getElementById('loanTenureType');
     const loanTenureSliderValues = document.getElementById('loanTenureSliderValues');
     
-    // Sync sliders with inputs
     if (loanAmountSlider && loanAmountInput) {
-        loanAmountSlider.addEventListener('input', (e) => {
-            loanAmountInput.value = e.target.value;
-            calculateAndUpdate();
-        });
-        
-        loanAmountInput.addEventListener('input', (e) => {
-            loanAmountSlider.value = e.target.value;
-            calculateAndUpdate();
-        });
+        loanAmountSlider.addEventListener('input', (e) => { loanAmountInput.value = e.target.value; calculateAndUpdate(); });
+        loanAmountInput.addEventListener('input', (e) => { loanAmountSlider.value = e.target.value; calculateAndUpdate(); });
     }
-    
     if (interestRateSlider && interestRateInput) {
-        interestRateSlider.addEventListener('input', (e) => {
-            interestRateInput.value = e.target.value;
-            calculateAndUpdate();
-        });
-        
-        interestRateInput.addEventListener('input', (e) => {
-            interestRateSlider.value = e.target.value;
-            calculateAndUpdate();
-        });
+        interestRateSlider.addEventListener('input', (e) => { interestRateInput.value = e.target.value; calculateAndUpdate(); });
+        interestRateInput.addEventListener('input', (e) => { interestRateSlider.value = e.target.value; calculateAndUpdate(); });
     }
-    
-    // Naya Tenure Logic
     if (loanTenureSlider && loanTenureInput && loanTenureType) {
-        
-        // Dropdown change hone par
         loanTenureType.addEventListener('change', (e) => {
             const currentValue = parseFloat(loanTenureInput.value) || 0;
             if (e.target.value === 'months') {
-                // Years se Months
                 const newValue = Math.round(currentValue * 12);
-                loanTenureSlider.max = 360; // 30 years * 12
+                loanTenureSlider.max = 360;
                 loanTenureSlider.step = 1;
                 loanTenureSlider.value = newValue;
                 loanTenureInput.value = newValue;
                 loanTenureSliderValues.innerHTML = `<span>1 Month</span><span>360 Months</span>`;
             } else {
-                // Months se Years
-                const newValue = Math.round(currentValue / 12);
+                const newValue = Math.max(1, Math.round(currentValue / 12));
                 loanTenureSlider.max = 30;
                 loanTenureSlider.step = 1;
                 loanTenureSlider.value = newValue;
@@ -2270,31 +1974,19 @@ function initializeSliders() {
             }
             calculateAndUpdate();
         });
-
-        // Slider change hone par
-        loanTenureSlider.addEventListener('input', (e) => {
-            loanTenureInput.value = e.target.value;
-            calculateAndUpdate();
-        });
-        
-        // Input mein type karne par
+        loanTenureSlider.addEventListener('input', (e) => { loanTenureInput.value = e.target.value; calculateAndUpdate(); });
         loanTenureInput.addEventListener('input', (e) => {
             const maxVal = loanTenureType.value === 'months' ? 360 : 30;
-            if (parseFloat(e.target.value) > maxVal) {
-                e.target.value = maxVal;
-            }
-            loanTenureSlider.value = e.target.value;
+            loanTenureSlider.value = Math.min(e.target.value, maxVal);
             calculateAndUpdate();
         });
     }
 }
-// === END OF MODIFIED FUNCTION ===
 
-// Calculate and update all displays
 function calculateAndUpdate() {
     const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
     const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
+    const loanTenure = getPrimaryLoanTenureInYears();
     const compoundingFrequency = document.getElementById('compoundingFrequency').value;
     
     if (loanAmount && interestRate && loanTenure) {
@@ -2306,213 +1998,20 @@ function calculateAndUpdate() {
     }
 }
 
-// Scenario calculations
-function calculateEmiScenario() {
-    const extraEmi = parseFloat(document.getElementById('extraEmi').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const originalCalculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    const newEmi = originalCalculation.emi + extraEmi;
-    
-    // Calculate new tenure with increased EMI
-    const monthlyRate = interestRate / 100 / 12;
-    let newTenureMonths = 0;
-    let balance = loanAmount;
-    
-    while (balance > 0 && newTenureMonths < 600) { // Max 50 years safety check
-        const interestPayment = balance * monthlyRate;
-        const principalPayment = newEmi - interestPayment;
-        balance -= principalPayment;
-        newTenureMonths++;
-    }
-    
-    const newTotalPayment = newEmi * newTenureMonths;
-    const newTotalInterest = newTotalPayment - loanAmount;
-    const interestSaved = originalCalculation.totalInterest - newTotalInterest;
-    const timeSaved = originalCalculation.numberOfPayments - newTenureMonths;
-    
-    document.getElementById('emiSavings').innerHTML = `
-        <strong>Impact of increasing EMI by ${formatCurrency(extraEmi)}:</strong><br>
-        Interest Saved: ${formatCurrency(interestSaved)}<br>
-        Time Saved: ${Math.floor(timeSaved / 12)} years ${timeSaved % 12} months<br>
-        New Loan Tenure: ${Math.floor(newTenureMonths / 12)} years ${newTenureMonths % 12} months
-    `;
-}
-
-function calculatePrepaymentScenario() {
-    const prepaymentAmount = parseFloat(document.getElementById('prepaymentAmount').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const originalCalculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    const reducedPrincipal = loanAmount - prepaymentAmount;
-    
-    if (reducedPrincipal <= 0) {
-        document.getElementById('prepaymentSavings').innerHTML = `
-            <strong>Prepayment of ${formatCurrency(prepaymentAmount)} will close your loan immediately!</strong><br>
-            Interest Saved: ${formatCurrency(originalCalculation.totalInterest)}<br>
-            You'll save the entire interest amount!
-        `;
-        return;
-    }
-    
-    const newCalculation = calculateEMI(reducedPrincipal, interestRate, loanTenure, 'monthly');
-    const interestSaved = originalCalculation.totalInterest - newCalculation.totalInterest;
-    
-    document.getElementById('prepaymentSavings').innerHTML = `
-        <strong>Impact of ${formatCurrency(prepaymentAmount)} prepayment:</strong><br>
-        Interest Saved: ${formatCurrency(interestSaved)}<br>
-        New Monthly EMI: ${formatCurrency(newCalculation.emi)}<br>
-        EMI Reduction: ${formatCurrency(originalCalculation.emi - newCalculation.emi)}
-    `;
-}
-
-function calculateEarlyClosure() {
-    const prepaymentAmount = parseFloat(document.getElementById('earlyClosurePrepayment').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const originalCalculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    const remainingBalance = loanAmount - prepaymentAmount;
-    
-    if (remainingBalance <= 0) {
-        document.getElementById('earlyClosureResult').innerHTML = `
-            <strong>Early Closure Analysis:</strong><br>
-            Loan can be closed immediately with ${formatCurrency(prepaymentAmount)}<br>
-            Total Interest Saved: ${formatCurrency(originalCalculation.totalInterest)}<br>
-            <span style="color: #4CAF50;">Recommended: Close the loan to save maximum interest!</span>
-        `;
-    } else {
-        const monthsToClose = Math.ceil(remainingBalance / originalCalculation.emi);
-        const interestForRemainingPeriod = (originalCalculation.emi * monthsToClose) - remainingBalance;
-        
-        document.getElementById('earlyClosureResult').innerHTML = `
-            <strong>Early Closure Analysis:</strong><br>
-            After ${formatCurrency(prepaymentAmount)} prepayment:<br>
-            Remaining Balance: ${formatCurrency(remainingBalance)}<br>
-            Months to close at current EMI: ${monthsToClose}<br>
-            Interest for remaining period: ${formatCurrency(interestForRemainingPeriod)}
-        `;
-    }
-}
-
-function calculateInflationScenario() {
-    const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const calculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    const realInterestRate = interestRate - inflationRate;
-    const presentValueOfPayments = calculation.totalPayment / Math.pow(1 + inflationRate/100, loanTenure);
-    
-    document.getElementById('inflationImpact').innerHTML = `
-        <strong>Inflation Impact Analysis:</strong><br>
-        Real Interest Rate: ${realInterestRate.toFixed(2)}%<br>
-        Present Value of Total Payments: ${formatCurrency(presentValueOfPayments)}<br>
-        ${realInterestRate < 0 ? '<span style="color: #4CAF50;">Your real borrowing cost is negative due to inflation!</span>' : 'Your real cost after inflation adjustment'}
-    `;
-}
-
-function calculateRefinanceScenario() {
-    const refinanceAfterYears = parseFloat(document.getElementById('refinanceAfterYears').value) || 0;
-    const newRate = parseFloat(document.getElementById('newRefinanceRate').value) || 0;
-    const newTenure = parseFloat(document.getElementById('newRefinanceTenure').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const originalCalculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    
-    // Calculate remaining balance after refinance years
-    const schedule = generateAmortizationSchedule(loanAmount, interestRate, loanTenure, 'monthly');
-    const refinanceMonth = refinanceAfterYears * 12;
-    const remainingBalance = refinanceMonth < schedule.length ? schedule[refinanceMonth - 1].balance : 0;
-    
-    if (remainingBalance > 0) {
-        const newCalculation = calculateEMI(remainingBalance, newRate, newTenure, 'monthly');
-        const originalRemainingCost = originalCalculation.emi * (originalCalculation.numberOfPayments - refinanceMonth);
-        const newRemainingCost = newCalculation.totalPayment;
-        const savings = originalRemainingCost - newRemainingCost;
-        
-        document.getElementById('refinanceSavings').innerHTML = `
-            <strong>Refinance Analysis:</strong><br>
-            Remaining Balance after ${refinanceAfterYears} years: ${formatCurrency(remainingBalance)}<br>
-            New EMI: ${formatCurrency(newCalculation.emi)}<br>
-            Total Savings: ${formatCurrency(savings)}<br>
-            ${savings > 0 ? '<span style="color: #4CAF50;">Refinancing is beneficial!</span>' : '<span style="color: #F44336;">Refinancing may not be worth it.</span>'}
-        `;
-    }
-}
-
-function calculateRateChangeScenario() {
-    const rateChangeAfterYears = parseFloat(document.getElementById('rateChangeAfterYears').value) || 0;
-    const newRate = parseFloat(document.getElementById('newRateAfterChange').value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const loanTenure = getPrimaryLoanTenureInYears(); // <-- MODIFIED
-    
-    if (!loanAmount || !interestRate || !loanTenure) return;
-    
-    const originalCalculation = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
-    
-    // Calculate payments with rate change
-    const schedule = generateAmortizationSchedule(loanAmount, interestRate, loanTenure, 'monthly');
-    const changeMonth = rateChangeAfterYears * 12;
-    
-    if (changeMonth < schedule.length) {
-        const remainingBalance = schedule[changeMonth - 1].balance;
-        const remainingTenure = (loanTenure * 12 - changeMonth) / 12;
-        const newCalculation = calculateEMI(remainingBalance, newRate, remainingTenure, 'monthly');
-        
-        const costBeforeChange = originalCalculation.emi * changeMonth;
-        const costAfterChange = newCalculation.totalPayment;
-        const totalCostWithChange = costBeforeChange + costAfterChange;
-        const difference = originalCalculation.totalPayment - totalCostWithChange;
-        
-        document.getElementById('rateChangeImpact').innerHTML = `
-            <strong>Interest Rate Change Impact:</strong><br>
-            New EMI after ${rateChangeAfterYears} years: ${formatCurrency(newCalculation.emi)}<br>
-            EMI Change: ${formatCurrency(newCalculation.emi - originalCalculation.emi)}<br>
-            Total Cost Impact: ${formatCurrency(Math.abs(difference))} ${difference > 0 ? 'savings' : 'additional cost'}<br>
-        `;
-    }
-}
-
-// Home Loan Tax Benefits
+// Scenario, Tax, Portfolio & Affordability Handlers
 function calculateHomeLoanTax() {
     const loanAmount = parseFloat(document.getElementById('hlLoanAmount').value) || 0;
     const interestRate = parseFloat(document.getElementById('hlInterestRate').value) || 0;
-    
-    // === MODIFIED HOME LOAN TENURE LOGIC ===
     const tenureValue = parseFloat(document.getElementById('hlTenure').value) || 0;
     const tenureType = document.getElementById('hlTenureType').value;
     const tenure = (tenureType === 'months') ? tenureValue / 12 : tenureValue;
-    // === END OF MODIFIED LOGIC ===
-
-    const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 0;
     const taxSlab = parseFloat(document.getElementById('taxSlab').value) || 0;
     
     if (!loanAmount || !interestRate || !tenure) return;
-    
     const calculation = calculateEMI(loanAmount, interestRate, tenure, 'monthly');
     const yearlyEmi = calculation.emi * 12;
-    const yearlyInterest = Math.min(calculation.emi * 12 * 0.7, 200000); // Max 2 lakh under 24(b)
-    const yearlyPrincipal = Math.min(calculation.emi * 12 * 0.3, 150000); // Max 1.5 lakh under 80(c)
+    const yearlyInterest = Math.min(calculation.emi * 12 * 0.7, 200000);
+    const yearlyPrincipal = Math.min(calculation.emi * 12 * 0.3, 150000);
     const totalDeduction = yearlyInterest + yearlyPrincipal;
     const taxSaving = totalDeduction * taxSlab;
     const effectiveRate = interestRate - (taxSaving / yearlyEmi) * 100;
@@ -2522,40 +2021,6 @@ function calculateHomeLoanTax() {
     document.getElementById('interest24b').textContent = formatCurrency(yearlyInterest);
     document.getElementById('totalDeduction').textContent = formatCurrency(totalDeduction);
     document.getElementById('effectiveRate').textContent = effectiveRate.toFixed(1) + '%';
-}
-
-// Portfolio management functions
-function addLoanRow() {
-    const tbody = document.getElementById('portfolioBody');
-    const row = tbody.insertRow();
-    row.innerHTML = `
-        <td><input type="text" value="Loan ${tbody.children.length + 1}"></td>
-        <td><input type="number" value="1000000" min="1000"></td>
-        <td><input type="number" value="8.0" step="0.1" min="1"></td>
-        <td>
-            <div style="display: flex; gap: 5px;">
-                <input type="number" value="10" min="1" style="flex: 2;">
-                <select style="flex: 1; padding: 8px; font-size: 14px; border-radius: 8px;">
-                    <option value="years" selected>Years</option>
-                    <option value="months">Months</option>
-                </select>
-            </div>
-        </td>
-        <td>
-            <select>
-                <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="half-yearly">Half-Yearly</option>
-                <option value="yearly">Yearly</option>
-            </select>
-        </td>
-        <td><button class="remove-loan-row"><i class="fas fa-trash"></i></button></td>
-    `;
-    
-    // Add event listener to remove button
-    row.querySelector('.remove-loan-row').addEventListener('click', function() {
-        row.remove();
-    });
 }
 
 function calculatePortfolioEMI() {
@@ -2568,18 +2033,13 @@ function calculatePortfolioEMI() {
     
     rows.forEach(row => {
         const inputs = row.querySelectorAll('input, select');
-        
-        // === MODIFIED PORTFOLIO LOGIC ===
-        // Now expecting 6 elements: name, amount, rate, tenureValue, tenureType, compounding
         if (inputs.length >= 6) { 
             const loanName = inputs[0].value || 'Unnamed Loan';
             const amount = parseFloat(inputs[1].value) || 0;
             const rate = parseFloat(inputs[2].value) || 0;
-            
             const tenureValue = parseFloat(inputs[3].value) || 0;
             const tenureType = inputs[4].value;
             const tenure = (tenureType === 'months') ? tenureValue / 12 : tenureValue;
-            
             const compounding = inputs[5].value; 
             
             if (amount > 0 && rate > 0 && tenure > 0) {
@@ -2587,96 +2047,58 @@ function calculatePortfolioEMI() {
                 totalEMI += calculation.emi;
                 loanCount++;
                 longestTenure = Math.max(longestTenure, tenure);
-                
-                loans.push({
-                    name: loanName,
-                    emi: calculation.emi,
-                    tenure: tenure
-                });
+                loans.push({ name: loanName, emi: calculation.emi, tenure: tenure });
             }
         }
-        // === END OF MODIFIED LOGIC ===
     });
     
     document.getElementById('totalPortfolioEmi').textContent = formatCurrency(totalEMI);
     document.getElementById('portfolioLoanCount').textContent = loanCount;
     document.getElementById('portfolioLongestTenure').textContent = longestTenure.toFixed(1) + ' Years';
     
-    // Create portfolio chart
-    createPortfolioChart(loans);
-}
-
-function createPortfolioChart(loans) {
+    // Update Chart
     const ctx = document.getElementById('portfolioEmiChart');
-    if (!ctx || loans.length === 0) return;
-    
-    // Destroy existing chart
-    if (window.portfolioChart) {
-        window.portfolioChart.destroy();
-    }
-    
-    // Create monthly data for longest tenure
-    const maxTenure = Math.max(...loans.map(l => l.tenure));
-    const months = Array.from({length: Math.round(maxTenure * 12)}, (_, i) => i + 1);
-    
-    const datasets = loans.map((loan, index) => ({
-        label: loan.name,
-        data: months.map(month => month <= loan.tenure * 12 ? loan.emi : 0),
-        backgroundColor: `hsla(${index * 360 / loans.length}, 70%, 50%, 0.7)`,
-        borderColor: `hsl(${index * 360 / loans.length}, 70%, 40%)`,
-        borderWidth: 1
-    }));
-    
-    window.portfolioChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: months.filter((_, i) => i % 12 === 0).map(m => `Year ${Math.ceil(m/12)}`),
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { stacked: true },
-                y: { 
-                    stacked: true,
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '₹' + value.toLocaleString();
-                        }
-                    }
-                }
+    if (ctx && loans.length > 0) {
+        if (window.portfolioChart) window.portfolioChart.destroy();
+        const maxTenure = Math.max(...loans.map(l => l.tenure));
+        const months = Array.from({length: Math.round(maxTenure * 12)}, (_, i) => i + 1);
+        const datasets = loans.map((loan, index) => ({
+            label: loan.name,
+            data: months.map(month => month <= loan.tenure * 12 ? loan.emi : 0),
+            backgroundColor: `hsla(${index * 360 / loans.length}, 70%, 50%, 0.7)`,
+        }));
+        window.portfolioChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months.filter((_, i) => i % 12 === 0).map(m => `Year ${Math.ceil(m/12)}`),
+                datasets: datasets
             },
-            plugins: {
-                legend: { display: true, position: 'top' }
+            options: {
+                responsive: true,
+                scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '₹' + v } } }
             }
-        }
-    });
+        });
+    }
 }
 
-// Affordability calculations
+function addLoanRow() {
+    const tbody = document.getElementById('portfolioBody');
+    const row = tbody.insertRow();
+    row.innerHTML = `<td><input type="text" value="Loan"></td><td><input type="number" value="100000"></td><td><input type="number" value="10"></td><td><div style="display:flex;gap:5px;"><input type="number" value="1"><select style="flex:1"><option value="years">Years</option><option value="months">Months</option></select></div></td><td><select><option>Monthly</option></select></td><td><button class="remove-loan-row"><i class="fas fa-trash"></i></button></td>`;
+    row.querySelector('.remove-loan-row').addEventListener('click', () => row.remove());
+}
+
 function calculateAffordableLoan() {
     const affordableEmi = parseFloat(document.getElementById('affordableEmi').value) || 0;
     const interestRate = parseFloat(document.getElementById('affordabilityInterestRate').value) || 0;
-
-    // === MODIFIED AFFORDABILITY TENURE LOGIC ===
     const tenureValue = parseFloat(document.getElementById('affordabilityTenure').value) || 0;
     const tenureType = document.getElementById('affordabilityTenureType').value;
     const tenure = (tenureType === 'months') ? tenureValue / 12 : tenureValue;
-    // === END OF MODIFIED LOGIC ===
     
     if (!affordableEmi || !interestRate || !tenure) return;
-    
     const monthlyRate = interestRate / 100 / 12;
     const numberOfPayments = tenure * 12;
-    
-    let maxLoanAmount;
-    if (monthlyRate === 0) {
-        maxLoanAmount = affordableEmi * numberOfPayments;
-    } else {
-        maxLoanAmount = affordableEmi * (Math.pow(1 + monthlyRate, numberOfPayments) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments));
-    }
-    
+    const maxLoanAmount = affordableEmi * (Math.pow(1 + monthlyRate, numberOfPayments) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments));
     const totalPayment = affordableEmi * numberOfPayments;
     const totalInterest = totalPayment - maxLoanAmount;
     
@@ -2688,217 +2110,106 @@ function calculateAffordableLoan() {
 function calculateDTI() {
     const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value) || 0;
     const currentEmi = currentEmiData.emi || 0;
-    
     if (!monthlyIncome) return;
-    
     const dtiRatio = (currentEmi / monthlyIncome) * 100;
-    
     document.getElementById('currentEmiForDti').textContent = formatCurrency(currentEmi);
     document.getElementById('dtiRatio').textContent = dtiRatio.toFixed(1) + '%';
     
-    let riskAssessment = '';
-    let riskColor = '';
-    
-    if (dtiRatio <= 20) {
-        riskAssessment = 'Excellent: Your EMI burden is very manageable. You have good capacity for additional loans.';
-        riskColor = '#4CAF50';
-    } else if (dtiRatio <= 40) {
-        riskAssessment = 'Good: Your EMI burden is reasonable. You can consider additional loans with caution.';
-        riskColor = '#8BC34A';
-    } else if (dtiRatio <= 50) {
-        riskAssessment = 'Caution: Your EMI burden is high. Consider reducing debt before taking new loans.';
-        riskColor = '#FF9800';
-    } else {
-        riskAssessment = 'High Risk: Your EMI burden is very high. Focus on debt reduction and avoid new loans.';
-        riskColor = '#F44336';
+    const risk = document.getElementById('dtiRiskAssessment');
+    if (dtiRatio <= 30) { risk.textContent = "Healthy DTI"; risk.style.background = "#4CAF50"; }
+    else if (dtiRatio <= 50) { risk.textContent = "Moderate DTI"; risk.style.background = "#FF9800"; }
+    else { risk.textContent = "High Risk DTI"; risk.style.background = "#F44336"; }
+}
+
+function calculateEmiScenario() {
+    const extraEmi = parseFloat(document.getElementById('extraEmi').value) || 0;
+    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const loanTenure = getPrimaryLoanTenureInYears();
+    const original = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
+    const newEmi = original.emi + extraEmi;
+    const monthlyRate = interestRate/100/12;
+    let months = 0;
+    let bal = loanAmount;
+    while(bal > 0 && months < 600) {
+        bal = bal - (newEmi - (bal * monthlyRate));
+        months++;
     }
-    
-    document.getElementById('dtiRiskAssessment').innerHTML = riskAssessment;
-    document.getElementById('dtiRiskAssessment').style.backgroundColor = riskColor;
+    const saved = original.totalInterest - ((newEmi * months) - loanAmount);
+    document.getElementById('emiSavings').innerHTML = `New Tenure: ${Math.floor(months/12)}Y ${months%12}M <br> Saved: ${formatCurrency(saved)}`;
 }
 
-// Advanced options toggle functionality
-function initializeAdvancedOptions() {
-    const toggles = document.querySelectorAll('.option-toggle');
-    
-    toggles.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const content = toggle.nextElementSibling;
-            const icon = toggle.querySelector('i');
-            
-            if (content.classList.contains('active')) {
-                content.classList.remove('active');
-                icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
-            } else {
-                content.classList.add('active');
-                icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-            }
-        });
-    });
+function calculatePrepaymentScenario() {
+    const prepay = parseFloat(document.getElementById('prepaymentAmount').value) || 0;
+    const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const loanTenure = getPrimaryLoanTenureInYears();
+    const original = calculateEMI(loanAmount, interestRate, loanTenure, 'monthly');
+    const newPrincipal = loanAmount - prepay;
+    if(newPrincipal <= 0) {
+        document.getElementById('prepaymentSavings').innerHTML = "Loan fully paid off!";
+        return;
+    }
+    const newCalc = calculateEMI(newPrincipal, interestRate, loanTenure, 'monthly');
+    const saved = original.totalInterest - newCalc.totalInterest;
+    document.getElementById('prepaymentSavings').innerHTML = `New EMI: ${formatCurrency(newCalc.emi)} <br> Saved: ${formatCurrency(saved)}`;
 }
 
-// Advanced options: Variable rate functionality
 function addVariableRateRow() {
     const tbody = document.getElementById('variableRateBody');
     const row = tbody.insertRow();
-    row.innerHTML = `
-        <td><input type="number" value="1" min="1"></td>
-        <td><input type="number" value="3" min="1"></td>
-        <td><input type="number" value="8.5" step="0.1"></td>
-        <td><button class="remove-row"><i class="fas fa-trash"></i></button></td>
-    `;
-    
-    row.querySelector('.remove-row').addEventListener('click', function() {
-        row.remove();
-    });
+    row.innerHTML = `<td><input type="number"></td><td><input type="number"></td><td><input type="number"></td><td><button class="remove-row"><i class="fas fa-trash"></i></button></td>`;
+    row.querySelector('.remove-row').addEventListener('click', () => row.remove());
 }
-
-// Advanced options: Prepayment functionality
 function addPrepaymentRow() {
     const tbody = document.getElementById('prepaymentBody');
     const row = tbody.insertRow();
-    row.innerHTML = `
-        <td><input type="number" value="12" min="1"></td>
-        <td>
-            <select>
-                <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="half-yearly">Half-Yearly</option>
-                <option value="yearly">Yearly</option>
-            </select>
-        </td>
-        <td><input type="number" value="50000" min="0" step="1000"></td>
-        <td><button class="remove-row"><i class="fas fa-trash"></i></button></td>
-    `;
-    
-    row.querySelector('.remove-row').addEventListener('click', function() {
-        row.remove();
-    });
+    row.innerHTML = `<td><input type="number"></td><td><select><option value="monthly">Monthly</option></select></td><td><input type="number"></td><td><button class="remove-row"><i class="fas fa-trash"></i></button></td>`;
+    row.querySelector('.remove-row').addEventListener('click', () => row.remove());
 }
 
-// Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Set current year in footer
     document.getElementById('currentYear').textContent = new Date().getFullYear();
-    
-    // Initialize components
     initializeTabs();
     initializeDarkMode();
     initializeSliders();
     
-    // Initial calculation
-    calculateAndUpdate();
-    
-    // Add event listeners for basic calculator
+    const toggles = document.querySelectorAll('.option-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            toggle.nextElementSibling.classList.toggle('active');
+        });
+    });
+
     document.getElementById('calculateBtn').addEventListener('click', calculateAndUpdate);
-    
-    // Export buttons
     document.getElementById('exportTxtBtn').addEventListener('click', exportToTXT);
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
     document.getElementById('exportMdBtn').addEventListener('click', exportToMD);
     document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
-    
-    // Google Sheets button
     document.getElementById('saveToGoogleSheetsBtn').addEventListener('click', saveToGoogleSheets);
     
-    // Home loan calculation
-    const calculateHlBtn = document.getElementById('calculateHlBtn');
-    if (calculateHlBtn) {
-        calculateHlBtn.addEventListener('click', calculateHomeLoanTax);
-    }
+    if(document.getElementById('calculateHlBtn')) document.getElementById('calculateHlBtn').addEventListener('click', calculateHomeLoanTax);
+    if(document.getElementById('calculateEmiScenario')) document.getElementById('calculateEmiScenario').addEventListener('click', calculateEmiScenario);
+    if(document.getElementById('calculatePrepaymentScenario')) document.getElementById('calculatePrepaymentScenario').addEventListener('click', calculatePrepaymentScenario);
     
-    // Scenario buttons
-    const calculateEmiScenarioBtn = document.getElementById('calculateEmiScenario');
-    if (calculateEmiScenarioBtn) {
-        calculateEmiScenarioBtn.addEventListener('click', calculateEmiScenario);
-    }
+    if(document.querySelector('.add-loan-row')) document.querySelector('.add-loan-row').addEventListener('click', addLoanRow);
+    if(document.getElementById('calculatePortfolioBtn')) document.getElementById('calculatePortfolioBtn').addEventListener('click', calculatePortfolioEMI);
     
-    const calculatePrepaymentScenarioBtn = document.getElementById('calculatePrepaymentScenario');
-    if (calculatePrepaymentScenarioBtn) {
-        calculatePrepaymentScenarioBtn.addEventListener('click', calculatePrepaymentScenario);
-    }
+    if(document.getElementById('calculateAffordableLoanBtn')) document.getElementById('calculateAffordableLoanBtn').addEventListener('click', calculateAffordableLoan);
+    if(document.getElementById('calculateDtiBtn')) document.getElementById('calculateDtiBtn').addEventListener('click', calculateDTI);
+
+    if(document.querySelector('.add-rate-row')) document.querySelector('.add-rate-row').addEventListener('click', addVariableRateRow);
+    if(document.querySelector('.add-prepayment-row')) document.querySelector('.add-prepayment-row').addEventListener('click', addPrepaymentRow);
     
-    const calculateEarlyClosureBtn = document.getElementById('calculateEarlyClosure');
-    if (calculateEarlyClosureBtn) {
-        calculateEarlyClosureBtn.addEventListener('click', calculateEarlyClosure);
-    }
+    document.querySelectorAll('.remove-loan-row').forEach(btn => btn.addEventListener('click', function() { btn.closest('tr').remove(); }));
+    document.querySelectorAll('.remove-row').forEach(btn => btn.addEventListener('click', function() { btn.closest('tr').remove(); }));
+
+    calculateAndUpdate();
     
-    const calculateInflationScenarioBtn = document.getElementById('calculateInflationScenario');
-    if (calculateInflationScenarioBtn) {
-        calculateInflationScenarioBtn.addEventListener('click', calculateInflationScenario);
-    }
-    
-    const calculateRefinanceScenarioBtn = document.getElementById('calculateRefinanceScenario');
-    if (calculateRefinanceScenarioBtn) {
-        calculateRefinanceScenarioBtn.addEventListener('click', calculateRefinanceScenario);
-    }
-    
-    const calculateRateChangeScenarioBtn = document.getElementById('calculateRateChangeScenario');
-    if (calculateRateChangeScenarioBtn) {
-        calculateRateChangeScenarioBtn.addEventListener('click', calculateRateChangeScenario);
-    }
-    
-    // Portfolio buttons
-    const addLoanRowBtn = document.querySelector('.add-loan-row');
-    if (addLoanRowBtn) {
-        addLoanRowBtn.addEventListener('click', addLoanRow);
-    }
-    
-    const calculatePortfolioBtn = document.getElementById('calculatePortfolioBtn');
-    if (calculatePortfolioBtn) {
-        calculatePortfolioBtn.addEventListener('click', calculatePortfolioEMI);
-    }
-    
-    // Affordability buttons
-    const calculateAffordableLoanBtn = document.getElementById('calculateAffordableLoanBtn');
-    if (calculateAffordableLoanBtn) {
-        calculateAffordableLoanBtn.addEventListener('click', calculateAffordableLoan);
-    }
-    
-    const calculateDtiBtn = document.getElementById('calculateDtiBtn');
-    if (calculateDtiBtn) {
-        calculateDtiBtn.addEventListener('click', calculateDTI);
-    }
-    
-    // Advanced options
-    initializeAdvancedOptions();
-    
-    // Advanced option buttons
-    const addRateRowBtn = document.querySelector('.add-rate-row');
-    if (addRateRowBtn) {
-        addRateRowBtn.addEventListener('click', addVariableRateRow);
-    }
-    
-    const addPrepaymentRowBtn = document.querySelector('.add-prepayment-row');
-    if (addPrepaymentRowBtn) {
-        addPrepaymentRowBtn.addEventListener('click', addPrepaymentRow);
-    }
-    
-    // Add remove functionality to existing rows
-    document.querySelectorAll('.remove-loan-row').forEach(btn => {
-        btn.addEventListener('click', function() {
-            btn.closest('tr').remove();
-        });
-    });
-    
-    document.querySelectorAll('.remove-row').forEach(btn => {
-        btn.addEventListener('click', function() {
-            btn.closest('tr').remove();
-        });
-    });
-    
-    // Initialize Google APIs when the page loads
-    updateGoogleSheetsStatus('Click the button to save your loan data to Google Sheets', 'loading');
     setTimeout(() => {
-        if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-            // APIs are loaded, ready to use
-            updateGoogleSheetsStatus('Ready to save to Google Sheets. Click the button above.', 'success');
-        } else {
-            updateGoogleSheetsStatus('Google APIs not loaded. Check your internet connection.', 'error');
-        }
+        if (typeof gapi !== 'undefined') updateGoogleSheetsStatus('Ready to save.', 'success');
     }, 2000);
 });
- </script>
-
+    </script>
 </body>
 </html>
