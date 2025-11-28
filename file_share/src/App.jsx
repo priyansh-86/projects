@@ -68,11 +68,16 @@ function getTotalSize(files) {
   return formatFileSize(total);
 }
 
+function generateShareId() {
+  return 'share_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+}
+
 // --- Main App Component ---
 export default function App() {
   const [files, setFiles] = useState([]);
   const [uploadState, setUploadState] = useState('idle');
   const [shareLink, setShareLink] = useState('');
+  const [shareId, setShareId] = useState('');
   const [isCopying, setIsCopying] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -86,6 +91,7 @@ export default function App() {
     setFiles(Array.from(selectedFiles));
     setUploadState('idle');
     setShareLink('');
+    setShareId('');
     setErrorMessage('');
     setShowQR(false);
     setUploadProgress('');
@@ -129,7 +135,7 @@ export default function App() {
     setShowQR(false);
 
     try {
-      // 1. ZIP File Create karo
+      // 1. Create ZIP
       setUploadProgress('Creating ZIP file...');
       const zip = new JSZip();
       
@@ -138,7 +144,7 @@ export default function App() {
         zip.file(file.name, arrayBuffer);
       }
       
-      // 2. ZIP Compress karo
+      // 2. Compress ZIP
       setUploadProgress('Compressing files...');
       const zipBlob = await zip.generateAsync({ 
         type: 'blob',
@@ -146,15 +152,18 @@ export default function App() {
         compressionOptions: { level: 9 }
       });
 
-      // 3. Vercel Blob par upload karo
+      // 3. Upload to Vercel Blob (Direct Body)
       setUploadProgress('Uploading to cloud...');
       const fileName = `files-${Date.now()}.zip`;
-      const formData = new FormData();
-      formData.append('file', zipBlob, fileName);
-
+      
+      // ✅ FIX: No FormData, sending raw blob to avoid corruption
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+        },
+        body: zipBlob, 
       });
 
       if (!response.ok) {
@@ -167,18 +176,24 @@ export default function App() {
         throw new Error('No URL received from server');
       }
 
-      // ✅ FIX: Direct Blob URL use kar rahe hain
-      // Database ki zarurat nahi hai, kyunki ye link public hai.
+      // ✅ FIX: Using Blob URL directly (no window.storage crash)
+      const newShareId = generateShareId();
       setShareLink(blobData.url);
+      setShareId(newShareId);
       
-      // Local history save kar sakte ho (Optional)
-      const historyItem = { 
-        url: blobData.url, 
-        files: files.map(f => f.name), 
-        date: new Date().toISOString() 
-      };
-      const existingHistory = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
-      localStorage.setItem('uploadHistory', JSON.stringify([historyItem, ...existingHistory]));
+      // Optional: Save history to localStorage (safe)
+      try {
+        const historyItem = { 
+          id: newShareId,
+          url: blobData.url, 
+          files: files.map(f => f.name), 
+          date: new Date().toISOString() 
+        };
+        const existingHistory = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+        localStorage.setItem('uploadHistory', JSON.stringify([historyItem, ...existingHistory]));
+      } catch (e) {
+        console.warn("Could not save to local history", e);
+      }
 
       setUploadState('completed');
       setUploadProgress('');
@@ -205,6 +220,7 @@ export default function App() {
     setFiles([]);
     setUploadState('idle');
     setShareLink('');
+    setShareId('');
     setErrorMessage('');
     setShowQR(false);
     setUploadProgress('');
