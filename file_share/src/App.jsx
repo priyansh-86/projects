@@ -1,8 +1,7 @@
-// Quick Share - Client-Side ZIP Creation (MOST RELIABLE)
+// FILE: src/App.jsx
 import React, { useState, useRef, useCallback } from 'react';
 import QRCode from 'react-qr-code';
 import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
 
 // --- Icon Components ---
 const UploadIcon = ({ className }) => (
@@ -22,12 +21,6 @@ const FilesIcon = ({ className }) => (
 const FileIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline>
-  </svg>
-);
-
-const DownloadIcon = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
   </svg>
 );
 
@@ -75,16 +68,11 @@ function getTotalSize(files) {
   return formatFileSize(total);
 }
 
-function generateShareId() {
-  return 'share_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-}
-
 // --- Main App Component ---
 export default function App() {
   const [files, setFiles] = useState([]);
   const [uploadState, setUploadState] = useState('idle');
   const [shareLink, setShareLink] = useState('');
-  const [shareId, setShareId] = useState('');
   const [isCopying, setIsCopying] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -98,7 +86,6 @@ export default function App() {
     setFiles(Array.from(selectedFiles));
     setUploadState('idle');
     setShareLink('');
-    setShareId('');
     setErrorMessage('');
     setShowQR(false);
     setUploadProgress('');
@@ -130,6 +117,7 @@ export default function App() {
     fileInputRef.current.click();
   };
 
+  // --- 🔥 FIXED UPLOAD FUNCTION ---
   const handleUpload = async () => {
     if (files.length === 0) {
       setErrorMessage("Please select files first.");
@@ -141,19 +129,16 @@ export default function App() {
     setShowQR(false);
 
     try {
-      const newShareId = generateShareId();
-      
-      // Create ZIP file using JSZip
+      // 1. ZIP File Create karo
       setUploadProgress('Creating ZIP file...');
       const zip = new JSZip();
       
-      // Add all files to ZIP
       for (const file of files) {
         const arrayBuffer = await file.arrayBuffer();
         zip.file(file.name, arrayBuffer);
       }
       
-      // Generate ZIP blob
+      // 2. ZIP Compress karo
       setUploadProgress('Compressing files...');
       const zipBlob = await zip.generateAsync({ 
         type: 'blob',
@@ -161,10 +146,11 @@ export default function App() {
         compressionOptions: { level: 9 }
       });
 
-      // Upload ZIP to Vercel Blob
+      // 3. Vercel Blob par upload karo
       setUploadProgress('Uploading to cloud...');
+      const fileName = `files-${Date.now()}.zip`;
       const formData = new FormData();
-      formData.append('file', zipBlob, `${newShareId}.zip`);
+      formData.append('file', zipBlob, fileName);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -172,7 +158,7 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        throw new Error('Upload failed. Please try again.');
       }
 
       const blobData = await response.json();
@@ -181,24 +167,19 @@ export default function App() {
         throw new Error('No URL received from server');
       }
 
-      // Store metadata in persistent storage
-      await window.storage.set(
-        newShareId,
-        JSON.stringify({
-          zipUrl: blobData.url,
-          files: files.map(f => ({ name: f.name, size: f.size })),
-          uploadedAt: new Date().toISOString(),
-          totalFiles: files.length
-        }),
-        true // shared storage
-      );
-
-      // Generate share link
-      const baseUrl = window.location.origin + window.location.pathname;
-      const link = `${baseUrl}?share=${newShareId}`;
+      // ✅ FIX: Direct Blob URL use kar rahe hain
+      // Database ki zarurat nahi hai, kyunki ye link public hai.
+      setShareLink(blobData.url);
       
-      setShareLink(link);
-      setShareId(newShareId);
+      // Local history save kar sakte ho (Optional)
+      const historyItem = { 
+        url: blobData.url, 
+        files: files.map(f => f.name), 
+        date: new Date().toISOString() 
+      };
+      const existingHistory = JSON.parse(localStorage.getItem('uploadHistory') || '[]');
+      localStorage.setItem('uploadHistory', JSON.stringify([historyItem, ...existingHistory]));
+
       setUploadState('completed');
       setUploadProgress('');
 
@@ -212,27 +193,18 @@ export default function App() {
 
   const copyToClipboard = () => {
     if (!shareLink) return;
-    const textArea = document.createElement('textarea');
-    textArea.value = shareLink;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      setIsCopying(true);
-      setTimeout(() => setIsCopying(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy link: ', err);
-    }
-    document.body.removeChild(textArea);
+    navigator.clipboard.writeText(shareLink).then(() => {
+        setIsCopying(true);
+        setTimeout(() => setIsCopying(false), 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
   };
 
   const resetApp = () => {
     setFiles([]);
     setUploadState('idle');
     setShareLink('');
-    setShareId('');
     setErrorMessage('');
     setShowQR(false);
     setUploadProgress('');
@@ -338,17 +310,17 @@ export default function App() {
               <CheckIcon className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Share Link Ready!
+              Files Uploaded!
             </h2>
             <p className="text-sm text-gray-500 mb-5">
-              {files.length} {files.length > 1 ? 'files packaged' : 'file'} and ready to share
+              Share this link to download the files directly.
             </p>
 
             {/* Single QR Code Section */}
             {showQR && (
               <div className="p-4 bg-white rounded-lg border border-gray-200 mb-4 shadow-sm animate-fade-in">
                 <QRCode value={shareLink} size={160} level="M" className="mx-auto" />
-                <p className="text-xs text-gray-500 mt-3">Scan to access files</p>
+                <p className="text-xs text-gray-500 mt-3">Scan to download</p>
               </div>
             )}
             
@@ -356,7 +328,7 @@ export default function App() {
             <div className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 mb-4">
               <div className="flex items-center justify-center mb-3">
                 <ShareIcon className="w-5 h-5 text-blue-600 mr-2" />
-                <p className="text-sm font-semibold text-gray-700">Share Link</p>
+                <p className="text-sm font-semibold text-gray-700">Direct Download Link</p>
               </div>
               
               <div className="flex w-full mb-3">
